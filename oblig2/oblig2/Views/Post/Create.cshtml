@@ -1,0 +1,51 @@
+﻿@model oblig2.Models.ViewModels.PostCreateViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Post</h1>
+
+<h4>Create</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Title" class="control-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Content" class="control-label"></label>
+                <input asp-for="Content" class="form-control" />
+                <span asp-validation-for="Content" class="text-danger"></span>
+            </div>
+            <br/>
+            <div class="form-group">
+                <label asp-for="IsCommentAllowed" class="control-label">New comment allowed</label>
+                <input type="checkbox" asp-for="IsCommentAllowed" />
+                <span asp-validation-for="Content" class="text-danger"></span>
+            </div>
+            <br/>
+            <br/>
+            <div class="form-group" hidden="hidden">
+                <label asp-for="BlogId" class="control-label"></label>
+                <input asp-for="BlogId" class="form-control" />
+                <span asp-validation-for="BlogId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index" asp-route-id="@Model.BlogId">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

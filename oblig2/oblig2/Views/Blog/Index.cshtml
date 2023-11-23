@@ -1,0 +1,74 @@
+﻿@model IEnumerable<oblig2.Models.Entities.Blog>
+@using Microsoft.AspNetCore.Identity;
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Blog</h1>
+
+<h4>Index</h4>
+<p>
+    <a asp-action="Create">Add a new blog</a>
+</p>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Content)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Created)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Owner.UserName)
+            </th>
+            <th style="text-align: center">
+                New post allowed
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+
+    @if (Model != null)
+    {
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <a asp-area="" asp-controller="Post" asp-action="Index" asp-route-id="@item.BlogId">
+                    @Html.DisplayFor(modelItem => item.Title)
+                    </a>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Content)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Created)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Owner.UserName)
+                </td>
+
+                <td style="text-align: center">
+                    @Html.DisplayFor(modelItem => item.IsPostAllowed)
+                </td>
+                <td>
+                        @if (item.Owner.UserName == User.Identity.Name)
+                        {
+                            @Html.ActionLink("Edit ", "Edit", new { id=item.BlogId }) 
+                            @Html.ActionLink("| Delete", "Delete", new { id=item.BlogId },new { onclick = "return confirm('Are you sure you wish to delete this blog?');" })
+                        }
+
+                </td>
+            </tr>
+        }
+    }
+    </tbody>
+</table>

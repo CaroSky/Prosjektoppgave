@@ -1,0 +1,89 @@
+﻿@model oblig2.Models.ViewModels.PostIndexViewModel
+@using Microsoft.AspNetCore.Identity;
+@using Microsoft.CodeAnalysis.CSharp.Syntax
+@using oblig2.Models.Entities
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Blog: @Model.BlogTitle</h1>
+
+<h4>Post Index</h4>
+
+<p>
+    @if (Model.IsPostAllowed == true)
+    {
+        <a asp-action="Create" asp-route-id="@Model.BlogId">Add a new post</a>
+    }
+    else
+    {
+        <label>New posts are not allowed</label>
+    }
+
+
+
+
+</p>
+<table class="table">
+    <thead>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Posts.FirstOrDefault().Title)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Posts.FirstOrDefault().Content)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Posts.FirstOrDefault().Created)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Posts.FirstOrDefault().Author.UserName)
+        </th>
+        <th style="text-align: center">
+            New comment allowed
+        </th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+
+    @if (Model.Posts != null)
+    {
+        @foreach (var item in Model.Posts)
+        {
+            <tr>
+                <td>
+                    <a asp-area="" asp-controller="Comment" asp-action="Index" asp-route-id="@item.PostId">
+                    @Html.DisplayFor(modelItem => item.Title)
+                    </a>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Content)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Created)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Author.UserName)
+                </td>
+                <td style="text-align: center">
+                    @Html.DisplayFor(modelItem => item.IsCommentAllowed)
+                </td>
+                <td>
+                    @if (item.Author.UserName == User.Identity.Name)
+                    {
+                            @Html.ActionLink("Edit ", "Edit", new { id=item.PostId, blogId = item.Blog.BlogId })
+                            @Html.ActionLink("| Delete", "Delete", new { id=item.PostId, blogId = item.Blog.BlogId},new { onclick = "return confirm('Are you sure you wish to delete this post?');" })
+
+                    }
+
+                </td>
+            </tr>
+        }
+    }
+    </tbody>
+</table>
+<div>
+    <a asp-area="" asp-controller="Blog" asp-action="Index" asp-route-id="@Model.BlogId">Back to blog</a>
+</div>

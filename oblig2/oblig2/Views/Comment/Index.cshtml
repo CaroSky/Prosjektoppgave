@@ -1,0 +1,69 @@
+﻿@model oblig2.Models.ViewModels.CommentIndexViewModel
+@using Microsoft.AspNetCore.Identity;
+@using oblig2.Models.Entities
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Post: @Model.PostTitle</h1>
+
+<h4>Comment index</h4>
+
+<p>
+    @if (Model.IsCommentAllowed == true)
+    {
+        <a asp-action="Create" asp-route-id="@Model.PostId">Add a new comment</a>
+    }
+    else
+    {
+        <label>New comments are not allowed</label>
+    }
+</p>
+<table class="table">
+    <thead>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Comments.FirstOrDefault().Content)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Comments.FirstOrDefault().Created)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Comments.FirstOrDefault().Author.UserName)
+        </th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+
+    @if (Model.Comments != null)
+    {
+        @foreach (var item in Model.Comments)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Content)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Created)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Author.UserName)
+                </td>
+                <td>
+                    @if (item.Author.UserName == User.Identity.Name)
+                    {
+                            @Html.ActionLink("Edit ", "Edit", new { id=item.CommentId, postId=item.Post.PostId })
+                            @Html.ActionLink("| Delete", "Delete", new { id=item.CommentId, postId=item.Post.PostId },new { onclick = "return confirm('Are you sure you wish to delete this comment?');" })
+                    }
+
+                </td>
+            </tr>
+        }
+    }
+    </tbody>
+</table>
+<div>
+    <a asp-area="" asp-controller="Post" asp-action="Index" asp-route-id="@Model.BlogId">Back to post</a>
+</div>
