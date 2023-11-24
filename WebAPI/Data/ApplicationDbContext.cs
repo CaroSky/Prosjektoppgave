@@ -23,9 +23,9 @@ namespace WebAPI.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Post>()
-                .HasMany(p => p.Tags)
-                .WithMany(t => t.Posts);
+            //modelBuilder.Entity<Post>()
+             //   .HasMany(p => p.Tags)
+             //   .WithMany(t => t.Posts);
 
         }
     }

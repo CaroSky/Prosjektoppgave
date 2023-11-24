@@ -9,20 +9,20 @@ namespace WebAPI.Models.Repositories
 {
     public interface IBlogRepository
     {
-        IEnumerable<Blog> GetAllBlogs();
+        Task<IEnumerable<Blog>> GetAllBlogs();
         Task SaveBlog(Blog blog, IPrincipal principal);
         BlogCreateViewModel GetBlogCreateViewModel();
         BlogEditViewModel GetBlogEditViewModel();
-        BlogEditViewModel GetBlogEditViewModelById(int Id);
-        Blog GetBlogById(int Id);
+        Task<BlogEditViewModel> GetBlogEditViewModelById(int Id);
+        Task<Blog> GetBlogById(int Id);
         Task UpdateBlog(Blog blog, IPrincipal principal);
         Task DeleteBlog(Blog blog, IPrincipal principal);
-        IEnumerable<Post> GetAllPostByBlogId(int id);
+        Task<IEnumerable<Post>> GetAllPostByBlogId(int id);
         Task SavePost(Post post, IPrincipal principal);
         PostCreateViewModel GetPostCreateViewModel(int blogId);
         PostEditViewModel GetPostEditViewModel(int blogId);
-        PostEditViewModel GetPostEditViewModelById(int blogId);
-        Post GetPostById(int Id);
+        Task<PostEditViewModel> GetPostEditViewModelById(int blogId);
+        Task<Post> GetPostById(int Id);
         Task UpdatePost(Post post, IPrincipal principal);
         Task DeletePost(Post post, IPrincipal principal);
 
@@ -51,7 +51,7 @@ namespace WebAPI.Models.Repositories
 
         //blog------------------------------------------------------------------------------------------------
 
-        public IEnumerable<Blog> GetAllBlogs()
+        public async Task<IEnumerable<Blog>> GetAllBlogs()
         {
             var blogs = _db.Blog.Include(b => b.Owner).ToList();
             return blogs;
@@ -85,7 +85,7 @@ namespace WebAPI.Models.Repositories
             return blog;
         }
 
-        public BlogEditViewModel GetBlogEditViewModelById(int Id)
+        public async Task<BlogEditViewModel> GetBlogEditViewModelById(int Id)
         {
             var blogs = _db.Blog.ToList();
             var blog = blogs.Where(b => b.BlogId == Id).First(); ;
@@ -102,7 +102,7 @@ namespace WebAPI.Models.Repositories
             return editBlog;
         }
 
-        public Blog GetBlogById(int blogId)
+        public async Task<Blog> GetBlogById(int blogId)
         {
             var blogs = _db.Blog.Include(item => item.Owner).ToList();
             var blog = blogs.Where(item => item.BlogId == blogId).First(); ;
@@ -120,7 +120,7 @@ namespace WebAPI.Models.Repositories
         public async Task DeleteBlog(Blog blog, IPrincipal principal)
         {
 
-            var posts = GetAllPostByBlogId(blog.BlogId);
+            var posts = await GetAllPostByBlogId(blog.BlogId);
 
             foreach (var post in posts)
             {
@@ -134,7 +134,7 @@ namespace WebAPI.Models.Repositories
 
         //post---------------------------------------------------------------------------------------
 
-        public IEnumerable<Post> GetAllPostByBlogId(int id)
+        public async Task<IEnumerable<Post>> GetAllPostByBlogId(int id)
         {
             var allPosts = _db.Post.Include(item => item.Blog).Include(item => item.Author).ToList();
             var posts = allPosts.Where(item => item.Blog.BlogId == id);
@@ -171,7 +171,7 @@ namespace WebAPI.Models.Repositories
             return post;
         }
 
-        public PostEditViewModel GetPostEditViewModelById(int PostId)
+        public async Task<PostEditViewModel> GetPostEditViewModelById(int PostId)
         {
             var posts = _db.Post.Include(item => item.Blog).ToList();
             var post = posts.Where(item => item.PostId == PostId).First(); ;
@@ -189,7 +189,7 @@ namespace WebAPI.Models.Repositories
             return editPost;
         }
 
-        public Post GetPostById(int PostId)
+        public async Task<Post> GetPostById(int PostId)
         {
             var posts = _db.Post.Include(item => item.Blog).Include(item => item.Author).ToList();
             var post = posts.Where(item => item.PostId == PostId).First(); ;
