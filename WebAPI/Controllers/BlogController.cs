@@ -138,7 +138,7 @@ namespace WebAPI.Controllers
             var blogEdit = await _repository.GetBlogEditViewModelById(id);
 
             var currentUser = await _manager.FindByNameAsync(User.Identity.Name);
-            if (currentUser.UserName == blog.Owner.UserName)
+            if (currentUser.Id == blog.Owner.Id)
             {
                 return Ok(blog);
             }
