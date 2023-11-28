@@ -26,12 +26,12 @@ namespace WebAPI.Models.Repositories
         Task UpdatePost(Post post, IPrincipal principal);
         Task DeletePost(Post post, IPrincipal principal);
 
-        IEnumerable<Comment> GetAllCommentsByPostId(int postId);
+        Task<IEnumerable<Comment>> GetAllCommentsByPostId(int postId);
         Task SaveComment(Comment comment, IPrincipal principal);
         CommentCreateViewModel GetCommentCreateViewModel(int postId);
         CommentEditViewModel GetCommentEditViewModel(int postId);
-        CommentEditViewModel GetCommentEditViewModelById(int commentId);
-        Comment GetCommentById(int Id);
+        Task<CommentEditViewModel> GetCommentEditViewModelById(int commentId);
+        Task<Comment> GetCommentById(int Id);
         Task UpdateComment(Comment comment, IPrincipal principal);
         Task DeleteComment(Comment comment, IPrincipal principal);
 
@@ -206,7 +206,7 @@ namespace WebAPI.Models.Repositories
 
         public async Task DeletePost(Post post, IPrincipal principal)
         {
-            var comments = GetAllCommentsByPostId(post.PostId);
+            var comments = await GetAllCommentsByPostId(post.PostId);
 
             foreach (var comment in comments)
             {
@@ -218,7 +218,7 @@ namespace WebAPI.Models.Repositories
 
         //comment-----------------------------------------------------------
 
-        public IEnumerable<Comment> GetAllCommentsByPostId(int postId)
+        public async Task<IEnumerable<Comment>> GetAllCommentsByPostId(int postId)
         {
             var allComments = _db.Comment.Include(item => item.Post).Include(item => item.Author).ToList();
             var comments = allComments.Where(item => item.Post.PostId == postId);
@@ -254,7 +254,7 @@ namespace WebAPI.Models.Repositories
             return comment;
         }
 
-        public CommentEditViewModel GetCommentEditViewModelById(int commentId)
+        public async Task<CommentEditViewModel> GetCommentEditViewModelById(int commentId)
         {
             var comments = _db.Comment.Include(item => item.Post).ToList();
             var comment = comments.Where(item => item.CommentId == commentId).First(); ;
@@ -270,7 +270,7 @@ namespace WebAPI.Models.Repositories
             return editComment;
         }
 
-        public Comment GetCommentById(int CommentId)
+        public async Task<Comment> GetCommentById(int CommentId)
         {
             var comments = _db.Comment.Include(item => item.Post).Include(item => item.Author).ToList();
             var comment = comments.Where(item => item.CommentId == CommentId).First(); ;

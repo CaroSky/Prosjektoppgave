@@ -100,7 +100,7 @@ namespace oblig2.Controllers
 
 
             var currentUser = await _manager.FindByNameAsync(User.Identity.Name);
-            if (currentUser.UserName == comment.Author.UserName)
+            if (currentUser.Id == comment.Author.Id)
             {
                 return View(commentEdit);
             }
@@ -157,7 +157,7 @@ namespace oblig2.Controllers
             else
             {
                 var currentUser = await _manager.FindByNameAsync(User.Identity.Name);
-                if (currentUser.UserName == comment.Author.UserName)
+                if (currentUser.Id == comment.Author.Id)
                 {
                     await _repository.DeleteComment(comment, User);
                     //tempdata
