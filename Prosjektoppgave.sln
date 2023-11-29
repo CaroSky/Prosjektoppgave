@@ -4,10 +4,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.7.34024.191
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazor", "Blazor\Blazor.csproj", "{33E29180-DD4F-4EB0-850B-0E89A9DA9681}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7272CE0-1358-4BE1-B00E-8F660DDDE4BF} = {D7272CE0-1358-4BE1-B00E-8F660DDDE4BF}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebAPI", "WebAPI\WebAPI.csproj", "{1537ED85-2F88-4D5E-85B5-7BF4F5CE92A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedModels", "Shared\SharedModels.csproj", "{D7272CE0-1358-4BE1-B00E-8F660DDDE4BF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedModels", "Shared\SharedModels.csproj", "{D7272CE0-1358-4BE1-B00E-8F660DDDE4BF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
