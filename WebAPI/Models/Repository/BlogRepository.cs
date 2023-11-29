@@ -4,6 +4,7 @@ using System.Security.Principal;
 using WebAPI.Models.Entities;
 using WebAPI.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using SharedModels.Entities;
 
 namespace WebAPI.Models.Repositories
 {
@@ -53,7 +54,9 @@ namespace WebAPI.Models.Repositories
 
         public async Task<IEnumerable<Blog>> GetAllBlogs()
         {
-            var blogs = _db.Blog.Include(b => b.Owner).ToList();
+            //var blogs = _db.Blog.Include(b => b.Owner).ToList();
+            //return blogs;
+            var blogs = await _db.Blog.ToListAsync();
             return blogs;
         }
 
@@ -104,8 +107,24 @@ namespace WebAPI.Models.Repositories
 
         public async Task<Blog> GetBlogById(int blogId)
         {
-            var blogs = _db.Blog.Include(item => item.Owner).ToList();
-            var blog = blogs.Where(item => item.BlogId == blogId).First(); ;
+            //var blogs = _db.Blog.Include(item => item.Owner).ToList();
+            //var blog = blogs.Where(item => item.BlogId == blogId).First(); ;
+
+           // return blog;
+
+            // Anta at _db er din DbContext-instans
+            var blog = await _db.Blog
+                .SingleOrDefaultAsync(item => item.BlogId == blogId); // Bruker SingleOrDefaultAsync for å håndtere tilfeller hvor det ikke finnes en matchende blog
+
+            // Hvis du trenger brukerdetaljer (som brukernavn), må du hente det separat siden Blog ikke lenger inneholder Owner
+            // Dette kan gjøres ved å slå opp brukeren basert på UserId
+            if (blog != null)
+            {
+                var user = await _db.Users
+                    .SingleOrDefaultAsync(u => u.Id == blog.UserId); // Anta at 'Users' er tabellen for brukere
+                // Du kan nå legge til brukerdetaljer til blog-objektet hvis det trengs, f.eks.:
+                // blog.UserName = user?.UserName;
+            }
 
             return blog;
         }

@@ -9,6 +9,11 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 
+// Tove: HttpClient
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7153/") });
+builder.Services.AddScoped<BlogService>();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

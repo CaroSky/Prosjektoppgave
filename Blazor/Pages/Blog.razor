@@ -1,0 +1,29 @@
+﻿@page "/blogs"
+@using SharedModels.Entities 
+@using Blazor.Data
+
+@inject BlogService BlogService
+
+<h3>Blog Posts</h3>
+
+@if (blogs == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    foreach (var blog in blogs)
+    {
+        <div>@blog.Title</div>
+    }
+}
+
+@code {
+    private List<SharedModels.Entities.Blog> blogs;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var blogEnumerable = await BlogService.GetBlogsAsync();
+        blogs = blogEnumerable.ToList();
+    }
+}

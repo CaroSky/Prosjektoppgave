@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿
 
-namespace WebAPI.Models.Entities
+namespace SharedModels.Entities
 {
     public class Blog
     {
@@ -8,7 +8,7 @@ namespace WebAPI.Models.Entities
         public string Title { get; set; }
         public string Content { get; set; }
         public DateTime Created { get; set; }
-        public virtual IdentityUser Owner { get; set; }
+        public string UserId { get; set; } // Tove: Fremmednøkkel for brukeren
         public bool IsPostAllowed { get; set; }
     }
 }

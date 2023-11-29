@@ -8,6 +8,7 @@ using WebAPI.Models.Entities;
 using WebAPI.Models.Repositories;
 using WebAPI.Models.ViewModels;
 using System.Xml.Linq;
+using SharedModels.Entities;
 
 
 
@@ -58,13 +59,14 @@ namespace WebAPI.Controllers
         //[Authorize]
         public async Task<IActionResult> Post([FromBody] BlogCreateViewModel blogCreateViewModel)
         {
-            //to be removed
-            var user = await _manager.FindByNameAsync(_username);
-            if (user != null)
+            //TOVE: to be removed, har fjernet claims:ASP.NET Core Identity håndterer brukerprinsipper for deg.
+            //var user = await _manager.FindByNameAsync(_username);
+            var userId =  _manager.GetUserId(User);
+            /*if (userId != null)
             {
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.Name, user.UserName),
+                    new Claim(ClaimTypes.Name, userId.UserName),
                     // Add other claims as needed
                 };
                 var identity = new ClaimsIdentity(claims, "custom");
@@ -72,8 +74,12 @@ namespace WebAPI.Controllers
 
                 // Set the principal to HttpContext.User
                 HttpContext.User = principal;
-            }
+            }*/
             //---------------------------------------------------------
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(); // Brukeren er ikke autentisert
+            }
 
             if (!ModelState.IsValid)
             {
@@ -86,7 +92,8 @@ namespace WebAPI.Controllers
                 Title = blogCreateViewModel.Title,
                 Content = blogCreateViewModel.Content,
                 Created = DateTime.Now,
-                Owner = await _manager.FindByNameAsync(User.Identity.Name),
+                UserId = userId, // Sett den autentiserte brukerens ID
+                //Owner = await _manager.FindByNameAsync(User.Identity.Name),
                 IsPostAllowed = true
             };
 
@@ -137,14 +144,25 @@ namespace WebAPI.Controllers
 
             var blogEdit = await _repository.GetBlogEditViewModelById(id);
 
-            var currentUser = await _manager.FindByNameAsync(User.Identity.Name);
-            if (currentUser.UserName == blog.Owner.UserName)
+            //var currentUser = await _manager.FindByNameAsync(User.Identity.Name);
+            //if (currentUser.UserName == blog.Owner.UserName)
+            // Hent den innloggede brukerens ID
+            var userId = _manager.GetUserId(User);
+            if (userId == null)
             {
-                return Ok(blog);
+                return Unauthorized();
             }
 
-            return BadRequest(ModelState);
-            //return Ok(blog);
+            // Sjekk om den innloggede brukeren er eieren av bloggposten
+            if (userId == blog.UserId)
+                    {
+                return Ok(blog);
+            }
+            else
+            {
+                return BadRequest(ModelState);
+                //return Ok(blog);
+            }
 
 
         }
@@ -154,21 +172,27 @@ namespace WebAPI.Controllers
         //[Authorize]
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] BlogEditViewModel blogEditViewModel)
         {
-            //to be removed
-            var user = await _manager.FindByNameAsync(_username);
-            if (user != null)
+            // Få den innloggede brukerens ID
+            var userId = _manager.GetUserId(User);
+            if (userId == null)
             {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    // Add other claims as needed
-                };
-                var identity = new ClaimsIdentity(claims, "custom");
-                var principal = new ClaimsPrincipal(identity);
-
-                // Set the principal to HttpContext.User
-                HttpContext.User = principal;
+                return Unauthorized();
             }
+            //to be removed
+            /*// var user = await _manager.FindByNameAsync(_username);
+             if (user != null)
+             {
+                 var claims = new List<Claim>
+                 {
+                     new Claim(ClaimTypes.Name, user.UserName),
+                     // Add other claims as needed
+                 };
+                 var identity = new ClaimsIdentity(claims, "custom");
+                 var principal = new ClaimsPrincipal(identity);
+
+                 // Set the principal to HttpContext.User
+                 HttpContext.User = principal;
+             }*/
             //---------------------------------------------------------
             if (!ModelState.IsValid)
             {
@@ -192,7 +216,8 @@ namespace WebAPI.Controllers
                     IsPostAllowed = blogEditViewModel.IsPostAllowed
                 };
             //find the owner (the person logged in)
-            blog.Owner = await _manager.FindByNameAsync(User.Identity.Name);
+            //TOVE. Gjernet denne:
+            //blog.Owner = await _manager.FindByNameAsync(User.Identity.Name);
 
             await _repository.UpdateBlog(blog, User);
             // _repository.Update(product);

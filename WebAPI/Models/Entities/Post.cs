@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using SharedModels.Entities;
 
 namespace WebAPI.Models.Entities
 {
