@@ -144,7 +144,7 @@ namespace WebAPI.Controllers
             var postEdit = await _repository.GetPostEditViewModelById(id);
 
             var currentUser = await _manager.FindByNameAsync(User.Identity.Name);
-            if (currentUser.UserName == post.Author.UserName)
+            if (currentUser.Id == post.Author.Id)
             {
                 return Ok(postEdit);
             }
@@ -242,7 +242,7 @@ namespace WebAPI.Controllers
 
 
             var currentUser = await _manager.FindByNameAsync(User.Identity.Name);
-            if (currentUser.UserName == post.Author.UserName)
+            if (currentUser.Id == post.Author.Id)
             {
                 await _repository.DeletePost(post, User);
                 return Ok(post);

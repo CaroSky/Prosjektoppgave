@@ -100,7 +100,7 @@ namespace oblig2.Controllers
             var postEdit = _repository.GetPostEditViewModelById(id);
 
             var currentUser = await _manager.FindByNameAsync(User.Identity.Name);
-            if (currentUser.UserName == post.Author.UserName)
+            if (currentUser.Id == post.Author.Id)
             {
                 return View(postEdit);
             }
@@ -160,7 +160,7 @@ namespace oblig2.Controllers
             {
 
                 var currentUser = await _manager.FindByNameAsync(User.Identity.Name);
-                if (currentUser.UserName == post.Author.UserName)
+                if (currentUser.Id == post.Author.Id)
                 {
                     await _repository.DeletePost(post, User);
                     //tempdata

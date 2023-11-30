@@ -12,27 +12,27 @@ namespace WebAPI.Models.Repositories
     {
         Task<IEnumerable<Blog>> GetAllBlogs();
         Task SaveBlog(Blog blog, IPrincipal principal);
-        BlogCreateViewModel GetBlogCreateViewModel();
-        BlogEditViewModel GetBlogEditViewModel();
+        //BlogCreateViewModel GetBlogCreateViewModel();
+        //BlogEditViewModel GetBlogEditViewModel();
         Task<BlogEditViewModel> GetBlogEditViewModelById(int Id);
         Task<Blog> GetBlogById(int Id);
         Task UpdateBlog(Blog blog, IPrincipal principal);
         Task DeleteBlog(Blog blog, IPrincipal principal);
         Task<IEnumerable<Post>> GetAllPostByBlogId(int id);
         Task SavePost(Post post, IPrincipal principal);
-        PostCreateViewModel GetPostCreateViewModel(int blogId);
-        PostEditViewModel GetPostEditViewModel(int blogId);
+        //PostCreateViewModel GetPostCreateViewModel(int blogId);
+        //PostEditViewModel GetPostEditViewModel(int blogId);
         Task<PostEditViewModel> GetPostEditViewModelById(int blogId);
         Task<Post> GetPostById(int Id);
         Task UpdatePost(Post post, IPrincipal principal);
         Task DeletePost(Post post, IPrincipal principal);
 
-        IEnumerable<Comment> GetAllCommentsByPostId(int postId);
+        Task<IEnumerable<Comment>> GetAllCommentsByPostId(int postId);
         Task SaveComment(Comment comment, IPrincipal principal);
-        CommentCreateViewModel GetCommentCreateViewModel(int postId);
-        CommentEditViewModel GetCommentEditViewModel(int postId);
-        CommentEditViewModel GetCommentEditViewModelById(int commentId);
-        Comment GetCommentById(int Id);
+        //CommentCreateViewModel GetCommentCreateViewModel(int postId);
+        //CommentEditViewModel GetCommentEditViewModel(int postId);
+        Task<CommentEditViewModel> GetCommentEditViewModelById(int commentId);
+        Task<Comment> GetCommentById(int Id);
         Task UpdateComment(Comment comment, IPrincipal principal);
         Task DeleteComment(Comment comment, IPrincipal principal);
 
@@ -72,12 +72,12 @@ namespace WebAPI.Models.Repositories
             }
         }
 
-        public BlogCreateViewModel GetBlogCreateViewModel()
-        {
-            var blog = new BlogCreateViewModel();
-            blog.IsPostAllowed = true;
-            return blog;
-        }
+        //public BlogCreateViewModel GetBlogCreateViewModel()
+        //{
+        //    var blog = new BlogCreateViewModel();
+        //    blog.IsPostAllowed = true;
+        //    return blog;
+        //}
 
         public async Task SaveBlog(Blog blog, IPrincipal principal)
         {
@@ -94,11 +94,11 @@ namespace WebAPI.Models.Repositories
 
         }
 
-        public BlogEditViewModel GetBlogEditViewModel()
-        {
-            var blog = new BlogEditViewModel();
-            return blog;
-        }
+        //public BlogEditViewModel GetBlogEditViewModel()
+        //{
+        //    var blog = new BlogEditViewModel();
+        //    return blog;
+        //}
 
         public async Task<BlogEditViewModel> GetBlogEditViewModelById(int Id)
         {
@@ -172,13 +172,13 @@ namespace WebAPI.Models.Repositories
             return posts;
         }
 
-        public PostCreateViewModel GetPostCreateViewModel(int blogId)
-        {
-            var post = new PostCreateViewModel();
-            post.BlogId = blogId;
-            post.IsCommentAllowed = true;
-            return post;
-        }
+        //public PostCreateViewModel GetPostCreateViewModel(int blogId)
+        //{
+        //    var post = new PostCreateViewModel();
+        //    post.BlogId = blogId;
+        //    post.IsCommentAllowed = true;
+        //    return post;
+        //}
 
         public async Task SavePost(Post post, IPrincipal principal)
         {
@@ -195,12 +195,12 @@ namespace WebAPI.Models.Repositories
 
         }
 
-        public PostEditViewModel GetPostEditViewModel(int blogId)
-        {
-            var post = new PostEditViewModel();
-            post.BlogId = blogId;
-            return post;
-        }
+        //public PostEditViewModel GetPostEditViewModel(int blogId)
+        //{
+        //    var post = new PostEditViewModel();
+        //    post.BlogId = blogId;
+        //    return post;
+        //}
 
         public async Task<PostEditViewModel> GetPostEditViewModelById(int PostId)
         {
@@ -237,7 +237,7 @@ namespace WebAPI.Models.Repositories
 
         public async Task DeletePost(Post post, IPrincipal principal)
         {
-            var comments = GetAllCommentsByPostId(post.PostId);
+            var comments = await GetAllCommentsByPostId(post.PostId);
 
             foreach (var comment in comments)
             {
@@ -249,19 +249,19 @@ namespace WebAPI.Models.Repositories
 
         //comment-----------------------------------------------------------
 
-        public IEnumerable<Comment> GetAllCommentsByPostId(int postId)
+        public async Task<IEnumerable<Comment>> GetAllCommentsByPostId(int postId)
         {
             var allComments = _db.Comment.Include(item => item.Post).Include(item => item.Author).ToList();
             var comments = allComments.Where(item => item.Post.PostId == postId);
             return comments;
         }
 
-        public CommentCreateViewModel GetCommentCreateViewModel(int postId)
-        {
-            var comment = new CommentCreateViewModel();
-            comment.PostId = postId;
-            return comment;
-        }
+        //public CommentCreateViewModel GetCommentCreateViewModel(int postId)
+        //{
+        //    var comment = new CommentCreateViewModel();
+        //    comment.PostId = postId;
+        //    return comment;
+        //}
 
         public async Task SaveComment(Comment comment, IPrincipal principal)
         {
@@ -278,14 +278,14 @@ namespace WebAPI.Models.Repositories
 
         }
 
-        public CommentEditViewModel GetCommentEditViewModel(int postId)
-        {
-            var comment = new CommentEditViewModel();
-            comment.PostId = postId;
-            return comment;
-        }
+        //public CommentEditViewModel GetCommentEditViewModel(int postId)
+        //{
+        //    var comment = new CommentEditViewModel();
+        //    comment.PostId = postId;
+        //    return comment;
+        //}
 
-        public CommentEditViewModel GetCommentEditViewModelById(int commentId)
+        public async Task<CommentEditViewModel> GetCommentEditViewModelById(int commentId)
         {
             var comments = _db.Comment.Include(item => item.Post).ToList();
             var comment = comments.Where(item => item.CommentId == commentId).First(); ;
@@ -301,7 +301,7 @@ namespace WebAPI.Models.Repositories
             return editComment;
         }
 
-        public Comment GetCommentById(int CommentId)
+        public async Task<Comment> GetCommentById(int CommentId)
         {
             var comments = _db.Comment.Include(item => item.Post).Include(item => item.Author).ToList();
             var comment = comments.Where(item => item.CommentId == CommentId).First(); ;
