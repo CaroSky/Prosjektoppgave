@@ -25,21 +25,32 @@ namespace WebAPI.Controllers
 
         private IAuthorizationService _authorizationService;
 
-        private string _username = "cla040@uit.no";
+        private string _username = "testuser@example.com";
+        private readonly ILogger<BlogController> _logger;
 
 
 
-        public BlogController(UserManager<IdentityUser> manager, IBlogRepository repository)
+        public BlogController(UserManager<IdentityUser> manager, IBlogRepository repository, ILogger<BlogController> logger)
         {
             this._repository = repository;
             this._manager = manager;
+            _logger = logger;
         }
 
 
-        [HttpGet]
-        public async Task<IEnumerable<Blog>> GetBlogs()
+        public async Task<IActionResult> GetBlogs()
         {
-            return await _repository.GetAllBlogs();
+            _logger.LogInformation("Handling GET request for blogs");
+            try
+            {
+                var blogs = await _repository.GetAllBlogs();
+            return Ok(blogs); // This will return a 200 OK status with the blogs data
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching blogs");
+                throw;
+            }
         }
 
 

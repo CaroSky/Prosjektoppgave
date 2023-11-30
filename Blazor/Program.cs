@@ -13,6 +13,15 @@ builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7153/") });
 builder.Services.AddScoped<BlogService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("MyPolicy",
+        builder => builder.WithOrigins("https://localhost:7153")
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
+
+
 
 var app = builder.Build();
 
@@ -23,6 +32,7 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
 
 app.UseHttpsRedirection();
 

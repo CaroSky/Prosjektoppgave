@@ -43,11 +43,14 @@ namespace WebAPI.Models.Repositories
     {
         private ApplicationDbContext _db;
         private UserManager<IdentityUser> _manager;
+        private readonly ILogger<BlogRepository> _logger;
 
-        public BlogRepository(UserManager<IdentityUser> userManager, ApplicationDbContext db)
+        public BlogRepository(UserManager<IdentityUser> userManager, ApplicationDbContext db
+        , ILogger<BlogRepository> logger)
         {
             this._db = db;
             this._manager = userManager;
+            _logger = logger;
         }
 
         //blog------------------------------------------------------------------------------------------------
@@ -56,8 +59,17 @@ namespace WebAPI.Models.Repositories
         {
             //var blogs = _db.Blog.Include(b => b.Owner).ToList();
             //return blogs;
-            var blogs = await _db.Blog.ToListAsync();
-            return blogs;
+            try
+            {
+                _logger.LogInformation("Getting all blogs");
+                var blogs = await _db.Blog.ToListAsync();
+                return blogs;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all blogs");
+                throw;
+            }
         }
 
         public BlogCreateViewModel GetBlogCreateViewModel()

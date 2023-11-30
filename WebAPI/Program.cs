@@ -8,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddLogging(configure => configure.AddConsole())
+    .Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Information);
 builder.Services.AddTransient<IBlogRepository, BlogRepository>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
