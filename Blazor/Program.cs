@@ -10,16 +10,10 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 
 // Tove: HttpClient
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7153/") });
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:5001/") });
 builder.Services.AddScoped<BlogService>();
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("MyPolicy",
-        builder => builder.WithOrigins("https://localhost:7153")
-            .AllowAnyHeader()
-            .AllowAnyMethod());
-});
+
 
 
 

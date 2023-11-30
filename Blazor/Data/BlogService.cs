@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SharedModels.Entities;
 using System.Text.Json;
@@ -18,8 +19,18 @@ namespace Blazor.Data
 
         public async Task<IEnumerable<Blog>> GetBlogsAsync()
         {
+            _logger.LogInformation($"Sending HTTP GET request to URL: {"api/blog"}");
+
             var response = await _httpClient.GetAsync("api/blog");
             _logger.LogInformation("Sending request to get all blogs");
+            _logger.LogInformation($"Received HTTP response with status code: {response.StatusCode}");
+            foreach (var header in response.Headers)
+            {
+                _logger.LogInformation($"Header: {header.Key} Value: {string.Join(", ", header.Value)}");
+            }
+           // _logger.LogError($"Error response content: {errorContent}");
+
+
 
             if (!response.IsSuccessStatusCode)
             {
@@ -33,6 +44,9 @@ namespace Blazor.Data
             }
             catch (JsonException ex)
             {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                _logger.LogInformation($"Response content: {responseContent}");
+
                 throw new JsonException("Error parsing JSON response", ex);
             }
         }

@@ -133,7 +133,7 @@ namespace WebAPI.Models.Repositories
             if (blog != null)
             {
                 var user = await _db.Users
-                    .SingleOrDefaultAsync(u => u.Id == blog.UserId); // Anta at 'Users' er tabellen for brukere
+                    .SingleOrDefaultAsync(u => u.Id == blog.OwnerId); // Anta at 'Users' er tabellen for brukere
                 // Du kan nå legge til brukerdetaljer til blog-objektet hvis det trengs, f.eks.:
                 // blog.UserName = user?.UserName;
             }

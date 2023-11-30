@@ -28,7 +28,7 @@ namespace WebAPI.Data
             modelBuilder.Entity<Blog>()
                 .HasOne<IdentityUser>() // Du refererer til standard IdentityUser-klassen
                 .WithMany() // En bruker kan ha mange blogger
-                .HasForeignKey(b => b.UserId); // UserId er fremmednøkkelen i Blog-klassen
+                .HasForeignKey(b => b.OwnerId); // UserId er fremmednøkkelen i Blog-klassen
                                                //.IsRequired(false); // Gjør dette valgfritt hvis en blogg ikke nødvendigvis trenger en bruker
 
 
@@ -61,7 +61,7 @@ namespace WebAPI.Data
                 Title = "Eksempel på blogginnlegg",
                 Content = "Dette er innholdet i blogginnlegget.",
                 Created = DateTime.UtcNow,
-            UserId = "0cde7c88-d719-4905-89f4-9b94ce2390c2",
+           OwnerId = "0cde7c88-d719-4905-89f4-9b94ce2390c2",
             IsPostAllowed = true
             });
 

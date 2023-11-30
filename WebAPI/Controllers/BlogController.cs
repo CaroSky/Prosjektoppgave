@@ -37,7 +37,7 @@ namespace WebAPI.Controllers
             _logger = logger;
         }
 
-
+        [HttpGet]
         public async Task<IActionResult> GetBlogs()
         {
             _logger.LogInformation("Handling GET request for blogs");
@@ -103,7 +103,7 @@ namespace WebAPI.Controllers
                 Title = blogCreateViewModel.Title,
                 Content = blogCreateViewModel.Content,
                 Created = DateTime.Now,
-                UserId = userId, // Sett den autentiserte brukerens ID
+                OwnerId = userId, // Sett den autentiserte brukerens ID
                 //Owner = await _manager.FindByNameAsync(User.Identity.Name),
                 IsPostAllowed = true
             };
@@ -165,7 +165,7 @@ namespace WebAPI.Controllers
             }
 
             // Sjekk om den innloggede brukeren er eieren av bloggposten
-            if (userId == blog.UserId)
+            if (userId == blog.OwnerId)
                     {
                 return Ok(blog);
             }
