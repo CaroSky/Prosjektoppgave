@@ -1,37 +1,6 @@
 ﻿@page "/authentication/{action}"
-
-@using Microsoft.AspNetCore.Components.Authorization
-@using Microsoft.AspNetCore.Components.Web
-@inject NavigationManager Navigation
-
-<AuthorizeView>
-    <Authorized>
-        @if (Action == "profile")
-        {
-            <p>Hello, @context.User.Identity?.Name!</p>
-        }
-        <button class="nav-link btn btn-link" @onclick="BeginSignOut">Log out</button>
-    </Authorized>
-    <NotAuthorized>
-        @if (Action == "register")
-        {
-            <p>Register Page</p>
-        }
-        @if (Action == "login")
-        {
-            <p>Login Page</p>
-        }
-    </NotAuthorized>
-</AuthorizeView>
-
 @code {
     [Parameter] public string? Action { get; set; }
-
-    private async Task BeginSignOut(MouseEventArgs args)
-    {
-        // Handle sign-out logic, if needed
-        // Example: Redirect to a sign-out page
-        Navigation.NavigateTo("/signout");
-    }
 }
+
 
