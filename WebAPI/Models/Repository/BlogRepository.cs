@@ -16,7 +16,7 @@ namespace WebAPI.Models.Repositories
         //BlogEditViewModel GetBlogEditViewModel();
         Task<BlogEditViewModel> GetBlogEditViewModelById(int Id);
         Task<Blog> GetBlogById(int Id);
-        Task UpdateBlog(Blog blog, IPrincipal principal);
+        Task UpdateBlog(Blog blog);
         Task DeleteBlog(Blog blog, IPrincipal principal);
         Task<IEnumerable<Post>> GetAllPostByBlogId(int id);
         Task SavePost(Post post, IPrincipal principal);
@@ -141,7 +141,7 @@ namespace WebAPI.Models.Repositories
             return blog;
         }
 
-        public async Task UpdateBlog(Blog blog, IPrincipal principal)
+        public async Task UpdateBlog(Blog blog)
         {
             _db.Blog.Update(blog);
             _db.SaveChanges();

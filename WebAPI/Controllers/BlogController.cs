@@ -55,29 +55,21 @@ namespace WebAPI.Controllers
 
 
 
-        // GET: Product/Create
-        //[HttpGet]
-        //[Authorize]
-        //public ActionResult Create()
-        //{
-        //    var blog = _repository.GetBlogCreateViewModel();
-        //
-        //    return View(blog);
-        //}
 
         //POST: Product/Create
         [HttpPost]
         //[Authorize]
-        public async Task<IActionResult> Post([FromBody] BlogCreateViewModel blogCreateViewModel)
+        //public async Task<IActionResult> Post([FromBody] BlogCreateViewModel blogCreateViewModel)
+        public async Task<IActionResult> Post([FromBody] Blog blog)
         {
             //TOVE: to be removed, har fjernet claims:ASP.NET Core Identity håndterer brukerprinsipper for deg.
-            //var user = await _manager.FindByNameAsync(_username);
-            var userId =  _manager.GetUserId(User);
-            /*if (userId != null)
+            var user = await _manager.FindByNameAsync(_username);
+
+            if (user != null)
             {
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.Name, userId.UserName),
+                    new Claim(ClaimTypes.Name, user.UserName),
                     // Add other claims as needed
                 };
                 var identity = new ClaimsIdentity(claims, "custom");
@@ -85,9 +77,11 @@ namespace WebAPI.Controllers
 
                 // Set the principal to HttpContext.User
                 HttpContext.User = principal;
-            }*/
+            }
+            //var userId = _manager.GetUserId(User);
             //---------------------------------------------------------
-            if (string.IsNullOrEmpty(userId))
+            //if (string.IsNullOrEmpty(userI))
+            if (user == null)
             {
                 return Unauthorized(); // Brukeren er ikke autentisert
             }
@@ -97,21 +91,10 @@ namespace WebAPI.Controllers
                 return BadRequest(ModelState);
             }
             
-            //Kall til metoden save i repository
-            var blog = new Blog
-            {
-                Title = blogCreateViewModel.Title,
-                Content = blogCreateViewModel.Content,
-                Created = DateTime.Now,
-                OwnerId = userId, // Sett den autentiserte brukerens ID
-                //Owner = await _manager.FindByNameAsync(User.Identity.Name),
-                IsPostAllowed = true
-            };
-
+ 
+            blog.OwnerId = user.Id;
 
             await _repository.SaveBlog(blog, User);
-            //tempdata
-            //TempData["message"] = string.Format("{0} has been created", blog.Title);
 
             return CreatedAtAction("Get", new { id = blog.BlogId }, blog);
 
@@ -181,14 +164,15 @@ namespace WebAPI.Controllers
         //PUT: Product/Edit
         [HttpPut("{id}")]
         //[Authorize]
-        public async Task<IActionResult> Put([FromRoute] int id, [FromBody] BlogEditViewModel blogEditViewModel)
+        //public async Task<IActionResult> Put([FromRoute] int id, [FromBody] BlogEditViewModel blogEditViewModel)
+        public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Blog blog)
         {
             // Få den innloggede brukerens ID
-            var userId = _manager.GetUserId(User);
-            if (userId == null)
-            {
-                return Unauthorized();
-            }
+            //var userId = _manager.GetUserId(User);
+            //if (userId == null)
+            //{
+            //    return Unauthorized();
+            //}
             //to be removed
             /*// var user = await _manager.FindByNameAsync(_username);
              if (user != null)
@@ -210,30 +194,17 @@ namespace WebAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (id != blogEditViewModel.BlogId)
-            {
-                return BadRequest();
-            }
+            //if (id != blogEditViewModel.BlogId)
+            //{
+            //    return BadRequest();
+            //}
 
-
-            //Kall til metoden save i repository
-
-            var blog = new Blog
-                {
-                    BlogId = blogEditViewModel.BlogId,
-                    Title = blogEditViewModel.Title,
-                    Content = blogEditViewModel.Content,
-                    Created = blogEditViewModel.Created,
-                    IsPostAllowed = blogEditViewModel.IsPostAllowed
-                };
+       
             //find the owner (the person logged in)
             //TOVE. Gjernet denne:
             //blog.Owner = await _manager.FindByNameAsync(User.Identity.Name);
 
-            await _repository.UpdateBlog(blog, User);
-            // _repository.Update(product);
-            //tempdata
-            //TempData["message"] = string.Format("{0} has been updated", blog.Title);
+            await _repository.UpdateBlog(blog);
 
             return Ok(blog);
 
@@ -257,9 +228,6 @@ namespace WebAPI.Controllers
             }
 
             await _repository.DeleteBlog(blog, User);
-
-            //tempdata
-            //TempData["message"] = string.Format("{0} has been deleted", blog.Title);
            
             return Ok(blog);
 

@@ -1,6 +1,7 @@
 ﻿@page "/blogs"
 @using SharedModels.Entities 
 @using Blazor.Data
+@using ViewModels
 
 @inject BlogService BlogService
 
@@ -12,18 +13,134 @@
 }
 else
 {
-    foreach (var blog in blogs)
-    {
-        <div>@blog.Title</div>
-    }
+    <button class="btn btn-success ml-auto" @onclick="@(() => CreateBlogDialog("Create"))">Add a blog</button>
+    <br/>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Content</th>
+            <th>Created</th>
+            <th>OwnerId</th>
+            <th>New post allowed</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+
+        @foreach (var blog in blogs)
+        {
+
+            <tr>
+                <td>@blog.Title</td>
+                <td>@blog.Content</td>
+                <td>@blog.Created</td>
+                <td>@blog.OwnerId</td>
+                <td>
+                    <div class="form-check">
+                            <input class="form-check-input" type="checkbox" disabled="disabled" @bind="blog.IsPostAllowed" />
+                    </div>
+                    </td>
+                <td>
+                    <button class="btn btn-success ml-auto" @onclick="@(() => EditBlogDialog("Update", blog))">Update</button>
+                    <button class="btn btn-success ml-auto" @onclick="@(() => DeleteBlog(blog))">Delete</button>
+                </td>
+            </tr>
+        }
+
+        </tbody>
+        </table>
 }
+
+
+<BlogDialogBox Title="@_titleDialog" blog="@_viewBlog" OnCancel="CancelDialog" OnSave="OnSaveDialog" @ref="_dialog"></BlogDialogBox>
 
 @code {
     private List<SharedModels.Entities.Blog> blogs;
+    private SharedModels.Entities.Blog _blog = new SharedModels.Entities.Blog();
+    private BlogViewModel _viewBlog = new BlogViewModel();
+    private string _titleDialog;
+    private BlogDialogBox _dialog;
 
     protected override async Task OnInitializedAsync()
     {
         var blogEnumerable = await BlogService.GetBlogsAsync();
         blogs = blogEnumerable.ToList();
+        _titleDialog = "title";
     }
+
+    async Task OnSaveDialog()
+    {
+        if (_titleDialog == "Create")
+        {
+            _blog.Title = _viewBlog.Title;
+            _blog.Content = _viewBlog.Content;
+            _blog.IsPostAllowed = _viewBlog.IsPostAllowed;
+            await BlogService.PostBlogAsync(_blog);
+            var blogEnumerable = await BlogService.GetBlogsAsync();
+            blogs = blogEnumerable.ToList();
+            _dialog.CloseDialog();
+        }
+        else if (_titleDialog == "Update")
+        {
+            _blog.Title = _viewBlog.Title;
+            _blog.Content = _viewBlog.Content;
+            _blog.IsPostAllowed = _viewBlog.IsPostAllowed;
+            await BlogService.PutBlogAsync(_blog);
+            var blogEnumerable = await BlogService.GetBlogsAsync();
+            blogs = blogEnumerable.ToList();
+            _dialog.CloseDialog();
+        }
+    }
+
+
+    private void EditBlogDialog(string title, SharedModels.Entities.Blog blog)
+    {
+        _blog = blog;
+        _viewBlog = new BlogViewModel()
+        {
+            BlogId = blog.BlogId,
+            Title = blog.Title,
+            Content = blog.Content,
+            Created = blog.Created,
+            IsPostAllowed = blog.IsPostAllowed
+        };
+        _titleDialog = title;
+        _dialog.Show();
+    }
+
+
+    void CancelDialog()
+    {
+        _dialog.CloseDialog();
+    }
+
+
+    private void CreateBlogDialog(string title)
+    {
+        _blog = new SharedModels.Entities.Blog()
+        {
+            Created = DateTime.Now,
+            OwnerId = "0",
+            IsPostAllowed = true
+
+        };
+        _viewBlog = new BlogViewModel()
+        {
+            Created = DateTime.Now,
+            IsPostAllowed = true
+        };
+        _titleDialog = title;
+        _dialog.Show();
+    }
+
+    async Task DeleteBlog(SharedModels.Entities.Blog blog)
+    {
+        await BlogService.DeleteBlogAsync(blog);
+        var blogEnumerable = await BlogService.GetBlogsAsync();
+        blogs = blogEnumerable.ToList();
+
+    }
+
+
 }
