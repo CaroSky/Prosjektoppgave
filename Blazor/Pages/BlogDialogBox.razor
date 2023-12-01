@@ -1,0 +1,71 @@
+﻿@inherits ComponentBase
+@using ViewModels
+
+
+<EditForm Model="@blog" OnValidSubmit="OnSave">
+    <DataAnnotationsValidator />
+
+    <div class="modal" tabindex="-1" role="dialog" style="display: @(_show ? "block" : "none")">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@Title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="CloseDialog">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="blogTitle">Name:</label>
+                        <input id="blogTitle" class="form-control" @bind="blog.Title" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="blogContent">Content:</label>
+                        <input id="blogContent" class="form-control" @bind="blog.Content" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="blogCreated">Created:</label>
+                        <input id="blogCreated" class="form-control" disabled="disabled" @bind="blog.Created" />
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input id="isPostAllowed" class="form-check-input" type="checkbox" @bind="blog.IsPostAllowed" />
+                            <label class="form-check-label" for="isPostAllowed">Is Post Allowed</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="OnCancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+
+
+@code {
+    [Parameter] public string Title { get; set; }
+    [Parameter] public BlogViewModel blog { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+
+    private bool _show;
+
+    public void Show()
+    {
+        _show = true;
+        StateHasChanged();
+    }
+
+    public void CloseDialog()
+    {
+        _show = false;
+        StateHasChanged();
+    }
+}
