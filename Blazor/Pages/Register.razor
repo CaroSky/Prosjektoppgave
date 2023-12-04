@@ -1,7 +1,6 @@
 ﻿@page "/register"
-@using Services
 @using SharedModels.Entities
-@inject IAuthService AuthService
+@inject HttpClient Http
 @inject NavigationManager NavigationManager
 
 <h1>Register</h1>
@@ -34,8 +33,8 @@
                 <ValidationMessage For="@(() => RegisterModel.Password)" />
             </div>
             <div class="form-group">
-                <label for="password">Confirm Password</label>
-                <InputText Id="password" type="password" class="form-control" @bind-Value="RegisterModel.ConfirmPassword" />
+                <label for="confirmPassword">Confirm Password</label>
+                <InputText Id="confirmPassword" type="password" class="form-control" @bind-Value="RegisterModel.ConfirmPassword" />
                 <ValidationMessage For="@(() => RegisterModel.ConfirmPassword)" />
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
@@ -44,33 +43,38 @@
 </div>
 
 @code {
-
     private RegisterModel RegisterModel = new RegisterModel();
+    private List<string> Errors = new List<string>();
     private bool ShowErrors;
-    private IEnumerable<string> Errors;
 
     private async Task HandleRegistration()
     {
         ShowErrors = false;
+        Errors.Clear();
 
-        var result = await AuthService.Register(RegisterModel);
+        var response = await Http.PostAsJsonAsync("api/Accounts/register", RegisterModel);
 
-        if (result.Successful)
+        if (response.IsSuccessStatusCode)
         {
-            NavigationManager.NavigateTo("/login");
+            var result = await response.Content.ReadFromJsonAsync<RegisterResult>();
+
+            if (result.Successful)
+            {
+                // If registration is successful, redirect to login page or dashboard
+                NavigationManager.NavigateTo("/login");
+            }
+            else
+            {
+                // Handle the errors
+                Errors = result.Errors.ToList();
+                ShowErrors = true;
+            }
         }
         else
         {
-            Console.WriteLine("Errors:");
-            foreach (var error in result.Errors)
-            {
-                Console.WriteLine(error);
-            }
-
-            Errors = result.Errors; // Check the content of result.Errors
+            // Handle HTTP errors (e.g., server not responding)
+            Errors.Add("Server error occurred. Please try again.");
             ShowErrors = true;
         }
     }
-
-
 }

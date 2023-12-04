@@ -1,15 +1,35 @@
 ﻿@page "/logout"
-@using Services
-@inject IAuthService AuthService
 @inject NavigationManager NavigationManager
+@inject HttpClient Http
+@inject TokenService TokenService
 
+<button class="btn btn-danger" @onclick="HandleLogout">Logout</button>
 
 @code {
-
-    protected override async Task OnInitializedAsync()
+    private async Task HandleLogout()
     {
-        await AuthService.Logout();
-        NavigationManager.NavigateTo("/");
-    }
+        try
+        {
+            // Send a logout request to the server (optional, see explanation below)
+            var response = await Http.PostAsync("api/Accounts/logout", null);
 
+            if (response.IsSuccessStatusCode)
+            {
+                // Handle the response from the server if necessary
+
+                TokenService.JwtToken = null;
+
+                // Redirect to the login page or another appropriate page
+                NavigationManager.NavigateTo("/login");
+            }
+            else
+            {
+                // Handle failed logout attempt
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle exceptions
+        }
+    }
 }

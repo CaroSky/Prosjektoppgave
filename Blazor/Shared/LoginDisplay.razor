@@ -1,8 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
-@using Microsoft.AspNetCore.Components.Web
-@using Microsoft.AspNetCore.Components
-@inject NavigationManager Navigation
-@inject ApiAuthenticationStateProvider ApiAuthenticationStateProvider
+@inject AuthenticationStateProvider authenticationStateProvider
 
 <AuthorizeView>
     <Authorized>
@@ -14,5 +11,3 @@
         <a href="Login">Log in</a>
     </NotAuthorized>
 </AuthorizeView>
-
-
