@@ -25,7 +25,7 @@ namespace WebAPI.Controllers
 
         private IAuthorizationService _authorizationService;
 
-        private string _username = "testuser@example.com";
+        private string _username = "tli061@uit.no";
         private readonly ILogger<BlogController> _logger;
 
 
