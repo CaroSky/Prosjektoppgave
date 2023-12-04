@@ -7,7 +7,7 @@
 <AuthorizeView>
     <Authorized>
         <a href="authentication/profile">Hello, @(context.User.Identity?.Name)!</a>
-        <button class="nav-link btn btn-link" @onclick="BeginSignOut">Log out</button>
+        <a href="/Identity/Account/Logout">Log out</a>
     </Authorized>
     <NotAuthorized>
         <a href="/Identity/Account/Register">Register</a>
@@ -15,15 +15,4 @@
     </NotAuthorized>
 </AuthorizeView>
 
-@code {
-    private async Task BeginSignOut()
-    {
-        // Sign out using the AuthenticationStateProvider
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        if (user.Identity.IsAuthenticated)
-        {
-            Navigation.NavigateTo("/Identity/Account/Logout");
-        }
-    }
-}
+
