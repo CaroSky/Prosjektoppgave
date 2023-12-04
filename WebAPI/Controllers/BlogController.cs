@@ -43,8 +43,22 @@ namespace WebAPI.Controllers
             _logger.LogInformation("Handling GET request for blogs");
             try
             {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+                if (userIdClaim != null)
+                {
+                    var userId = userIdClaim.Value;
+                    _logger.LogInformation($"User ID: {userId}");
+                }
+                else
+                {
+                    _logger.LogWarning("User ID claim not found.");
+                }
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
                 var blogs = await _repository.GetAllBlogs();
-            return Ok(blogs); // This will return a 200 OK status with the blogs data
+
+                _logger.LogInformation($"Username: {username}");
+                return Ok(blogs); // This will return a 200 OK status with the blogs data
             }
             catch (Exception ex)
             {
@@ -52,8 +66,6 @@ namespace WebAPI.Controllers
                 throw;
             }
         }
-
-
 
 
         //POST: Product/Create

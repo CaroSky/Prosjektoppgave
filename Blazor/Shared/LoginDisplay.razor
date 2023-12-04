@@ -2,16 +2,16 @@
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.AspNetCore.Components
 @inject NavigationManager Navigation
-@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ApiAuthenticationStateProvider ApiAuthenticationStateProvider
 
 <AuthorizeView>
     <Authorized>
-        <a href="authentication/profile">Hello, @(context.User.Identity?.Name)!</a>
-        <a href="/Identity/Account/Logout">Log out</a>
+        Hello, @context.User.Identity.Name!
+        <a href="LogOut">Log out</a>
     </Authorized>
     <NotAuthorized>
-        <a href="/Identity/Account/Register">Register</a>
-        <a href="/Identity/Account/Login">Log in</a>
+        <a href="Register">Register</a>
+        <a href="Login">Log in</a>
     </NotAuthorized>
 </AuthorizeView>
 

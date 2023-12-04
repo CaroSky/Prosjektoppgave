@@ -1,12 +1,19 @@
 using Blazor.Data;
+using Blazor;
+using Blazor.Services;
+using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using WebAPI.Data;
+using WebAPI.Models.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddTransient<IAuthService, AuthService>();
+builder.Services.AddScoped<ApiAuthenticationStateProvider>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -21,10 +28,6 @@ builder.Services.AddSingleton<WeatherForecastService>();
 // Tove: HttpClient
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:5001/") });
 builder.Services.AddScoped<BlogService>();
-
-
-
-
 
 var app = builder.Build();
 
