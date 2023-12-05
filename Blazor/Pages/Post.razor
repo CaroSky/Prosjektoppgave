@@ -15,13 +15,18 @@
 
 else
 {
-    <button class="btn btn-success ml-auto" @onclick="@(() => CreatePostDialog("Create"))">Add New Post</button>
+
+    @if (allowed)
+    {
+
+        <button class="btn btn-success ml-auto" @onclick="@(() => CreatePostDialog("Create"))">Add New Post</button>
+    }
     @foreach (var post in posts)
     {
         <div class="post-preview">
             <h4>@post.Title</h4>
             <p>@post.Content</p>
-            <p>@post.Created.ToString("yyyy-MM-dd")</p> 
+            <p>@post.Created.ToString("yyyy-MM-dd")</p>
             <button class="btn btn-primary" @onclick="@(() => ViewPost(post.PostId))">View</button>
             <button class="btn btn-secondary" @onclick="@(() => EditPostDialog("Update", post.PostId, post))">Edit</button>
 
@@ -48,6 +53,8 @@ else
     private PostEditViewModel _viewEditPost = new SharedModels.ViewModels.PostEditViewModel();
     private string _titleDialog;
     private PostDialogBox _dialog;
+    private PostIndexViewModel postIndexViewModel;
+    private bool allowed;
 
     //private IEnumerable<Post> posts;
     private IEnumerable<SharedModels.Entities.Post> posts;
@@ -55,7 +62,8 @@ else
     protected override async Task OnInitializedAsync()
     {
         await GetPostsForBlog(Id); //posts
-        
+
+
         _titleDialog = "title";
     }
 
@@ -63,12 +71,13 @@ else
     {
         _dialog.CloseDialog();
     }
-   
+
     private async Task OnSavePostDialog()
     {
         if (_titleDialog == "Create")
         {
             // Konverter fra PostEditViewModel til PostCreateViewModel
+            //EditViewmodel er i dialogboxen siden den inneholder alle verdiene edit og create trenger
             var createViewModel = new PostCreateViewModel
                 {
                     Title = _viewEditPost.Title,
@@ -103,6 +112,7 @@ else
         {
             var postIndexViewModel = await response.Content.ReadFromJsonAsync<PostIndexViewModel>();
             posts = postIndexViewModel.Posts;
+            allowed = postIndexViewModel.IsPostAllowed;
         }
         else
         {
@@ -126,7 +136,7 @@ else
         _post = new SharedModels.Entities.Post()
             {
                 Created = DateTime.Now,
-                // Sett andre relevante verdier for 'Post' entiteten
+               
             };
 
         // Overfør verdier fra '_post' til '_viewEditPost'
@@ -134,8 +144,8 @@ else
             {
                 BlogId = Id,
                 IsCommentAllowed = true,
-                Title = "", // Standard verdi siden det er et nytt innlegg
-                Content = "", // Standard verdi siden det er et nytt innlegg
+                Title = "", 
+                Content = "",
                 Created = _post.Created
             };
 
