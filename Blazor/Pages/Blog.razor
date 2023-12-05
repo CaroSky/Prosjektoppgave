@@ -169,7 +169,10 @@ else
 
     private void Search()
     {
-        NavigationManager.NavigateTo($"/search/{Uri.EscapeDataString(tag)}");
+        if (!string.IsNullOrEmpty(tag))
+        {
+            NavigationManager.NavigateTo($"/search/{Uri.EscapeDataString(tag)}");
+        }
     }
 
 
