@@ -39,6 +39,10 @@ namespace WebAPI.Models.Repositories
         Task<IEnumerable<Tag>> GetTags();
         Task<Tag> GetTagByName(string name);
         Task<IEnumerable<Post>> SearchPostByTag(string name);
+        Task SavePostTag(PostTag postTag);
+        Task SaveTag(Tag tag);
+      
+          
 
     }
 
@@ -383,6 +387,35 @@ namespace WebAPI.Models.Repositories
 
             return postsList;
         }
+
+        public async Task SavePostTag(PostTag postTag)
+        {
+            try
+            {
+                _db.PostTag.Add(postTag);
+                await _db.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving post-tag relationship");
+                throw;
+            }
+        }
+
+        public async Task SaveTag(Tag tag)
+        {
+            try
+            {
+                _db.Tag.Add(tag);
+                await _db.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving tag");
+                throw;
+            }
+        }
+
 
     }
 

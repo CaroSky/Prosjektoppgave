@@ -10,6 +10,7 @@ using System.Security.Claims;
 using WebAPI.Models.Repositories;
 using WebAPI.Models.ViewModels;
 using SharedModels.Entities;
+using System.Text.RegularExpressions;
 
 namespace WebAPI.Controllers
 {
@@ -20,15 +21,17 @@ namespace WebAPI.Controllers
         private IBlogRepository _repository;
 
         private UserManager<IdentityUser> _manager;
+        private readonly ILogger<PostController> _logger;
 
         private string _username = "til061@uit.no";
 
 
 
-        public PostController(UserManager<IdentityUser> manager, IBlogRepository repository)
+        public PostController(UserManager<IdentityUser> manager, IBlogRepository repository, ILogger<PostController> logger)
         {
             this._repository = repository;
             this._manager = manager;
+            _logger = logger;
         }
 
 
@@ -97,14 +100,42 @@ namespace WebAPI.Controllers
                     Blog = await _repository.GetBlogById(postCreateViewModel.BlogId),
                     IsCommentAllowed = true
                 };
-
-
+            
+            // Ekstraher tags fra innholdet
+            var tags = ExtractHashtags(post.Content);
+            //Lagrer post
             await _repository.SavePost(post, User);
             //tempdata
             //TempData["message"] = string.Format("{0} has been created", post.Title);
+
+            foreach (var tagName in tags)
+            {
+                // Sjekk om taggen finnes, hvis ikke opprett ny
+                var tag = await _repository.GetTagByName(tagName) ?? new Tag { Name = tagName };
+
+                // Lagre taggen om den er ny
+                if (tag.TagId == 0)
+                {
+                    await _repository.SaveTag(tag);
+                }
+
+                // Opprett og lagre PostTag-forbindelse
+                var postTag = new PostTag { PostsPostId = post.PostId, TagsTagId = tag.TagId };
+                await _repository.SavePostTag(postTag);
+            }
             return CreatedAtAction("Get", new { id = post.PostId }, post);
 
 
+        }
+
+        private List<string> ExtractHashtags(string content)
+        {
+            var tags = Regex.Matches(content, @"#\w+")
+                        .Cast<Match>()
+                        .Select(match => match.Value.TrimStart('#'))
+                        .ToList();
+            _logger.LogInformation("Extracted Tags: {Tags}", string.Join(", ", tags));
+            return tags;
         }
 
 

@@ -1,5 +1,6 @@
 ﻿using System.Net.Http;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SharedModels.Entities;
@@ -100,6 +101,8 @@ namespace Blazor.Data
             var response = await _httpClient.DeleteAsync($"api/post/{postId}");
             return response.IsSuccessStatusCode;
         }
+        
+
 
 
     }
