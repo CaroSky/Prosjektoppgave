@@ -217,19 +217,19 @@ namespace WebAPI.Controllers
         {
             //to be removed
             var user = await _manager.FindByNameAsync(_username);
-            if (user != null)
-            {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.UserName),
+           // if (user != null)
+            //{
+              //  var claims = new List<Claim>
+               // {
+                 //   new Claim(ClaimTypes.Name, user.UserName),
                     // Add other claims as needed
-                };
-                var identity = new ClaimsIdentity(claims, "custom");
-                var principal = new ClaimsPrincipal(identity);
+                //};
+                //var identity = new ClaimsIdentity(claims, "custom");
+                //var principal = new ClaimsPrincipal(identity);
 
                 // Set the principal to HttpContext.User
-                HttpContext.User = principal;
-            }
+                //HttpContext.User = principal;
+            //}
             //---------------------------------------------------------
             if (!ModelState.IsValid)
             {
@@ -246,12 +246,12 @@ namespace WebAPI.Controllers
            // var currentUser = await _manager.FindByNameAsync(User.Identity.Name);
             //if (currentUser.Id == post.Author.Id)
             //{
-              //  await _repository.DeletePost(post, User);
-                //return Ok(post);
+             await _repository.DeletePost(post, User);
+                return Ok(post);
             //}
-            ///else
+           //else
             //{
-                return BadRequest(ModelState);
+              //  return BadRequest(ModelState);
             //}
             
         }

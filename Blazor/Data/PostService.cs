@@ -95,6 +95,13 @@ namespace Blazor.Data
             }
         }
 
+        public async Task<bool> DeletePostAsync(int postId)
+        {
+            var response = await _httpClient.DeleteAsync($"api/post/{postId}");
+            return response.IsSuccessStatusCode;
+        }
+
+
     }
 
 

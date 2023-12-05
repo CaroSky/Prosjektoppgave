@@ -124,12 +124,22 @@ else
         NavigationManager.NavigateTo($"/postdetails/{postId}");
     }
 
-
     private async Task DeletePost(int postId)
     {
-        // Kall PostService for å slette innlegget
-        // Oppdater listen etter sletting
-    }
+       
+            var success = await PostService.DeletePostAsync(postId);
+            if (success)
+            {
+                // Oppdater listen over innlegg her, eller naviger brukeren til en annen side
+                 await GetPostsForBlog(Id);
+            }
+            else
+            {
+                // Vis en feilmelding til brukeren
+            }
+        }
+    
+
 
     private void CreatePostDialog(string title)
     {
