@@ -26,7 +26,7 @@ namespace Blazor.Data
             _logger.LogInformation($"Received HTTP response with status code: {response.StatusCode}");
 
             if (!response.IsSuccessStatusCode)
-            {
+            {   
                 var errorContent = await response.Content.ReadAsStringAsync();
                 throw new HttpRequestException($"Request failed with status code {response.StatusCode} and content {errorContent}");
             }
