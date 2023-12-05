@@ -55,6 +55,34 @@ namespace Blazor.Data
             }
         }
 
+        public async Task<Blog> GetBlogByIdAsync(int blogId)
+        {
+            _logger.LogInformation($"Sending HTTP GET request to URL: api/blog/{blogId}");
+
+            var response = await _httpClient.GetAsync($"api/blog/{blogId}");
+            _logger.LogInformation($"Received HTTP response with status code: {response.StatusCode}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError($"Error response content: {errorContent}");
+                throw new HttpRequestException($"Request failed with status code {response.StatusCode} and content {errorContent}");
+            }
+
+            try
+            {
+                return await response.Content.ReadFromJsonAsync<Blog>();
+            }
+            catch (JsonException ex)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError($"Response content: {responseContent}");
+                throw new JsonException("Error parsing JSON response", ex);
+            }
+        }
+
+
+
 
         // Andre metoder for å opprette, oppdatere, og slette blogginnlegg
 

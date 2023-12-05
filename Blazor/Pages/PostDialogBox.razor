@@ -1,0 +1,62 @@
+﻿@using SharedModels.ViewModels
+
+
+<div class="modal" tabindex="-1" role="dialog" style="display: @(_show ? "block" : "none")">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@Title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="CloseDialog">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="postTitle">Title:</label>
+                    <input id="postTitle" class="form-control" @bind="post.Title" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="postContent">Content:</label>
+                    <textarea id="postContent" class="form-control" @bind="post.Content" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-check">
+                        <input id="isCommentAllowed" class="form-check-input" type="checkbox" @bind="post.IsCommentAllowed" />
+                        <label class="form-check-label" for="isCommentAllowed">Is Comment Allowed</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="OnCancel">Cancel</button>
+                <button type="submit" class="btn btn-primary" @onclick="OnSave">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [Parameter] public string Title { get; set; }
+    [Parameter] public int BlogId { get; set; }
+    [Parameter] public PostCreateViewModel post { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+    [Parameter] public PostEditViewModel editpost { get; set; }
+
+    private bool _show;
+
+    public void Show()
+    {
+        _show = true;
+        StateHasChanged();
+    }
+
+    public void CloseDialog()
+    {
+        _show = false;
+        StateHasChanged();
+    }
+}

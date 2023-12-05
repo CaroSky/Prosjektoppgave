@@ -1,4 +1,6 @@
-﻿namespace WebAPI.Models.Entities
+﻿using SharedModels.Entities;
+
+namespace SharedModels.Entities
 {
     public class Tag
     {

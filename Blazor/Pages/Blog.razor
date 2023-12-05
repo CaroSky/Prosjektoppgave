@@ -4,6 +4,10 @@
 @using ViewModels
 
 @inject BlogService BlogService
+@inject PostService PostService
+@inject NavigationManager NavigationManager
+
+
 
 <h3>Blog Posts</h3>
 
@@ -31,8 +35,10 @@ else
         @foreach (var blog in blogs)
         {
 
-            <tr>
-                <td>@blog.Title</td>
+                <tr>
+                <td>
+                        <a class="btn btn-outline-primary" @onclick="@(() => NavigateToPosts(blog.BlogId))">@blog.Title</a>
+                </td>
                 <td>@blog.Content</td>
                 <td>@blog.Created</td>
                 <td>@blog.OwnerId</td>
@@ -61,6 +67,7 @@ else
     private BlogViewModel _viewBlog = new BlogViewModel();
     private string _titleDialog;
     private BlogDialogBox _dialog;
+    private IEnumerable<SharedModels.Entities.Post> selectedPosts;
 
     protected override async Task OnInitializedAsync()
     {
@@ -69,10 +76,11 @@ else
         _titleDialog = "title";
     }
 
-    async Task OnSaveDialog()
+    private async Task OnSaveDialog()
     {
         if (_titleDialog == "Create")
         {
+          
             _blog.Title = _viewBlog.Title;
             _blog.Content = _viewBlog.Content;
             _blog.IsPostAllowed = _viewBlog.IsPostAllowed;
@@ -140,6 +148,17 @@ else
         var blogEnumerable = await BlogService.GetBlogsAsync();
         blogs = blogEnumerable.ToList();
 
+    }
+
+   // private async Task LoadPosts(int blogId)
+    //{
+      //  selectedPosts = await PostService.GetPostsByBlogIdAsync(blogId);
+       // selectedBlogTitle = blogs.FirstOrDefault(b => b.BlogId == blogId)?.Title;
+    //}
+
+    private void NavigateToPosts(int blogId)
+    {
+        NavigationManager.NavigateTo($"/post/{blogId}");
     }
 
 

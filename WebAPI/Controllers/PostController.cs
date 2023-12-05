@@ -3,11 +3,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
+using SharedModels.ViewModels;
 using System.Reflection.Metadata;
 using System.Security.Claims;
-using WebAPI.Models.Entities;
+//using WebAPI.Models.Entities;
 using WebAPI.Models.Repositories;
 using WebAPI.Models.ViewModels;
+using SharedModels.Entities;
 
 namespace WebAPI.Controllers
 {
@@ -19,7 +21,7 @@ namespace WebAPI.Controllers
 
         private UserManager<IdentityUser> _manager;
 
-        private string _username = "cla040@uit.no";
+        private string _username = "til061@uit.no";
 
 
 
@@ -64,20 +66,20 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> Post([FromBody] PostCreateViewModel postCreateViewModel)
         {
             //to be removed
-            var user = await _manager.FindByNameAsync(_username);
-            if (user != null)
-            {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.UserName),
+           // var user = await _manager.FindByNameAsync(_username);
+            //if (user != null)
+           // {
+              //  var claims = new List<Claim>
+                //{
+                  //  new Claim(ClaimTypes.Name, user.UserName),
                     // Add other claims as needed
-                };
-                var identity = new ClaimsIdentity(claims, "custom");
-                var principal = new ClaimsPrincipal(identity);
+                //};
+               // var identity = new ClaimsIdentity(claims, "custom");
+               // var principal = new ClaimsPrincipal(identity);
 
                 // Set the principal to HttpContext.User
-                HttpContext.User = principal;
-            }
+               // HttpContext.User = principal;
+            //}
             //---------------------------------------------------------
 
             if (!ModelState.IsValid)
@@ -91,7 +93,7 @@ namespace WebAPI.Controllers
                     Title = postCreateViewModel.Title,
                     Content = postCreateViewModel.Content,
                     Created = DateTime.Now,
-                    Author = await _manager.FindByNameAsync(User.Identity.Name),
+                   // Author = await _manager.FindByNameAsync(User.Identity.Name),
                     Blog = await _repository.GetBlogById(postCreateViewModel.BlogId),
                     IsCommentAllowed = true
                 };
@@ -143,13 +145,13 @@ namespace WebAPI.Controllers
 
             var postEdit = await _repository.GetPostEditViewModelById(id);
 
-            var currentUser = await _manager.FindByNameAsync(User.Identity.Name);
-            if (currentUser.Id == post.Author.Id)
-            {
-                return Ok(postEdit);
-            }
+           // var currentUser = await _manager.FindByNameAsync(User.Identity.Name);
+            //if (currentUser.Id == post.Author.Id)
+            //{
+               return Ok(postEdit);
+           // }
             //TempData["message"] = "You cannot edit this item";
-            return BadRequest(ModelState);
+           // return BadRequest(ModelState);
 
         }
 
@@ -195,7 +197,7 @@ namespace WebAPI.Controllers
                 Blog = await _repository.GetBlogById(postEditViewModel.BlogId)
             };
             //find the owner (the person logged in)
-            post.Author = await _manager.FindByNameAsync(User.Identity.Name);
+           // post.Author = await _manager.FindByNameAsync(User.Identity.Name);
 
             await _repository.UpdatePost(post, User);
             // _repository.Update(product);
@@ -241,16 +243,16 @@ namespace WebAPI.Controllers
             }
 
 
-            var currentUser = await _manager.FindByNameAsync(User.Identity.Name);
-            if (currentUser.Id == post.Author.Id)
-            {
-                await _repository.DeletePost(post, User);
-                return Ok(post);
-            }
-            else
-            {
+           // var currentUser = await _manager.FindByNameAsync(User.Identity.Name);
+            //if (currentUser.Id == post.Author.Id)
+            //{
+              //  await _repository.DeletePost(post, User);
+                //return Ok(post);
+            //}
+            ///else
+            //{
                 return BadRequest(ModelState);
-            }
+            //}
             
         }
     }

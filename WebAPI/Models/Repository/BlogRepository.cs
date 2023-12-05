@@ -5,6 +5,7 @@ using WebAPI.Models.Entities;
 using WebAPI.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using SharedModels.Entities;
+using SharedModels.ViewModels;
 
 namespace WebAPI.Models.Repositories
 {
@@ -167,7 +168,8 @@ namespace WebAPI.Models.Repositories
 
         public async Task<IEnumerable<Post>> GetAllPostByBlogId(int id)
         {
-            var allPosts = _db.Post.Include(item => item.Blog).Include(item => item.Author).ToList();
+            var allPosts = _db.Post.Include(item => item.Blog).ToList();
+           // var allPosts = _db.Post.Include(item => item.Blog).Include(item => item.Author).ToList();
             var posts = allPosts.Where(item => item.Blog.BlogId == id);
             return posts;
         }
@@ -222,7 +224,9 @@ namespace WebAPI.Models.Repositories
 
         public async Task<Post> GetPostById(int PostId)
         {
-            var posts = _db.Post.Include(item => item.Blog).Include(item => item.Author).ToList();
+            //var posts = _db.Post.Include(item => item.Blog).Include(item => item.Author).ToList();
+            var posts = _db.Post.Include(item => item.Blog).ToList();
+
             var post = posts.Where(item => item.PostId == PostId).First(); ;
 
             return post;

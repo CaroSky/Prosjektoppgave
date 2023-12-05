@@ -8,6 +8,7 @@ using WebAPI.Models.Repositories;
 using WebAPI.Models.ViewModels;
 using System.Reflection.Metadata;
 using System.Security.Claims;
+using SharedModels.Entities;
 
 namespace WebAPI.Controllers
 {
@@ -19,7 +20,7 @@ namespace WebAPI.Controllers
 
         private UserManager<IdentityUser> _manager;
 
-        private string _username = "cla040@uit.no";
+        private string _username = "tli0610@uit.no";
 
         public CommentController(UserManager<IdentityUser> manager, IBlogRepository repository)
         {
@@ -87,7 +88,7 @@ namespace WebAPI.Controllers
                 Content = commentCreateViewModel.Content,
                 Created = DateTime.Now,
                 Author = await _manager.FindByNameAsync(User.Identity.Name),
-                Post = await _repository.GetPostById(commentCreateViewModel.PostId)
+                //Må teste Tove//Post = await _repository.GetPostById(commentCreateViewModel.PostId)
             };
 
 
@@ -185,7 +186,7 @@ namespace WebAPI.Controllers
                 CommentId = commentEditViewModel.CommentId,
                 Content = commentEditViewModel.Content,
                 Created = commentEditViewModel.Created,
-                Post = await _repository.GetPostById(commentEditViewModel.PostId)
+               // Post = await _repository.GetPostById(commentEditViewModel.PostId)
             };
             //find the owner (the person logged in)
             comment.Author = await _manager.FindByNameAsync(User.Identity.Name);

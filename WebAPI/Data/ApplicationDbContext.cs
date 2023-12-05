@@ -37,7 +37,7 @@ namespace WebAPI.Data
             //   .WithMany(t => t.Posts);
 
             // Seeding a user
-            var userId = Guid.NewGuid().ToString(); // Create a GUID for the user Id
+           /*// var userId = Guid.NewGuid().ToString(); // Create a GUID for the user Id
             var user = new IdentityUser
             {
                 Id = userId,
@@ -52,17 +52,21 @@ namespace WebAPI.Data
                 // You can use the PasswordHasher<IdentityUser> to create this
             };
 
-            modelBuilder.Entity<IdentityUser>().HasData(user);
+            modelBuilder.Entity<IdentityUser>().HasData(user);*/
 
-            
-             modelBuilder.Entity<Blog>().HasData(new Blog
+
+            modelBuilder.Entity<Post>().Property<int>("BlogId");
+
+            modelBuilder.Entity<Post>().HasData(new
             {
-                BlogId = 1, // Gi et unikt ID til blogginnlegget
-                Title = "Eksempel på blogginnlegg",
-                Content = "Dette er innholdet i blogginnlegget.",
+                PostId = 1,
+                Title = "Seedet Post Tittel",
+                Content = "Dette er innholdet i den seedede posten.",
                 Created = DateTime.UtcNow,
-           OwnerId = "0cde7c88-d719-4905-89f4-9b94ce2390c2",
-            IsPostAllowed = true
+                IsCommentAllowed = true,
+                // Riktig måte å sette skyggeegenskapen på
+                BlogId = 1006,  // Eksisterende BlogId
+                //AuthorId = "c12eacb0 - c1a9 - 48c3 - b4a7 - c9e7a7ce3436"
             });
 
 
