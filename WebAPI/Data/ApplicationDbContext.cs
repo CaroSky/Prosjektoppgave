@@ -24,46 +24,46 @@ namespace WebAPI.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Her legger du til konfigurasjonen for relasjonen mellom Blog og IdentityUser
-            modelBuilder.Entity<Blog>()
-                .HasOne<IdentityUser>() // Du refererer til standard IdentityUser-klassen
-                .WithMany() // En bruker kan ha mange blogger
-                .HasForeignKey(b => b.OwnerId); // UserId er fremmednøkkelen i Blog-klassen
-                                               //.IsRequired(false); // Gjør dette valgfritt hvis en blogg ikke nødvendigvis trenger en bruker
+           // // Her legger du til konfigurasjonen for relasjonen mellom Blog og IdentityUser
+           // modelBuilder.Entity<Blog>()
+           //     .HasOne<IdentityUser>() // Du refererer til standard IdentityUser-klassen
+           //     .WithMany() // En bruker kan ha mange blogger
+           //     .HasForeignKey(b => b.OwnerId); // UserId er fremmednøkkelen i Blog-klassen
+           //                                    //.IsRequired(false); // Gjør dette valgfritt hvis en blogg ikke nødvendigvis trenger en bruker
 
 
-            //modelBuilder.Entity<Post>()
-            //   .HasMany(p => p.Tags)
-            //   .WithMany(t => t.Posts);
+           // //modelBuilder.Entity<Post>()
+           // //   .HasMany(p => p.Tags)
+           // //   .WithMany(t => t.Posts);
 
-            // Seeding a user
-            var userId = Guid.NewGuid().ToString(); // Create a GUID for the user Id
-            var user = new IdentityUser
-            {
-                Id = userId,
-                UserName = "testuser",
-                NormalizedUserName = "TESTUSER",
-                Email = "testuser@example.com",
-                NormalizedEmail = "TESTUSER@EXAMPLE.COM",
-                EmailConfirmed = true,
-                PasswordHash = new PasswordHasher<IdentityUser>().HashPassword(null, "Passord123!"),
-                SecurityStamp = string.Empty, // Normally this would be a random value
-                // PasswordHash would be set to a hashed password
-                // You can use the PasswordHasher<IdentityUser> to create this
-            };
+           // // Seeding a user
+           // var userId = Guid.NewGuid().ToString(); // Create a GUID for the user Id
+           // var user = new IdentityUser
+           // {
+           //     Id = userId,
+           //     UserName = "testuser",
+           //     NormalizedUserName = "TESTUSER",
+           //     Email = "testuser@example.com",
+           //     NormalizedEmail = "TESTUSER@EXAMPLE.COM",
+           //     EmailConfirmed = true,
+           //     PasswordHash = new PasswordHasher<IdentityUser>().HashPassword(null, "Passord123!"),
+           //     SecurityStamp = string.Empty, // Normally this would be a random value
+           //     // PasswordHash would be set to a hashed password
+           //     // You can use the PasswordHasher<IdentityUser> to create this
+           // };
 
-            modelBuilder.Entity<IdentityUser>().HasData(user);
+           // modelBuilder.Entity<IdentityUser>().HasData(user);
 
             
-             modelBuilder.Entity<Blog>().HasData(new Blog
-            {
-                BlogId = 1, // Gi et unikt ID til blogginnlegget
-                Title = "Eksempel på blogginnlegg",
-                Content = "Dette er innholdet i blogginnlegget.",
-                Created = DateTime.UtcNow,
-           OwnerId = "0cde7c88-d719-4905-89f4-9b94ce2390c2",
-            IsPostAllowed = true
-            });
+           //  modelBuilder.Entity<Blog>().HasData(new Blog
+           // {
+           //     BlogId = 1, // Gi et unikt ID til blogginnlegget
+           //     Title = "Eksempel på blogginnlegg",
+           //     Content = "Dette er innholdet i blogginnlegget.",
+           //     Created = DateTime.UtcNow,
+           //OwnerId = "0cde7c88-d719-4905-89f4-9b94ce2390c2",
+           // IsPostAllowed = true
+           // });
 
 
         }
