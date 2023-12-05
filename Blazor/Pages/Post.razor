@@ -33,7 +33,7 @@ else
 
 }
 <PostDialogBox Title="@_titleDialog"
-               post="@_viewPost"
+               post="@_viewEditPost"
                OnCancel="CancelPostDialog"
                OnSave="OnSavePostDialog"
 @ref="_dialog"></PostDialogBox>
@@ -63,41 +63,38 @@ else
     {
         _dialog.CloseDialog();
     }
-
+   
     private async Task OnSavePostDialog()
     {
         if (_titleDialog == "Create")
         {
-            await PostService.CreatePostAsync(_viewPost);
-            await GetPostsForBlog(Id);
-            _dialog.CloseDialog();
+            // Konverter fra PostEditViewModel til PostCreateViewModel
+            var createViewModel = new PostCreateViewModel
+                {
+                    Title = _viewEditPost.Title,
+                    Content = _viewEditPost.Content,
+                    BlogId = _viewEditPost.BlogId,
+                    IsCommentAllowed = _viewEditPost.IsCommentAllowed
+                };
+
+            Console.WriteLine("Creating new post...");
+            await PostService.CreatePostAsync(createViewModel);
+            Console.WriteLine("New post created.");
         }
         else if (_titleDialog == "Update")
         {
-            Console.WriteLine("Update button clicked");
-            Console.WriteLine($"_post.Title før oppdatering: {_post.Title}");
-            Console.WriteLine($"_post.Content før oppdatering: {_post.Content}");
-            Console.WriteLine($"_post.IsCommentAllowed før oppdatering: {_post.IsCommentAllowed}");
-
-
-            _post.Title = _viewEditPost.Title;
-            _post.Content = _viewEditPost.Content;
-            _post.IsCommentAllowed = _viewEditPost.IsCommentAllowed;
-
-            Console.WriteLine($"_post.Title etter oppdatering: {_post.Title}");
-            Console.WriteLine($"_post.Content etter oppdatering: {_post.Content}");
-            Console.WriteLine($"_post.IsCommentAllowed etter oppdatering: {_post.IsCommentAllowed}");
-
-            // Legg til loggmeldinger for å sjekke verdiene i _viewEditPost
-            Console.WriteLine($"_viewEditPost.Title: {_viewEditPost.Title}");
-            Console.WriteLine($"_viewEditPost.Content: {_viewEditPost.Content}");
-            Console.WriteLine($"_viewEditPost.IsCommentAllowed: {_viewEditPost.IsCommentAllowed}");
-
+            // Send PostEditViewModel direkte
+            Console.WriteLine($"Updating post with ID {_viewEditPost.PostId}...");
             await PostService.UpdatePostAsync(_viewEditPost.PostId, _viewEditPost);
-            await GetPostsForBlog(Id);
-            _dialog.CloseDialog();
+            Console.WriteLine($"Post with ID {_viewEditPost.PostId} updated.");
         }
+
+        await GetPostsForBlog(Id);
+        Console.WriteLine("Posts updated after save operation.");
+        _dialog.CloseDialog();
+        Console.WriteLine("Dialog closed.");
     }
+
 
     private async Task GetPostsForBlog(int blogId)
     {
@@ -129,16 +126,20 @@ else
         _post = new SharedModels.Entities.Post()
             {
                 Created = DateTime.Now,
-              
-
+                // Sett andre relevante verdier for 'Post' entiteten
             };
-        _viewPost= new PostCreateViewModel()
+
+        // Overfør verdier fra '_post' til '_viewEditPost'
+        _viewEditPost = new PostEditViewModel()
             {
-                IsCommentAllowed = true,
                 BlogId = Id,
-
+                IsCommentAllowed = true,
+                Title = "", // Standard verdi siden det er et nytt innlegg
+                Content = "", // Standard verdi siden det er et nytt innlegg
+                Created = _post.Created
             };
-        _titleDialog = title;
+
+        _titleDialog = "Create";
         _dialog.Show();
     }
 
