@@ -61,7 +61,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        await GetPostsForBlog(Id); //posts
+        posts = await PostService.GetPostsByBlogIdAsync(Id);
 
 
         _titleDialog = "title";
@@ -107,17 +107,9 @@ else
 
     private async Task GetPostsForBlog(int blogId)
     {
-        var response = await HttpClient.GetAsync($"api/post/{blogId}/posts");
-        if (response.IsSuccessStatusCode)
-        {
-            var postIndexViewModel = await response.Content.ReadFromJsonAsync<PostIndexViewModel>();
-            posts = postIndexViewModel.Posts;
-            allowed = postIndexViewModel.IsPostAllowed;
-        }
-        else
-        {
-            // Håndter feilen, kanskje ved å vise en feilmelding til brukeren
-        }
+        var postsFromService = await PostService.GetPostsByBlogIdAsync(blogId);
+        posts = postsFromService.ToList();
+        allowed = postsFromService.Any() && postsFromService.First().IsCommentAllowed;
     }
     private void ViewPost(int postId)
     {

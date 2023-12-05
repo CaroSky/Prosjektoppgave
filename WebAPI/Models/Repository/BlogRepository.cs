@@ -47,6 +47,7 @@ namespace WebAPI.Models.Repositories
 
 
 
+
     }
 
 
@@ -280,7 +281,7 @@ namespace WebAPI.Models.Repositories
 
         public async Task<IEnumerable<Comment>> GetAllCommentsByPostId(int postId)
         {
-            var allComments = _db.Comment.Include(item => item.Post).Include(item => item.Author).ToList();
+            var allComments = _db.Comment.Include(item => item.Post).ToList();
             var comments = allComments.Where(item => item.Post.PostId == postId);
             return comments;
         }
@@ -292,20 +293,20 @@ namespace WebAPI.Models.Repositories
         //    return comment;
         //}
 
-        public async Task SaveComment(Comment comment, IPrincipal principal)
-        {
-            try
-            {
-                _db.Comment.Add(comment);
-                _db.SaveChanges();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+       // public async Task SaveComment(Comment comment, IPrincipal principal)
+        //{
+          // try
+            //{
+              //  _db.Comment.Add(comment);
+                //_db.SaveChanges();
+           // }
+            //catch (Exception e)
+            //{
+              //  Console.WriteLine(e);
+               // throw;
+            //}
 
-        }
+        //}
 
         //public CommentEditViewModel GetCommentEditViewModel(int postId)
         //{
@@ -314,7 +315,7 @@ namespace WebAPI.Models.Repositories
         //    return comment;
         //}
 
-        public async Task<CommentEditViewModel> GetCommentEditViewModelById(int commentId)
+       /* public async Task<CommentEditViewModel> GetCommentEditViewModelById(int commentId)
         {
             var comments = _db.Comment.Include(item => item.Post).ToList();
             var comment = comments.Where(item => item.CommentId == commentId).First();
@@ -344,7 +345,7 @@ namespace WebAPI.Models.Repositories
         {
             _db.Comment.Update(comment);
             _db.SaveChanges();
-        }
+        }*/
 
 
         public async Task DeleteComment(Comment comment, IPrincipal principal)
@@ -459,10 +460,25 @@ namespace WebAPI.Models.Repositories
                             .FirstOrDefaultAsync(pt => pt.PostsPostId == postId && pt.TagsTagId == tagId);
         }
 
+        public Task SaveComment(Comment comment, IPrincipal principal)
+        {
+            throw new NotImplementedException();
+        }
 
+        public Task<CommentEditViewModel> GetCommentEditViewModelById(int commentId)
+        {
+            throw new NotImplementedException();
+        }
 
+        public Task<Comment> GetCommentById(int Id)
+        {
+            throw new NotImplementedException();
+        }
 
-
+        public Task UpdateComment(Comment comment, IPrincipal principal)
+        {
+            throw new NotImplementedException();
+        }
     }
 
 }

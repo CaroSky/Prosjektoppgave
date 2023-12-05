@@ -1,0 +1,49 @@
+﻿@@page "/post/{PostId:int}/comments"
+@using SharedModels.Entities
+@using Blazor.Data
+
+@inject CommentService CommentService
+@inject NavigationManager NavigationManager
+
+<h3>Comments for Post @PostId</h3>
+
+@if (comments == null)
+{
+    <p>Loading comments...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Author</th>
+                <th>Content</th>
+                <th>Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var comment in comments)
+            {
+                <tr>
+                  
+                    <td>@comment</td>
+                    
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    public int PostId { get; set; }
+    private IEnumerable<Comment> comments;
+    private bool isCommentAllowed;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var commentIndexViewModel = await CommentService.GetCommentsByPostIdAsync(PostId);
+        
+    }
+}
+

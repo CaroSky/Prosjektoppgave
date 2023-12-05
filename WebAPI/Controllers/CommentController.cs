@@ -87,7 +87,7 @@ namespace WebAPI.Controllers
             {
                 Content = commentCreateViewModel.Content,
                 Created = DateTime.Now,
-                Author = await _manager.FindByNameAsync(User.Identity.Name),
+                //Author = await _manager.FindByNameAsync(User.Identity.Name),
                 //Må teste Tove//Post = await _repository.GetPostById(commentCreateViewModel.PostId)
             };
 
@@ -100,13 +100,13 @@ namespace WebAPI.Controllers
         }
 
 
-        // GET: Edit
+      /*  // GET: Edit
         [HttpGet("{id}")]
         //[Authorize]
         public async Task<IActionResult> Get(int id, int postId)
         {
             //to be removed
-            var user = await _manager.FindByNameAsync(_username);
+          //  var user = await _manager.FindByNameAsync(_username);
             if (user != null)
             {
                 var claims = new List<Claim>
@@ -147,10 +147,10 @@ namespace WebAPI.Controllers
             return BadRequest(ModelState);
 
 
-        }
+        }*/
 
         //PUT: Edit
-        [HttpPut("{id}")]
+       /* [HttpPut("{id}")]
         //[Authorize]
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] CommentEditViewModel commentEditViewModel)
         {
@@ -248,6 +248,6 @@ namespace WebAPI.Controllers
             }
 
 
-        }
+        }*/
     }
 }
