@@ -36,6 +36,9 @@ namespace WebAPI.Models.Repositories
         Task<Comment> GetCommentById(int Id);
         Task UpdateComment(Comment comment, IPrincipal principal);
         Task DeleteComment(Comment comment, IPrincipal principal);
+        Task<IEnumerable<Tag>> GetTags();
+        Task<Tag> GetTagByName(string name);
+        Task<IEnumerable<Post>> SearchPostByTag(string name);
 
     }
 
@@ -47,7 +50,7 @@ namespace WebAPI.Models.Repositories
         private readonly ILogger<BlogRepository> _logger;
 
         public BlogRepository(UserManager<IdentityUser> userManager, ApplicationDbContext db
-        , ILogger<BlogRepository> logger)
+            , ILogger<BlogRepository> logger)
         {
             this._db = db;
             this._manager = userManager;
@@ -104,7 +107,8 @@ namespace WebAPI.Models.Repositories
         public async Task<BlogEditViewModel> GetBlogEditViewModelById(int Id)
         {
             var blogs = _db.Blog.ToList();
-            var blog = blogs.Where(b => b.BlogId == Id).First(); ;
+            var blog = blogs.Where(b => b.BlogId == Id).First();
+            ;
 
             var editBlog = new BlogEditViewModel
             {
@@ -123,11 +127,13 @@ namespace WebAPI.Models.Repositories
             //var blogs = _db.Blog.Include(item => item.Owner).ToList();
             //var blog = blogs.Where(item => item.BlogId == blogId).First(); ;
 
-           // return blog;
+            // return blog;
 
             // Anta at _db er din DbContext-instans
             var blog = await _db.Blog
-                .SingleOrDefaultAsync(item => item.BlogId == blogId); // Bruker SingleOrDefaultAsync for å håndtere tilfeller hvor det ikke finnes en matchende blog
+                .SingleOrDefaultAsync(item =>
+                    item.BlogId ==
+                    blogId); // Bruker SingleOrDefaultAsync for å håndtere tilfeller hvor det ikke finnes en matchende blog
 
             // Hvis du trenger brukerdetaljer (som brukernavn), må du hente det separat siden Blog ikke lenger inneholder Owner
             // Dette kan gjøres ved å slå opp brukeren basert på UserId
@@ -158,6 +164,7 @@ namespace WebAPI.Models.Repositories
             {
                 await DeletePost(post, principal);
             }
+
             _db.Blog.Remove(blog);
             _db.SaveChanges();
         }
@@ -169,7 +176,7 @@ namespace WebAPI.Models.Repositories
         public async Task<IEnumerable<Post>> GetAllPostByBlogId(int id)
         {
             var allPosts = _db.Post.Include(item => item.Blog).ToList();
-           // var allPosts = _db.Post.Include(item => item.Blog).Include(item => item.Author).ToList();
+            // var allPosts = _db.Post.Include(item => item.Blog).Include(item => item.Author).ToList();
             var posts = allPosts.Where(item => item.Blog.BlogId == id);
             return posts;
         }
@@ -207,7 +214,8 @@ namespace WebAPI.Models.Repositories
         public async Task<PostEditViewModel> GetPostEditViewModelById(int PostId)
         {
             var posts = _db.Post.Include(item => item.Blog).ToList();
-            var post = posts.Where(item => item.PostId == PostId).First(); ;
+            var post = posts.Where(item => item.PostId == PostId).First();
+            ;
 
             var editPost = new PostEditViewModel
             {
@@ -227,7 +235,8 @@ namespace WebAPI.Models.Repositories
             //var posts = _db.Post.Include(item => item.Blog).Include(item => item.Author).ToList();
             var posts = _db.Post.Include(item => item.Blog).ToList();
 
-            var post = posts.Where(item => item.PostId == PostId).First(); ;
+            var post = posts.Where(item => item.PostId == PostId).First();
+            ;
 
             return post;
         }
@@ -247,6 +256,7 @@ namespace WebAPI.Models.Repositories
             {
                 await DeleteComment(comment, principal);
             }
+
             _db.Post.Remove(post);
             _db.SaveChanges();
         }
@@ -292,7 +302,8 @@ namespace WebAPI.Models.Repositories
         public async Task<CommentEditViewModel> GetCommentEditViewModelById(int commentId)
         {
             var comments = _db.Comment.Include(item => item.Post).ToList();
-            var comment = comments.Where(item => item.CommentId == commentId).First(); ;
+            var comment = comments.Where(item => item.CommentId == commentId).First();
+            ;
 
             var editComment = new CommentEditViewModel
             {
@@ -308,7 +319,8 @@ namespace WebAPI.Models.Repositories
         public async Task<Comment> GetCommentById(int CommentId)
         {
             var comments = _db.Comment.Include(item => item.Post).Include(item => item.Author).ToList();
-            var comment = comments.Where(item => item.CommentId == CommentId).First(); ;
+            var comment = comments.Where(item => item.CommentId == CommentId).First();
+            ;
 
             return comment;
         }
@@ -324,6 +336,52 @@ namespace WebAPI.Models.Repositories
         {
             _db.Comment.Remove(comment);
             _db.SaveChanges();
+        }
+
+
+        // Search tag---------------------------------------------------------------------------------------------
+
+        public async Task<IEnumerable<Tag>> GetTags()
+        {
+            try
+            {
+                _logger.LogInformation("Getting all tags");
+                var tags = await _db.Tag.ToListAsync();
+
+                return tags;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all blogs");
+                throw;
+            }
+
+        }
+
+
+        public async Task<Tag> GetTagByName(string name)
+        {
+            var tags = _db.Tag.ToList();
+            var tag = tags.Where(item => item.Name == name).FirstOrDefault();
+
+            return tag;
+        }
+
+        public async Task<IEnumerable<Post>> SearchPostByTag(string name)
+        {
+            var tag = await GetTagByName(name);
+            if (tag == null)
+            {
+                return new List<Post>();
+            }
+            var postIdList = _db.PostTag.Where(item => item.TagsTagId == tag.TagId).ToList();
+            List<Post> postsList = new List<Post>();
+            foreach (var postTag in postIdList)
+            {
+                postsList.Add(await GetPostById(postTag.PostsPostId));
+            }
+
+            return postsList;
         }
 
     }

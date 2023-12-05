@@ -20,9 +20,16 @@ namespace WebAPI.Data
 
         public DbSet<Comment> Comment { get; set; }
 
+        public DbSet<Tag> Tag { get; set; }
+
+        public DbSet<PostTag> PostTag { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<PostTag>()
+                .HasKey(pt => new { pt.PostsPostId, pt.TagsTagId });
 
             // Her legger du til konfigurasjonen for relasjonen mellom Blog og IdentityUser
             modelBuilder.Entity<Blog>()

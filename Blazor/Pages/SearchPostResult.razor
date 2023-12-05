@@ -1,0 +1,66 @@
+﻿@using SharedModels.Entities
+@using SharedModels.ViewModels
+@using Blazor.Data;
+
+@page "/search/{tag}"
+
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject SearchService SearchService
+
+@if (posts == null)
+{
+    <p>No post found...</p>
+}
+
+else
+{
+    @foreach (var post in posts)
+    {
+        <div class="post-preview">
+            <h4>@post.Title</h4>
+            <p>@post.Content</p>
+            <p>@post.Created.ToString("yyyy-MM-dd")</p>
+        </div>
+    }
+
+
+
+}
+
+
+@code {
+
+    [Parameter]
+    public string tag { get; set; }
+    private List<SharedModels.Entities.Post> posts;
+    private SharedModels.Entities.Post _post = new SharedModels.Entities.Post();
+    private PostCreateViewModel _viewPost = new PostCreateViewModel();
+    private PostEditViewModel _viewEditPost = new SharedModels.ViewModels.PostEditViewModel();
+    private string _titleDialog;
+    private PostDialogBox _dialog;
+
+    //private IEnumerable<Post> posts;
+    //private IEnumerable<SharedModels.Entities.Post> posts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var postEnumerable = await SearchService.SearchPostAsync(tag);
+        if (postEnumerable.Count() == 0)
+        {
+            posts = null;
+
+        }
+        else
+        {
+            posts = postEnumerable.ToList();
+        }
+        
+
+    }
+
+ 
+
+}
+
+

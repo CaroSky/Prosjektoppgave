@@ -20,7 +20,7 @@ namespace SharedModels.Entities
         //public virtual IdentityUser Author { get; set; }
         public bool IsCommentAllowed { get; set; }
 
-        public ICollection<Tag> Tags { get; set; }
+        //public ICollection<Tag> Tags { get; set; }
 
         }
     

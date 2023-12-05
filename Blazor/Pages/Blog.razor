@@ -6,6 +6,7 @@
 @inject BlogService BlogService
 @inject PostService PostService
 @inject NavigationManager NavigationManager
+@inject SearchService SearchService
 
 
 
@@ -17,6 +18,10 @@
 }
 else
 {
+    <input @bind="tag" />
+    <button class="btn btn-success ml-auto"  @onclick="Search">Search post</button>
+    <br/>
+    <br />
     <button class="btn btn-success ml-auto" @onclick="@(() => CreateBlogDialog("Create"))">Add a blog</button>
     <br/>
     <table class="table">
@@ -68,6 +73,7 @@ else
     private string _titleDialog;
     private BlogDialogBox _dialog;
     private IEnumerable<SharedModels.Entities.Post> selectedPosts;
+    private string tag;
 
     protected override async Task OnInitializedAsync()
     {
@@ -159,6 +165,11 @@ else
     private void NavigateToPosts(int blogId)
     {
         NavigationManager.NavigateTo($"/post/{blogId}");
+    }
+
+    private void Search()
+    {
+        NavigationManager.NavigateTo($"/search/{Uri.EscapeDataString(tag)}");
     }
 
 
