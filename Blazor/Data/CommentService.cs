@@ -6,8 +6,9 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SharedModels.ViewModels;
-using WebAPI.Models.ViewModels;
+using SharedModels.Entities;
 using System.Text.Json;
+
 
 namespace Blazor.Data
 {

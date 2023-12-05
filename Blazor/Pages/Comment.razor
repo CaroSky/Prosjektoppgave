@@ -1,5 +1,6 @@
-﻿@@page "/post/{PostId:int}/comments"
+﻿@page "/comment/{PostId:int}"
 @using SharedModels.Entities
+@using SharedModels.ViewModels;
 @using Blazor.Data
 
 @inject CommentService CommentService
@@ -7,43 +8,50 @@
 
 <h3>Comments for Post @PostId</h3>
 
-@if (comments == null)
-{
-    <p>Loading comments...</p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Author</th>
-                <th>Content</th>
-                <th>Created</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var comment in comments)
-            {
-                <tr>
-                  
-                    <td>@comment</td>
-                    
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-
-@code {
-    [Parameter]
-    public int PostId { get; set; }
-    private IEnumerable<Comment> comments;
-    private bool isCommentAllowed;
-
-    protected override async Task OnInitializedAsync()
+    @if (comments == null)
     {
-        var commentIndexViewModel = await CommentService.GetCommentsByPostIdAsync(PostId);
-        
+        <p>Loading comments...</p>
     }
-}
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Author</th>
+                    <th>Content</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var comment in comments)
+                {
+                    <tr>
+                  
+                        <td>@comment.Created</td>
+                        <td>@comment.Content</td>
+                        
+                    
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    @code {
+        [Parameter]
+        public int PostId { get; set; }
+
+        private bool isCommentAllowed;
+        private SharedModels.Entities.Comment _comment = new SharedModels.Entities.Comment();
+        private IEnumerable<SharedModels.Entities.Comment> comments;
+
+        protected override async Task OnInitializedAsync()
+        {
+        Console.WriteLine($"Henter kommentarer for Post ID: {PostId}");
+        var commentIndexViewModel = await CommentService.GetCommentsByPostIdAsync(PostId);
+        comments = commentIndexViewModel.Comments;
+        Console.WriteLine($"Antall mottatte kommentarer: {comments.Count()}");
+        
+        }
+    }
 

@@ -4,7 +4,6 @@
 
 @page "/post/{Id:int}"
 
-@inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 @inject PostService PostService
 
@@ -27,7 +26,8 @@ else
             <h4>@post.Title</h4>
             <p>@post.Content</p>
             <p>@post.Created.ToString("yyyy-MM-dd")</p>
-            <button class="btn btn-primary" @onclick="@(() => ViewPost(post.PostId))">View</button>
+            <button class="btn btn-primary" @onclick="@(() => NavigateToComments(post.PostId))">View</button>
+
             <button class="btn btn-secondary" @onclick="@(() => EditPostDialog("Update", post.PostId, post))">Edit</button>
 
             <button class="btn btn-danger" @onclick="@(() => DeletePost(post.PostId))">Delete</button>
@@ -55,8 +55,6 @@ else
     private PostDialogBox _dialog;
     private PostIndexViewModel postIndexViewModel;
     private bool allowed;
-
-    //private IEnumerable<Post> posts;
     private IEnumerable<SharedModels.Entities.Post> posts;
 
     protected override async Task OnInitializedAsync()
@@ -111,10 +109,7 @@ else
         posts = postsFromService.ToList();
         allowed = postsFromService.Any() && postsFromService.First().IsCommentAllowed;
     }
-    private void ViewPost(int postId)
-    {
-        NavigationManager.NavigateTo($"/postdetails/{postId}");
-    }
+   
 
     private async Task DeletePost(int postId)
     {
@@ -181,6 +176,10 @@ else
         _dialog.CloseDialog();
     }
 
+    private void NavigateToComments(int postId)
+    {
+        NavigationManager.NavigateTo($"/comment/{postId}");
+    }
 }
 
 

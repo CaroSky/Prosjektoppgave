@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using WebAPI.Models.Entities;
 
-namespace WebAPI.Models.ViewModels
+using SharedModels.Entities;
+
+namespace SharedModels.ViewModels
 {
 
     public class CommentIndexViewModel

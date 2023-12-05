@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using SharedModels.Entities;
 
-namespace WebAPI.Models.Entities
+namespace SharedModels.Entities
 {
     public class Comment
     {

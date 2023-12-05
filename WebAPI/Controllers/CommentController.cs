@@ -9,6 +9,7 @@ using WebAPI.Models.ViewModels;
 using System.Reflection.Metadata;
 using System.Security.Claims;
 using SharedModels.Entities;
+using SharedModels.ViewModels;
 
 namespace WebAPI.Controllers
 {
@@ -21,29 +22,51 @@ namespace WebAPI.Controllers
         private UserManager<IdentityUser> _manager;
 
         private string _username = "tli0610@uit.no";
+        private readonly ILogger<CommentController> _logger;
 
-        public CommentController(UserManager<IdentityUser> manager, IBlogRepository repository)
+
+        public CommentController(UserManager<IdentityUser> manager, IBlogRepository repository, ILogger<CommentController> logger)
         {
             this._repository = repository;
             this._manager = manager;
+            _logger = logger;
         }
 
         [HttpGet("{id}/comments")]
         public async Task<CommentIndexViewModel> GetComments([FromRoute] int id)
         {
 
-            var comments = await _repository.GetAllCommentsByPostId(id);
-            var post = await _repository.GetPostById(id);
-            var commentIndexViewModel = new CommentIndexViewModel
+            try
             {
-                Comments = comments,
-                PostId = id,
-                BlogId = post.Blog.BlogId,
-                PostTitle = post.Title,
-                IsCommentAllowed = post.IsCommentAllowed,
-            };
+                _logger.LogInformation("Henter kommentarer for post med ID: {PostId}", id);
+                var comments = await _repository.GetAllCommentsByPostId(id);
+                _logger.LogInformation("Antall hentede kommentarer: {Count}", comments.Count());
 
-            return commentIndexViewModel;
+
+                var post = await _repository.GetPostById(id);
+
+                if (post == null)
+                {
+                    _logger.LogWarning("Ingen post funnet med ID: {PostId}", id);
+                   
+                }
+
+                var commentIndexViewModel = new CommentIndexViewModel
+                {
+                    Comments = comments,
+                    PostId = id,
+                    BlogId = post.Blog.BlogId,
+                    PostTitle = post.Title,
+                    IsCommentAllowed = post.IsCommentAllowed,
+                };
+
+                return commentIndexViewModel;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "En feil oppstod ved henting av kommentarer for post med ID: {PostId}", id);
+                throw;
+            }
         }
 
         //// GET: Create
