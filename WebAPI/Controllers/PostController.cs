@@ -214,7 +214,9 @@ namespace WebAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            
+            await _repository.RemovePostTags(id);
+
+
             if (id != postEditViewModel.PostId)
             {
                 return BadRequest();
@@ -236,6 +238,21 @@ namespace WebAPI.Controllers
             // _repository.Update(product);
             //tempdata
             //TempData["message"] = string.Format("{0} has been updated", post.Title);
+
+            var tags = ExtractHashtags(post.Content);
+            foreach (var tagName in tags)
+            {
+                var tag = await _repository.GetTagByName(tagName) ?? new Tag { Name = tagName };
+                if (tag.TagId == 0)
+                {
+                    await _repository.SaveTag(tag);
+                }
+                var postTag = new PostTag { PostsPostId = post.PostId, TagsTagId = tag.TagId };
+                await _repository.SavePostTag(postTag);
+            }
+
+            // Fjern foreldreløse tags
+            await _repository.RemoveOrphanedTags();
 
 
             return Ok(post);

@@ -43,6 +43,7 @@ namespace WebAPI.Models.Repositories
         Task SaveTag(Tag tag);
         Task RemoveOrphanedTags();
         Task<PostTag> GetPostTag(int postId, int tagId);
+        Task RemovePostTags(int postId);
 
 
 
