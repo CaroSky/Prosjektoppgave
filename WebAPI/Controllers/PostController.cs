@@ -113,6 +113,8 @@ namespace WebAPI.Controllers
                 // Sjekk om taggen finnes, hvis ikke opprett ny
                 var tag = await _repository.GetTagByName(tagName) ?? new Tag { Name = tagName };
 
+
+
                 // Lagre taggen om den er ny
                 if (tag.TagId == 0)
                 {
@@ -278,7 +280,8 @@ namespace WebAPI.Controllers
             //if (currentUser.Id == post.Author.Id)
             //{
              await _repository.DeletePost(post, User);
-                return Ok(post);
+            //await _repository.RemoveOrphanedTags();
+            return Ok(post);
             //}
            //else
             //{

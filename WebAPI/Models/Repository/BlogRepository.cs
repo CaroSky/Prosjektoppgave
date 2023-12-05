@@ -41,8 +41,10 @@ namespace WebAPI.Models.Repositories
         Task<IEnumerable<Post>> SearchPostByTag(string name);
         Task SavePostTag(PostTag postTag);
         Task SaveTag(Tag tag);
-      
-          
+        Task RemoveOrphanedTags();
+        Task<PostTag> GetPostTag(int postId, int tagId);
+
+
 
     }
 
@@ -261,8 +263,16 @@ namespace WebAPI.Models.Repositories
                 await DeleteComment(comment, principal);
             }
 
+            var postTags = _db.PostTag.Where(pt => pt.PostsPostId == post.PostId);
+            _db.PostTag.RemoveRange(postTags);
+            await _db.SaveChangesAsync();
+
             _db.Post.Remove(post);
+           
             _db.SaveChanges();
+            await RemoveOrphanedTags();
+
+            
         }
 
         //comment-----------------------------------------------------------
@@ -415,6 +425,41 @@ namespace WebAPI.Models.Repositories
                 throw;
             }
         }
+
+        public async Task RemovePostTags(int postId)
+        {
+            var postTags = _db.PostTag.Where(pt => pt.PostsPostId == postId);
+            _db.PostTag.RemoveRange(postTags);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task RemoveOrphanedTags()
+        {
+            var orphanedTags = _db.Tag
+                .Where(tag => !_db.PostTag.Any(pt => pt.TagsTagId == tag.TagId))
+                .ToList();
+
+            if (orphanedTags.Any())
+            {
+                _logger.LogInformation("Orphaned tags to be removed: {Tags}", string.Join(", ", orphanedTags.Select(t => t.Name)));
+                _db.Tag.RemoveRange(orphanedTags);
+                await _db.SaveChangesAsync();
+                _logger.LogInformation("Orphaned tags removed successfully.");
+            }
+            else
+            {
+                _logger.LogInformation("No orphaned tags found to remove.");
+            }
+        }
+
+        public async Task<PostTag> GetPostTag(int postId, int tagId)
+        {
+            return await _db.PostTag
+                            .FirstOrDefaultAsync(pt => pt.PostsPostId == postId && pt.TagsTagId == tagId);
+        }
+
+
+
 
 
     }
