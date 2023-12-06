@@ -60,7 +60,7 @@ else
     private string _titleDialog;
     private PostDialogBox _dialog;
     private PostIndexViewModel postIndexViewModel;
-    private bool allowed=true;
+    private bool allowed;
     private IEnumerable<SharedModels.Entities.Post> posts;
     private ClaimsPrincipal user;
     private string _username;
@@ -72,9 +72,9 @@ else
         user = authState.User;
         _username = user?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
         _userId = user?.FindFirst(JwtRegisteredClaimNames.NameId)?.Value;
-        posts = await PostService.GetPostsByBlogIdAsync(Id);
         //posts = await PostService.GetPostsByBlogIdAsync(Id);
-      await GetPostsForBlog(Id);
+        //posts = await PostService.GetPostsByBlogIdAsync(Id);
+        await GetPostsForBlog(Id);
 
 
         _titleDialog = "title";
