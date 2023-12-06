@@ -10,7 +10,8 @@ namespace Blazor
 {
     public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     {
-        private readonly TokenService _tokenService;
+        //private readonly TokenService _tokenService;
+        public readonly TokenService _tokenService;
         private readonly ILogger<CustomAuthenticationStateProvider> _logger;
         private readonly IConfiguration _configuration;
 

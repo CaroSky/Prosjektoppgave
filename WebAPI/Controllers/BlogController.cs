@@ -22,6 +22,7 @@ namespace WebAPI.Controllers
         private IBlogRepository _repository;
 
         private UserManager<IdentityUser> _manager;
+        private SignInManager<IdentityUser> _signManager;
 
         private IAuthorizationService _authorizationService;
 
@@ -30,11 +31,12 @@ namespace WebAPI.Controllers
 
 
 
-        public BlogController(UserManager<IdentityUser> manager, IBlogRepository repository, ILogger<BlogController> logger)
+        public BlogController(UserManager<IdentityUser> manager, IBlogRepository repository, ILogger<BlogController> logger, SignInManager<IdentityUser> signManager)
         {
             this._repository = repository;
             this._manager = manager;
             _logger = logger;
+            _signManager = signManager;
         }
 
         [HttpGet]
@@ -48,7 +50,7 @@ namespace WebAPI.Controllers
                 if (userIdClaim != null)
                 {
                     var userId = userIdClaim.Value;
-                    _logger.LogInformation($"User ID: {userId}");
+                    _logger.LogInformation($"User ID in blog Controller - GetBlogs: {userId}");
                 }
                 else
                 {
