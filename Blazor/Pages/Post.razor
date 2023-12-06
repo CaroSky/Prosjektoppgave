@@ -59,7 +59,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        posts = await PostService.GetPostsByBlogIdAsync(Id);
+        //posts = await PostService.GetPostsByBlogIdAsync(Id);
+      await GetPostsForBlog(Id);
 
 
         _titleDialog = "title";
@@ -105,10 +106,12 @@ else
 
     private async Task GetPostsForBlog(int blogId)
     {
-        var postsFromService = await PostService.GetPostsByBlogIdAsync(blogId);
-        posts = postsFromService.ToList();
-        allowed = postsFromService.Any() && postsFromService.First().IsCommentAllowed;
+        var postIndexViewModel = await PostService.GetPostsByBlogIdAsync(blogId);
+        posts = postIndexViewModel.Posts;
+        allowed = postIndexViewModel.IsPostAllowed;
     }
+
+
    
 
     private async Task DeletePost(int postId)

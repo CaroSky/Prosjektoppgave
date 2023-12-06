@@ -19,7 +19,7 @@ namespace Blazor.Data
             _logger = logger;
         }
 
-        public async Task<IEnumerable<Post>> GetPostsByBlogIdAsync(int blogId)
+        public async Task<PostIndexViewModel> GetPostsByBlogIdAsync(int blogId)
         {
             _logger.LogInformation($"Sending HTTP GET request to URL: api/post/{blogId}/posts");
 
@@ -27,15 +27,14 @@ namespace Blazor.Data
             _logger.LogInformation($"Received HTTP response with status code: {response.StatusCode}");
 
             if (!response.IsSuccessStatusCode)
-            {   
+            {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 throw new HttpRequestException($"Request failed with status code {response.StatusCode} and content {errorContent}");
             }
 
             try
             {
-                var postIndexViewModel = await response.Content.ReadFromJsonAsync<PostIndexViewModel>();
-                return postIndexViewModel.Posts;
+                return await response.Content.ReadFromJsonAsync<PostIndexViewModel>();
             }
             catch (JsonException ex)
             {
