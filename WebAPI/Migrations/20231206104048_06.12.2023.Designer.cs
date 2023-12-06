@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebAPI.Data;
 
@@ -11,9 +12,10 @@ using WebAPI.Data;
 namespace WebAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231206104048_06.12.2023")]
+    partial class _06122023
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -303,10 +305,6 @@ namespace WebAPI.Migrations
                     b.Property<bool>("IsCommentAllowed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("OwnerId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -316,6 +314,17 @@ namespace WebAPI.Migrations
                     b.HasIndex("BlogId");
 
                     b.ToTable("Post");
+
+                    b.HasData(
+                        new
+                        {
+                            PostId = 1,
+                            BlogId = 1006,
+                            Content = "Dette er innholdet i den seedede posten.",
+                            Created = new DateTime(2023, 12, 6, 10, 40, 48, 708, DateTimeKind.Utc).AddTicks(8245),
+                            IsCommentAllowed = true,
+                            Title = "Seedet Post Tittel"
+                        });
                 });
 
             modelBuilder.Entity("SharedModels.Entities.PostTag", b =>
@@ -329,30 +338,6 @@ namespace WebAPI.Migrations
                     b.HasKey("PostsPostId", "TagsTagId");
 
                     b.ToTable("PostTag");
-                });
-
-            modelBuilder.Entity("SharedModels.Entities.Subscription", b =>
-                {
-                    b.Property<int>("SubscriptionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SubscriptionId"), 1L, 1);
-
-                    b.Property<int>("BlogId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("SubscriptionId");
-
-                    b.HasIndex("BlogId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Subscriptions");
                 });
 
             modelBuilder.Entity("SharedModels.Entities.Tag", b =>
@@ -452,25 +437,6 @@ namespace WebAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Blog");
-                });
-
-            modelBuilder.Entity("SharedModels.Entities.Subscription", b =>
-                {
-                    b.HasOne("SharedModels.Entities.Blog", "Blog")
-                        .WithMany()
-                        .HasForeignKey("BlogId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Blog");
-
-                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

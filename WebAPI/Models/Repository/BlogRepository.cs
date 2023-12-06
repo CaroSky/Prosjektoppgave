@@ -44,11 +44,12 @@ namespace WebAPI.Models.Repositories
         Task RemoveOrphanedTags();
         Task<PostTag> GetPostTag(int postId, int tagId);
         Task RemovePostTags(int postId);
-
-
-
-
-    }
+        Task SubscribeToBlog(string userId, int blogId);
+        Task UnsubscribeFromBlog(string userId, int blogId);
+        Task<bool> IsSubscribed(string userId, int blogId);
+        Task<Dictionary<int, bool>> GetAllSubscriptionStatuses(string userId);
+    
+}
 
 
     public class BlogRepository : IBlogRepository
@@ -479,6 +480,47 @@ namespace WebAPI.Models.Repositories
         {
             throw new NotImplementedException();
         }
+
+        public async Task SubscribeToBlog(string userId, int blogId)
+        {
+            var subscription = new Subscription { UserId = userId, BlogId = blogId };
+            _db.Subscriptions.Add(subscription);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task UnsubscribeFromBlog(string userId, int blogId)
+        {
+            var subscription = await _db.Subscriptions
+                                        .FirstOrDefaultAsync(s => s.UserId == userId && s.BlogId == blogId);
+            if (subscription != null)
+            {
+                _db.Subscriptions.Remove(subscription);
+                await _db.SaveChangesAsync();
+            }
+        }
+
+        public async Task<bool> IsSubscribed(string userId, int blogId)
+        {
+            return await _db.Subscriptions
+                            .AnyAsync(s => s.UserId == userId && s.BlogId == blogId);
+        }
+        public async Task<Dictionary<int, bool>> GetAllSubscriptionStatuses(string userId)
+        {
+            var blogIds = await _db.Blog.Select(b => b.BlogId).ToListAsync(); // Fetch all blog IDs
+            var subscribedBlogIds = await _db.Subscriptions
+                                              .Where(s => s.UserId == userId)
+                                              .Select(s => s.BlogId)
+                                              .ToListAsync(); // Fetch IDs of blogs the user is subscribed to
+
+            var subscriptionStatuses = new Dictionary<int, bool>();
+            foreach (var blogId in blogIds)
+            {
+                subscriptionStatuses[blogId] = subscribedBlogIds.Contains(blogId);
+            }
+
+            return subscriptionStatuses;
+        }
+
     }
 
 }

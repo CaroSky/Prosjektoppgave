@@ -207,7 +207,65 @@ namespace WebAPI.Controllers
             return Ok(blog);
 
         }
+        [HttpPost("{blogId}/subscribe")]
+        [Authorize]
+        public async Task<IActionResult> Subscribe(int blogId)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            string[] words = userIdClaim.ToString().Split(':');
+            string username = words[words.Length - 1].Trim();
+            var user = await _manager.FindByNameAsync(username);
+            if (user == null)
+            {
+                _logger.LogWarning("User ID claim not found.");
+                return Unauthorized();
+            }
 
+            _logger.LogInformation($"User ID in blog Controller - Subscribe: {user.Id}");
+
+            await _repository.SubscribeToBlog(user.Id, blogId);
+            return Ok();
+        }
+
+        [HttpPost("{blogId}/unsubscribe")]
+        [Authorize]
+        public async Task<IActionResult> Unsubscribe(int blogId)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            string[] words = userIdClaim.ToString().Split(':');
+            string username = words[words.Length - 1].Trim();
+            var user = await _manager.FindByNameAsync(username);
+            if (user == null)
+            {
+                _logger.LogWarning("User ID claim not found.");
+                return Unauthorized();
+            }
+
+            _logger.LogInformation($"User ID in blog Controller - Unsubscribe: {user.Id}");
+
+            await _repository.UnsubscribeFromBlog(user.Id, blogId);
+            return Ok();
+        }
+
+        [HttpGet("subscriptionStatuses")]
+        [Authorize]
+        public async Task<IActionResult> GetAllSubscriptionStatuses()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            string[] words = userIdClaim.ToString().Split(':');
+            string username = words[words.Length - 1].Trim();
+            var user = await _manager.FindByNameAsync(username);
+            if (user == null)
+            {
+                _logger.LogWarning("User ID claim not found.");
+                return Unauthorized();
+            }
+
+            _logger.LogInformation($"User ID in blog Controller - GetAllSubscriptionStatuses: {user.Id}");
+
+            var subscriptionStatuses = await _repository.GetAllSubscriptionStatuses(user.Id);
+            return Ok(subscriptionStatuses);
+        }
 
     }
 }

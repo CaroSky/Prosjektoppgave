@@ -24,6 +24,8 @@ namespace WebAPI.Data
 
         public DbSet<PostTag> PostTag { get; set; }
 
+        public DbSet<Subscription> Subscriptions { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

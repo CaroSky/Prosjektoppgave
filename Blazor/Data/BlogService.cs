@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using NuGet.Common;
+using NuGet.Protocol.Core.Types;
 using SharedModels.Entities;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -60,7 +61,7 @@ namespace Blazor.Data
             {
                 _logger.LogInformation($"Header: {header.Key} Value: {string.Join(", ", header.Value)}");
             }
-           // _logger.LogError($"Error response content: {errorContent}");
+            // _logger.LogError($"Error response content: {errorContent}");
 
 
 
@@ -221,6 +222,79 @@ namespace Blazor.Data
                 throw new JsonException("Error parsing JSON response", ex);
             }
         }
-    }
+        public async Task SubscribeToBlogAsync(int blogId)
+        {
+            _logger.LogInformation($"Sending HTTP POST request to subscribe to blog with ID: {blogId}");
 
+            var response = await _httpClient.PostAsync($"api/blog/{blogId}/subscribe", null); // Assuming no body is required
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError($"Error response content: {errorContent}");
+                throw new HttpRequestException($"Request failed with status code {response.StatusCode} and content {errorContent}");
+            }
+
+            _logger.LogInformation($"Subscribed to blog with ID: {blogId}");
+        }
+
+        public async Task UnsubscribeFromBlogAsync(int blogId)
+        {
+            _logger.LogInformation($"Sending HTTP POST request to unsubscribe from blog with ID: {blogId}");
+
+            var response = await _httpClient.PostAsync($"api/blog/{blogId}/unsubscribe", null); // Assuming no body is required
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError($"Error response content: {errorContent}");
+                throw new HttpRequestException($"Request failed with status code {response.StatusCode} and content {errorContent}");
+            }
+
+            _logger.LogInformation($"Unsubscribed from blog with ID: {blogId}");
+        }
+
+        public async Task<bool> IsSubscribedAsync(int blogId)
+        {
+            _logger.LogInformation($"Sending HTTP GET request to check subscription status for blog with ID: {blogId}");
+
+            var response = await _httpClient.GetAsync($"api/blog/{blogId}/isSubscribed");
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError($"Error response content: {errorContent}");
+                throw new HttpRequestException($"Request failed with status code {response.StatusCode} and content {errorContent}");
+            }
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            return bool.Parse(responseContent); // Assuming the API returns 'true' or 'false' as plain text
+        }
+        public async Task<Dictionary<int, bool>> GetAllSubscriptionStatusesAsync()
+        {
+            _logger.LogInformation("Sending HTTP GET request to retrieve all blog subscription statuses.");
+
+            var response = await _httpClient.GetAsync("api/blog/subscriptionStatuses"); // Adjust the URL as per your API
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError($"Error fetching subscription statuses: {errorContent}");
+                throw new HttpRequestException($"Request failed with status code {response.StatusCode} and content {errorContent}");
+            }
+
+            _logger.LogInformation("Received subscription statuses successfully.");
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            try
+            {
+                var subscriptionStatuses = JsonSerializer.Deserialize<Dictionary<int, bool>>(responseContent);
+                return subscriptionStatuses ?? new Dictionary<int, bool>();
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError($"Error parsing subscription statuses JSON: {ex}");
+                throw;
+            }
+        }
+
+
+    }
 }
