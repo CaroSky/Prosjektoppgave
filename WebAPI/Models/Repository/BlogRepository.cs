@@ -48,8 +48,8 @@ namespace WebAPI.Models.Repositories
         Task UnsubscribeFromBlog(string userId, int blogId);
         Task<bool> IsSubscribed(string userId, int blogId);
         Task<Dictionary<int, bool>> GetAllSubscriptionStatuses(string userId);
-    
-}
+
+    } 
 
 
     public class BlogRepository : IBlogRepository
@@ -464,8 +464,23 @@ namespace WebAPI.Models.Repositories
             return await _db.PostTag
                             .FirstOrDefaultAsync(pt => pt.PostsPostId == postId && pt.TagsTagId == tagId);
         }
+        public async Task SubscribeToBlog(string userId, int blogId)
+        {
+            var subscription = new Subscription { UserId = userId, BlogId = blogId };
+            _db.Subscriptions.Add(subscription);
+            await _db.SaveChangesAsync();
+        }
 
-    }
+        public async Task UnsubscribeFromBlog(string userId, int blogId)
+        {
+            var subscription = await _db.Subscriptions
+                                        .FirstOrDefaultAsync(s => s.UserId == userId && s.BlogId == blogId);
+            if (subscription != null)
+            {
+                _db.Subscriptions.Remove(subscription);
+                await _db.SaveChangesAsync();
+            }
+        }
 
         public async Task<bool> IsSubscribed(string userId, int blogId)
         {
