@@ -2,6 +2,7 @@
 @inject NavigationManager NavigationManager
 @inject HttpClient Http
 @inject TokenService TokenService
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <button class="btn btn-danger" @onclick="HandleLogout">Logout</button>
 
@@ -18,6 +19,10 @@
                 // Handle the response from the server if necessary
 
                 TokenService.JwtToken = null;
+
+
+                var authStateProvider = (CustomAuthenticationStateProvider)AuthenticationStateProvider;
+                authStateProvider.NotifyUserLogout();
 
                 // Redirect to the login page or another appropriate page
                 NavigationManager.NavigateTo("/login");
