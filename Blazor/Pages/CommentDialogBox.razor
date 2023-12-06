@@ -1,0 +1,54 @@
+﻿@using SharedModels.ViewModels
+
+<div class="modal" tabindex="-1" role="dialog" style="display: @(_show ? "block" : "none")">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@Title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="CloseDialog">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="commentContent">Content:</label>
+                    <textarea id="commentContent" class="form-control" @bind="comment.Content" required></textarea>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="OnCancel">Cancel</button>
+                <button type="submit" class="btn btn-primary" @onclick="OnSave">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [Parameter] public string Title { get; set; }
+    [Parameter] public int PostId{ get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+    [Parameter] public CommentEditViewModel comment { get; set; }
+
+   // private CommentEditViewModel _viewComment = new CommentEditViewModel();
+    //private string _titleDialog;
+    //private CommentDialogBox _dialog;
+
+
+    private bool _show;
+
+    public void Show()
+    {
+        _show = true;
+        StateHasChanged();
+    }
+
+    public void CloseDialog()
+    {
+        _show = false;
+        StateHasChanged();
+    }
+}
+

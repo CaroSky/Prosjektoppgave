@@ -287,36 +287,36 @@ namespace WebAPI.Models.Repositories
             return comments;
         }
 
-        //public CommentCreateViewModel GetCommentCreateViewModel(int postId)
-        //{
-        //    var comment = new CommentCreateViewModel();
-        //    comment.PostId = postId;
-        //    return comment;
-        //}
+        public CommentCreateViewModel GetCommentCreateViewModel(int postId)
+        {
+            var comment = new CommentCreateViewModel();
+            comment.PostId = postId;
+           return comment;
+        }
 
-       // public async Task SaveComment(Comment comment, IPrincipal principal)
-        //{
-          // try
-            //{
-              //  _db.Comment.Add(comment);
-                //_db.SaveChanges();
-           // }
-            //catch (Exception e)
-            //{
-              //  Console.WriteLine(e);
-               // throw;
-            //}
+       public async Task SaveComment(Comment comment, IPrincipal principal)
+        {
+           try
+            {
+                _db.Comment.Add(comment);
+                _db.SaveChanges();
+            }
+            catch (Exception e)
+            {
+               Console.WriteLine(e);
+                throw;
+            }
 
-        //}
+        }
 
-        //public CommentEditViewModel GetCommentEditViewModel(int postId)
-        //{
-        //    var comment = new CommentEditViewModel();
-        //    comment.PostId = postId;
-        //    return comment;
-        //}
+        public CommentEditViewModel GetCommentEditViewModel(int postId)
+        {
+           var comment = new CommentEditViewModel();
+           comment.PostId = postId;
+           return comment;
+        }
 
-       /* public async Task<CommentEditViewModel> GetCommentEditViewModelById(int commentId)
+        public async Task<CommentEditViewModel> GetCommentEditViewModelById(int commentId)
         {
             var comments = _db.Comment.Include(item => item.Post).ToList();
             var comment = comments.Where(item => item.CommentId == commentId).First();
@@ -335,7 +335,8 @@ namespace WebAPI.Models.Repositories
 
         public async Task<Comment> GetCommentById(int CommentId)
         {
-            var comments = _db.Comment.Include(item => item.Post).Include(item => item.Author).ToList();
+            var comments = _db.Comment.Include(item => item.Post).ToList();
+            //Include(item => item.Author)
             var comment = comments.Where(item => item.CommentId == CommentId).First();
             ;
 
@@ -344,9 +345,12 @@ namespace WebAPI.Models.Repositories
 
         public async Task UpdateComment(Comment comment, IPrincipal principal)
         {
+            _logger.LogInformation($"Starter oppdatering av kommentar med ID {comment.CommentId} i databasen");
             _db.Comment.Update(comment);
             _db.SaveChanges();
-        }*/
+            _logger.LogInformation($"Kommentar med ID {comment.CommentId} er oppdatert i databasen");
+        }
+    
 
 
         public async Task DeleteComment(Comment comment, IPrincipal principal)
@@ -461,43 +465,7 @@ namespace WebAPI.Models.Repositories
                             .FirstOrDefaultAsync(pt => pt.PostsPostId == postId && pt.TagsTagId == tagId);
         }
 
-        public Task SaveComment(Comment comment, IPrincipal principal)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<CommentEditViewModel> GetCommentEditViewModelById(int commentId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Comment> GetCommentById(int Id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task UpdateComment(Comment comment, IPrincipal principal)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task SubscribeToBlog(string userId, int blogId)
-        {
-            var subscription = new Subscription { UserId = userId, BlogId = blogId };
-            _db.Subscriptions.Add(subscription);
-            await _db.SaveChangesAsync();
-        }
-
-        public async Task UnsubscribeFromBlog(string userId, int blogId)
-        {
-            var subscription = await _db.Subscriptions
-                                        .FirstOrDefaultAsync(s => s.UserId == userId && s.BlogId == blogId);
-            if (subscription != null)
-            {
-                _db.Subscriptions.Remove(subscription);
-                await _db.SaveChangesAsync();
-            }
-        }
+    }
 
         public async Task<bool> IsSubscribed(string userId, int blogId)
         {
