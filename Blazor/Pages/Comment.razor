@@ -13,7 +13,8 @@
         <p>Loading comments...</p>
     }
     else
-    {
+{
+    <button class="btn btn-success ml-auto" @onclick="@(() => CreateCommentDialog("Create"))">Add New Comment</button>
         <table class="table">
             <thead>
                 <tr>
@@ -29,29 +30,145 @@
                   
                         <td>@comment.Created</td>
                         <td>@comment.Content</td>
-                        
-                    
+
+
+                    <button class="btn btn-secondary" @onclick="@(() => EditCommentDialog("Update",comment.CommentId, comment))">Edit</button>
+
+                    <button class="btn btn-danger" @onclick="@(() => DeleteComment(comment.CommentId))">Delete</button>
                     </tr>
                 }
             </tbody>
         </table>
     }
 
+
+<CommentDialogBox Title="@_titleDialog"
+                  comment="@_viewEditComment"
+                  OnCancel="CancelCommentDialog"
+                  OnSave="OnSaveCommentDialog"
+@ref="_dialog"></CommentDialogBox>
+
     @code {
         [Parameter]
         public int PostId { get; set; }
 
-        private bool isCommentAllowed;
         private SharedModels.Entities.Comment _comment = new SharedModels.Entities.Comment();
-        private IEnumerable<SharedModels.Entities.Comment> comments;
+        private CommentCreateViewModel _viewComment = new CommentCreateViewModel();
+        private CommentEditViewModel _viewEditComment = new CommentEditViewModel();
+        private string _titleDialog;
+        private CommentDialogBox _dialog;
+        private CommentIndexViewModel commentIndexViewModel;
+        private bool allowed;
+    private IEnumerable<SharedModels.Entities.Comment> comments;
+        //private IEnumerable<Comment> comments;
 
         protected override async Task OnInitializedAsync()
         {
-        Console.WriteLine($"Henter kommentarer for Post ID: {PostId}");
-        var commentIndexViewModel = await CommentService.GetCommentsByPostIdAsync(PostId);
-        comments = commentIndexViewModel.Comments;
-        Console.WriteLine($"Antall mottatte kommentarer: {comments.Count()}");
+        
+        //var commentIndexViewModel =
+         //await CommentService.GetCommentsByPostIdAsync(Id);
+        //comments = commentIndexViewModel.Comments;
+        
+        await GetCommentsForPost(PostId);
         
         }
+
+        private void CancelCommentDialog()
+        {
+            _dialog.CloseDialog();
+        }
+
+    private async Task OnSaveCommentDialog()
+    {
+        if (_titleDialog == "Create")
+        {
+            // Konverter fra PostEditViewModel til PostCreateViewModel
+            //EditViewmodel er i dialogboxen siden den inneholder alle verdiene edit og create trenger
+            var createViewModel = new CommentCreateViewModel
+                {
+                    Content = _viewEditComment.Content,
+                    PostId = _viewEditComment.PostId,
+                  
+                };
+
+            Console.WriteLine("Creating new comment...");
+            await CommentService.CreateCommentAsync(createViewModel);
+            Console.WriteLine("New comment created.");
+        }
+        else if (_titleDialog == "Update")
+        {
+            // Send PostEditViewModel direkte
+            
+            Console.WriteLine($"Oppdaterer kommentar med ID {_viewEditComment.CommentId}...");
+            await CommentService.UpdateCommentAsync(_viewEditComment.CommentId, _viewEditComment);
+            Console.WriteLine($"Commentwith ID {_viewEditComment.CommentId} updated.");
+        }
+
+        await GetCommentsForPost(PostId);
+        Console.WriteLine("Comments updated after save operation.");
+        _dialog.CloseDialog();
+        Console.WriteLine("Dialog closed.");
     }
+    private async Task GetCommentsForPost(int postId)
+    {
+        var commentIndexViewModel = await CommentService.GetCommentsByPostIdAsync(postId);
+        comments = commentIndexViewModel.Comments;
+        allowed = commentIndexViewModel.IsCommentAllowed;
+    }
+
+
+    private async Task DeleteComment(int commentId)
+    {
+
+        var success = await CommentService.DeleteCommentAsync(commentId);
+        if (success)
+        {
+            // Oppdater listen over innlegg her, eller naviger brukeren til en annen side
+            await GetCommentsForPost(PostId);
+        }
+        else
+        {
+            // Vis en feilmelding til brukeren
+        }
+    }
+
+        private void CreateCommentDialog(string title)
+        {
+            _comment = new SharedModels.Entities.Comment();
+            {
+                //Created = DateTime.Now,
+
+            };
+
+        // Overfør verdier fra '_comment' til '_viewEditComment'
+        _viewEditComment = new CommentEditViewModel()
+            {
+               PostId = PostId,
+                Content = "",
+                Created = _comment.Created
+            };
+
+        _titleDialog = "Create";
+        _dialog.Show();
+    }
+
+    private void EditCommentDialog(string title, int commentId, SharedModels.Entities.Comment comment)
+    {   
+        Console.WriteLine($"Åpner dialog for redigering av kommentar med ID: {commentId}");
+        _comment = comment;
+        _viewEditComment = new CommentEditViewModel()
+            {
+                CommentId = commentId,
+                Content = comment.Content,
+                // Andre nødvendige felt ...
+            };
+        Console.WriteLine("EditCommentDialog - Start");
+        _titleDialog = "Edit";
+        _dialog.Show();
+    }
+    void CancelDialog()
+    {
+        _dialog.CloseDialog();
+    }
+}
 
