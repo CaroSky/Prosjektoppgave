@@ -18,7 +18,7 @@
 else
 {
 
-    @if (allowed)
+    @if (allowed && user.Identity.IsAuthenticated)
     {
 
         <button class="btn btn-success ml-auto" @onclick="@(() => CreatePostDialog("Create"))">Add New Post</button>
@@ -30,10 +30,13 @@ else
             <p>@post.Content</p>
             <p>@post.Created.ToString("yyyy-MM-dd")</p>
             <button class="btn btn-primary" @onclick="@(() => NavigateToComments(post.PostId))">View</button>
+        @if (post.OwnerId == _userId)
+        {
 
             <button class="btn btn-secondary" @onclick="@(() => EditPostDialog("Update", post.PostId, post))">Edit</button>
 
             <button class="btn btn-danger" @onclick="@(() => DeletePost(post.PostId))">Delete</button>
+        }
         </div>
     }
    
@@ -57,7 +60,7 @@ else
     private string _titleDialog;
     private PostDialogBox _dialog;
     private PostIndexViewModel postIndexViewModel;
-    private bool allowed;
+    private bool allowed=true;
     private IEnumerable<SharedModels.Entities.Post> posts;
     private ClaimsPrincipal user;
     private string _username;
@@ -172,6 +175,7 @@ else
                 Content = post.Content,
                 Created = post.Created,
                 IsCommentAllowed = post.IsCommentAllowed
+                    
             };
         // Legg til loggmeldinger for å sjekke verdier
         Console.WriteLine("EditPostDialog - Start");

@@ -62,19 +62,20 @@ namespace WebAPI.Data
             modelBuilder.Entity<IdentityUser>().HasData(user);*/
 
 
-            modelBuilder.Entity<Post>().Property<int>("BlogId");
+            //modelBuilder.Entity<Post>().Property<int>("BlogId");
 
-            modelBuilder.Entity<Post>().HasData(new
-            {
-                PostId = 1,
-                Title = "Seedet Post Tittel",
-                Content = "Dette er innholdet i den seedede posten.",
-                Created = DateTime.UtcNow,
-                IsCommentAllowed = true,
-                // Riktig måte å sette skyggeegenskapen på
-                BlogId = 1006,  // Eksisterende BlogId
-                //AuthorId = "c12eacb0 - c1a9 - 48c3 - b4a7 - c9e7a7ce3436"
-            });
+            //modelBuilder.Entity<Post>().HasData(new
+            //{
+            //    PostId = 1,
+            //    Title = "Seedet Post Tittel",
+            //    Content = "Dette er innholdet i den seedede posten.",
+            //    Created = DateTime.UtcNow,
+            //    IsCommentAllowed = true,
+            //    // Riktig måte å sette skyggeegenskapen på
+            //    BlogId = 1006,  // Eksisterende BlogId
+            //    //AuthorId = "c12eacb0 - c1a9 - 48c3 - b4a7 - c9e7a7ce3436"
+            //    OwnerId = "1"
+            //});
 
 
         }

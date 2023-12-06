@@ -10,6 +10,7 @@ namespace SharedModels.ViewModels
         public int BlogId { get; set; }
         public string BlogTitle { get; set; }
         public bool IsPostAllowed { get; set; }
+        public int OwnerId { get; set; }
     }
 
     public class PostCreateViewModel

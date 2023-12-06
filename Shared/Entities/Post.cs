@@ -17,10 +17,8 @@ namespace SharedModels.Entities
         public string Content { get; set; }
         public DateTime Created { get; set; }
         public Blog Blog { get; set; }
-        //public virtual IdentityUser Author { get; set; }
+        public string OwnerId { get; set; } // Tove: Fremmednøkkel for brukeren
         public bool IsCommentAllowed { get; set; }
-
-        //public ICollection<Tag> Tags { get; set; }
 
         }
     

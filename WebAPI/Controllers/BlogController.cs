@@ -61,10 +61,10 @@ namespace WebAPI.Controllers
                 {
                     _logger.LogWarning("User ID claim not found.");
                 }
-                var username2 = User.FindFirst(ClaimTypes.Name)?.Value;
+
                 var blogs = await _repository.GetAllBlogs();
 
-                _logger.LogInformation($"Username: {username2}");
+                _logger.LogInformation($"Username: {User.FindFirst(ClaimTypes.Name)?.Value}");
                 return Ok(blogs); // This will return a 200 OK status with the blogs data
             }
             catch (Exception ex)

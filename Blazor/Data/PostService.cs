@@ -1,4 +1,5 @@
 ﻿using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -12,11 +13,16 @@ namespace Blazor.Data
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<PostService> _logger;
+        private readonly CustomAuthenticationStateProvider _authenticationStateProvider;
+        private string _token;
 
-        public PostService(HttpClient httpClient, ILogger<PostService> logger)
+        public PostService(HttpClient httpClient, ILogger<PostService> logger, CustomAuthenticationStateProvider AuthenticationStateProvider)
         {
-            _httpClient = httpClient;
             _logger = logger;
+            _authenticationStateProvider = AuthenticationStateProvider;
+            _token = _authenticationStateProvider._tokenService.JwtToken;
+            _httpClient = httpClient;
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
         }
 
         public async Task<IEnumerable<Post>> GetPostsByBlogIdAsync(int blogId)
