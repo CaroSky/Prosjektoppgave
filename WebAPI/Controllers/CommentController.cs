@@ -22,7 +22,6 @@ namespace WebAPI.Controllers
 
         private UserManager<IdentityUser> _manager;
 
-        private string _username = "tli0610@uit.no";
         private readonly ILogger<CommentController> _logger;
 
 
@@ -39,6 +38,23 @@ namespace WebAPI.Controllers
 
             try
             {
+                //find the user that is logged in 
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);   //it return a http://...:username so I need to get the username from the string
+
+                if (userIdClaim != null)
+                {
+                    var userId = userIdClaim.Value;
+                    _logger.LogInformation($"User ID in blog Controller - GetBlogs: {userId}");
+                    string[] words = userIdClaim.ToString().Split(':');
+                    string username = words[words.Length - 1].Trim();
+                    var user = await _manager.FindByNameAsync(username);
+                }
+                else
+                {
+                    _logger.LogWarning("User ID claim not found.");
+                }
+
+
                 _logger.LogInformation("Henter kommentarer for post med ID: {PostId}", id);
                 var comments = await _repository.GetAllCommentsByPostId(id);
                 _logger.LogInformation("Antall hentede kommentarer: {Count}", comments.Count());
@@ -70,37 +86,30 @@ namespace WebAPI.Controllers
             }
         }
 
-        //// GET: Create
-        //[Authorize]
-        //public ActionResult Create(int id)
-        //{
-        //    //this.blog = _repository.GetBlogById(id);
-        //    var comment = _repository.GetCommentCreateViewModel(id);
-
-        //    return View(comment);
-        //}
 
         //POST: Create
         [HttpPost]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> Create([FromBody] CommentCreateViewModel commentCreateViewModel)
         {
-            //to be removed
-            var user = await _manager.FindByNameAsync(_username);
-            if (user != null)
-            {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    // Add other claims as needed
-                };
-                var identity = new ClaimsIdentity(claims, "custom");
-                var principal = new ClaimsPrincipal(identity);
+            //find the user that is logged in 
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);   //it return a http://...:username so I need to get the username from the string
+            string[] words = userIdClaim.ToString().Split(':');
+            string username = words[words.Length - 1].Trim();
+            var user = await _manager.FindByNameAsync(username);
 
-                // Set the principal to HttpContext.User
-                HttpContext.User = principal;
+            if (user == null)
+            {
+                return Unauthorized(); // Brukeren er ikke autentisert
             }
-            //---------------------------------------------------------
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -112,13 +121,13 @@ namespace WebAPI.Controllers
                 Content = commentCreateViewModel.Content,
                 Created = DateTime.Now,
                 //Author = await _manager.FindByNameAsync(User.Identity.Name),
-                Post = await _repository.GetPostById(commentCreateViewModel.PostId)
+                Post = await _repository.GetPostById(commentCreateViewModel.PostId),
+                OwnerId = user.Id,
             };
 
 
             await _repository.SaveComment(comment, User);
-            //tempdata
-            //TempData["message"] = string.Format("The comment has been created");
+
             return CreatedAtAction("Get", new { id = comment.CommentId }, comment);
             
         }
@@ -126,25 +135,26 @@ namespace WebAPI.Controllers
 
         // GET: Edit
         [HttpGet("{id}")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> Get(int id, int postId)
         {
-            //to be removed
-          //  var user = await _manager.FindByNameAsync(_username);
-           // if (user != null)
-            //{
-                //var claims = new List<Claim>
-              //  {
-                  //  new Claim(ClaimTypes.Name, user.UserName),
-                    // Add other claims as needed
-                //};
-                //var identity = new ClaimsIdentity(claims, "custom");
-                //var principal = new ClaimsPrincipal(identity);
+            //find the user that is logged in 
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);   //it return a http://...:username so I need to get the username from the string
+            string[] words = userIdClaim.ToString().Split(':');
+            string username = words[words.Length - 1].Trim();
+            var user = await _manager.FindByNameAsync(username);
 
-                // Set the principal to HttpContext.User
-                //HttpContext.User = principal;
-           // }
-            //---------------------------------------------------------
+            if (user == null)
+            {
+                return Unauthorized(); // Brukeren er ikke autentisert
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+
 
             if (!ModelState.IsValid)
             {
@@ -175,26 +185,26 @@ namespace WebAPI.Controllers
 
         //PUT: Edit
        [HttpPut("{id}")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] CommentEditViewModel commentEditViewModel)
         {
-            //to be removed
-            _logger.LogInformation($"Mottar PUT-forespørsel for å oppdatere kommentar med ID {id}");
-            var user = await _manager.FindByNameAsync(_username);
-            if (user != null)
-            {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    // Add other claims as needed
-                };
-                var identity = new ClaimsIdentity(claims, "custom");
-                var principal = new ClaimsPrincipal(identity);
+            //find the user that is logged in 
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);   //it return a http://...:username so I need to get the username from the string
+            string[] words = userIdClaim.ToString().Split(':');
+            string username = words[words.Length - 1].Trim();
+            var user = await _manager.FindByNameAsync(username);
 
-                // Set the principal to HttpContext.User
-                HttpContext.User = principal;
+            if (user == null)
+            {
+                return Unauthorized(); // Brukeren er ikke autentisert
             }
-            //---------------------------------------------------------
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+
 
             if (!ModelState.IsValid)
                 
@@ -213,7 +223,8 @@ namespace WebAPI.Controllers
                 CommentId = commentEditViewModel.CommentId,
                 Content = commentEditViewModel.Content,
                 Created = commentEditViewModel.Created,
-                Post = await _repository.GetPostById(commentEditViewModel.PostId)
+                Post = await _repository.GetPostById(commentEditViewModel.PostId),
+                OwnerId = user.Id,
             };
             //find the owner (the person logged in)
             // comment.Author = await _manager.FindByNameAsync(User.Identity.Name);
@@ -222,9 +233,8 @@ namespace WebAPI.Controllers
             await _repository.UpdateComment(comment, User);
             _logger.LogInformation("Kommentar med ID {id} er oppdatert i databasen");
 
-            // _repository.Update(product);
-            //tempdata
-            //TempData["message"] = string.Format("The comment has been updated");
+             //_repository.UpdateComment(product);
+
 
             return Ok(comment);
         }
@@ -232,26 +242,26 @@ namespace WebAPI.Controllers
 
         // GET: Delete
         [HttpDelete("{id}")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> Delete([FromRoute] int id, int postId)
         {
-            //to be removed
-            var user = await _manager.FindByNameAsync(_username);
-            if (user != null)
-            {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    // Add other claims as needed
-                };
-                var identity = new ClaimsIdentity(claims, "custom");
-                var principal = new ClaimsPrincipal(identity);
+            //find the user that is logged in 
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);   //it return a http://...:username so I need to get the username from the string
+            string[] words = userIdClaim.ToString().Split(':');
+            string username = words[words.Length - 1].Trim();
+            var user = await _manager.FindByNameAsync(username);
 
-                // Set the principal to HttpContext.User
-                HttpContext.User = principal;
+            if (user == null)
+            {
+                return Unauthorized(); // Brukeren er ikke autentisert
             }
 
-            //---------------------------------------------------------
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);

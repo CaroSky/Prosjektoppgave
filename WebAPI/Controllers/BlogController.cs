@@ -46,8 +46,6 @@ namespace WebAPI.Controllers
             {
                 //find the user that is logged in 
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);   //it return a http://...:username so I need to get the username from the string
-  
-
 
                 if (userIdClaim != null)
                 {

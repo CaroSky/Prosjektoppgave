@@ -33,26 +33,9 @@ namespace Blazor.Data
         }
 
 
-        //private void ConfigureHttpClient()
-        //{
-        //    // Create an instance of the JwtTokenHandler and set it as the inner handler for HttpClient
-        //    var token = _authenticationStateProvider._tokenService.JwtToken;
-        //    var tokenHandler = new JwtTokenHandler(_jwtToken);
-        //    var clientWithTokenHandler = new HttpClient(tokenHandler)
-        //    {
-        //        BaseAddress = new Uri("https://localhost:5001/"), // Set your API endpoint
-        //    };
-        //    // Inject the configured HttpClient
-        //    _httpClient.BaseAddress = clientWithTokenHandler.BaseAddress;
-        //    _httpClient.DefaultRequestHeaders.Clear();
-        //    _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        //}
-
-
         public async Task<IEnumerable<Blog>> GetBlogsAsync()
         {
             _logger.LogInformation($"Sending HTTP GET request to URL: {"api/blog"}");
-            //ConfigureHttpClient();
             var response = await _httpClient.GetAsync("api/blog");
             _logger.LogInformation("Sending request to get all blogs");
             _logger.LogInformation($"Received HTTP response with status code: {response.StatusCode}");

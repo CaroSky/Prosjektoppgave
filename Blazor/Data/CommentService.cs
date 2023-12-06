@@ -8,6 +8,8 @@ using Microsoft.Extensions.Logging;
 using SharedModels.ViewModels;
 using SharedModels.Entities;
 using System.Text.Json;
+using Microsoft.AspNetCore.Components.Authorization;
+using System.Net.Http.Headers;
 
 
 namespace Blazor.Data
@@ -16,11 +18,16 @@ namespace Blazor.Data
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<CommentService> _logger;
+        private readonly CustomAuthenticationStateProvider _authenticationStateProvider;
+        private string _token;
 
-        public CommentService(HttpClient httpClient, ILogger<CommentService> logger)
+        public CommentService(HttpClient httpClient, ILogger<CommentService> logger, CustomAuthenticationStateProvider AuthenticationStateProvider)
         {
-            _httpClient = httpClient;
             _logger = logger;
+            _authenticationStateProvider = AuthenticationStateProvider;
+            _token = _authenticationStateProvider._tokenService.JwtToken;
+            _httpClient = httpClient;
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
         }
 
         public async Task<CommentIndexViewModel> GetCommentsByPostIdAsync(int postId)

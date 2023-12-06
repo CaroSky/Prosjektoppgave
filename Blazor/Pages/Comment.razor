@@ -2,9 +2,13 @@
 @using SharedModels.Entities
 @using SharedModels.ViewModels;
 @using Blazor.Data
+@using System.Security.Claims
+@using System.IdentityModel.Tokens.Jwt;
 
 @inject CommentService CommentService
 @inject NavigationManager NavigationManager
+@inject CustomAuthenticationStateProvider AuthenticationStateProvider
+
 
 <h3>Comments for Post @PostId</h3>
 
@@ -14,13 +18,16 @@
     }
     else
 {
-    <button class="btn btn-success ml-auto" @onclick="@(() => CreateCommentDialog("Create"))">Add New Comment</button>
-        <table class="table">
+    @if (user.Identity.IsAuthenticated)
+    {
+        <button class="btn btn-success ml-auto" @onclick="@(() => CreateCommentDialog("Create"))">Add New Comment</button>
+    }
+    <table class="table">
             <thead>
                 <tr>
-                    <th>Author</th>
                     <th>Content</th>
                     <th>Created</th>
+                    <th>Author</th>
                 </tr>
             </thead>
             <tbody>
@@ -30,11 +37,15 @@
                   
                         <td>@comment.Created</td>
                         <td>@comment.Content</td>
+                        <td>@comment.OwnerId</td>
 
+                    @if (comment.OwnerId == _userId)
+                    {
 
-                    <button class="btn btn-secondary" @onclick="@(() => EditCommentDialog("Update",comment.CommentId, comment))">Edit</button>
+                        <button class="btn btn-secondary" @onclick="@(() => EditCommentDialog("Update", comment.CommentId, comment))">Edit</button>
 
-                    <button class="btn btn-danger" @onclick="@(() => DeleteComment(comment.CommentId))">Delete</button>
+                        <button class="btn btn-danger" @onclick="@(() => DeleteComment(comment.CommentId))">Delete</button>
+                    }
                     </tr>
                 }
             </tbody>
@@ -61,10 +72,17 @@
         private bool allowed;
     private IEnumerable<SharedModels.Entities.Comment> comments;
         //private IEnumerable<Comment> comments;
+        private ClaimsPrincipal user;
+        private string _username;
+        private string _userId;
+
 
         protected override async Task OnInitializedAsync()
         {
-        
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            user = authState.User;
+            _username = user?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            _userId = user?.FindFirst(JwtRegisteredClaimNames.NameId)?.Value;
         //var commentIndexViewModel =
          //await CommentService.GetCommentsByPostIdAsync(Id);
         //comments = commentIndexViewModel.Comments;
@@ -160,10 +178,13 @@
             {
                 CommentId = commentId,
                 Content = comment.Content,
+                PostId = comment.Post.PostId,
+                Created = comment.Created
+
                 // Andre nødvendige felt ...
             };
         Console.WriteLine("EditCommentDialog - Start");
-        _titleDialog = "Edit";
+        _titleDialog = "Update";
         _dialog.Show();
     }
     void CancelDialog()
