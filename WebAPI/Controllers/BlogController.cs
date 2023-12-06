@@ -16,7 +16,7 @@ namespace WebAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Route("api/blog")]
+
     public class BlogController : ControllerBase
     {
         private IBlogRepository _repository;
@@ -72,29 +72,15 @@ namespace WebAPI.Controllers
 
         //POST: Product/Create
         [HttpPost]
-        //[Authorize]
-        //public async Task<IActionResult> Post([FromBody] BlogCreateViewModel blogCreateViewModel)
+        [Authorize]
         public async Task<IActionResult> Post([FromBody] Blog blog)
         {
-            //TOVE: to be removed, har fjernet claims:ASP.NET Core Identity håndterer brukerprinsipper for deg.
-            var user = await _manager.FindByNameAsync(_username);
+            //find the user that is logged in 
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);   //it return a http://...:username so I need to get the username from the string
+            string[] words = userIdClaim.ToString().Split(':');
+            string username = words[words.Length - 1].Trim();
+            var user = await _manager.FindByNameAsync(username);
 
-            if (user != null)
-            {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    // Add other claims as needed
-                };
-                var identity = new ClaimsIdentity(claims, "custom");
-                var principal = new ClaimsPrincipal(identity);
-
-                // Set the principal to HttpContext.User
-                HttpContext.User = principal;
-            }
-            //var userId = _manager.GetUserId(User);
-            //---------------------------------------------------------
-            //if (string.IsNullOrEmpty(userI))
             if (user == null)
             {
                 return Unauthorized(); // Brukeren er ikke autentisert
@@ -118,24 +104,16 @@ namespace WebAPI.Controllers
 
         // GET: Product/Edit
         [HttpGet("{id}")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> Get([FromRoute] int id)
         {
-            //to be removed
-            var user = await _manager.FindByNameAsync(_username);
-            if (user != null)
-            {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    // Add other claims as needed
-                };
-                var identity = new ClaimsIdentity(claims, "custom");
-                var principal = new ClaimsPrincipal(identity);
 
-                // Set the principal to HttpContext.User
-                HttpContext.User = principal;
-            }
+            //find the user that is logged in 
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);   //it return a http://...:username so I need to get the username from the string
+            string[] words = userIdClaim.ToString().Split(':');
+            string username = words[words.Length - 1].Trim();
+            var user = await _manager.FindByNameAsync(username);
+
             //---------------------------------------------------------
             if (!ModelState.IsValid)
             {
@@ -152,17 +130,14 @@ namespace WebAPI.Controllers
 
             var blogEdit = await _repository.GetBlogEditViewModelById(id);
 
-            //var currentUser = await _manager.FindByNameAsync(User.Identity.Name);
-            //if (currentUser.UserName == blog.Owner.UserName)
-            // Hent den innloggede brukerens ID
-            var userId = _manager.GetUserId(User);
-            if (userId == null)
+
+            if (user.Id == null)
             {
                 return Unauthorized();
             }
 
             // Sjekk om den innloggede brukeren er eieren av bloggposten
-            if (userId == blog.OwnerId)
+            if (user.Id == blog.OwnerId)
                     {
                 return Ok(blog);
             }
@@ -177,46 +152,27 @@ namespace WebAPI.Controllers
 
         //PUT: Product/Edit
         [HttpPut("{id}")]
-        //[Authorize]
-        //public async Task<IActionResult> Put([FromRoute] int id, [FromBody] BlogEditViewModel blogEditViewModel)
+        [Authorize]
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Blog blog)
         {
-            // Få den innloggede brukerens ID
-            //var userId = _manager.GetUserId(User);
-            //if (userId == null)
-            //{
-            //    return Unauthorized();
-            //}
-            //to be removed
-            /*// var user = await _manager.FindByNameAsync(_username);
-             if (user != null)
-             {
-                 var claims = new List<Claim>
-                 {
-                     new Claim(ClaimTypes.Name, user.UserName),
-                     // Add other claims as needed
-                 };
-                 var identity = new ClaimsIdentity(claims, "custom");
-                 var principal = new ClaimsPrincipal(identity);
+            //find the user that is logged in 
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);   //it return a http://...:username so I need to get the username from the string
+            string[] words = userIdClaim.ToString().Split(':');
+            string username = words[words.Length - 1].Trim();
+            var user = await _manager.FindByNameAsync(username);
 
-                 // Set the principal to HttpContext.User
-                 HttpContext.User = principal;
-             }*/
+            if (user.Id != blog.OwnerId)
+            {
+                return Unauthorized();
+            }
+
+
             //---------------------------------------------------------
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            //if (id != blogEditViewModel.BlogId)
-            //{
-            //    return BadRequest();
-            //}
-
-       
-            //find the owner (the person logged in)
-            //TOVE. Gjernet denne:
-            //blog.Owner = await _manager.FindByNameAsync(User.Identity.Name);
 
             await _repository.UpdateBlog(blog);
 
@@ -227,7 +183,7 @@ namespace WebAPI.Controllers
 
         // GET: Product/Delete
         [HttpDelete("{id}")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             if (!ModelState.IsValid)

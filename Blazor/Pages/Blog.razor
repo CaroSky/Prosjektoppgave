@@ -60,15 +60,18 @@ else
                 <td>@blog.Content</td>
                 <td>@blog.Created</td>
                 <td>@blog.OwnerId</td>
-                <td>
-                    <div class="form-check">
+                    <td>
+                        <div class="form-check">
                             <input class="form-check-input" type="checkbox" disabled="disabled" @bind="blog.IsPostAllowed" />
-                    </div>
+                        </div>
                     </td>
-                <td>
-                    <button class="btn btn-success ml-auto" @onclick="@(() => EditBlogDialog("Update", blog))">Update</button>
-                    <button class="btn btn-success ml-auto" @onclick="@(() => DeleteBlog(blog))">Delete</button>
-                </td>
+                    @if (blog.OwnerId == _userId)
+                    {
+                        <td>
+                            <button class="btn btn-success ml-auto" @onclick="@(() => EditBlogDialog("Update", blog))">Update</button>
+                            <button class="btn btn-success ml-auto" @onclick="@(() => DeleteBlog(blog))">Delete</button>
+                        </td>
+                    }
             </tr>
         }
 
@@ -89,6 +92,7 @@ else
     private string tag;
     private ClaimsPrincipal user;
     private string _username;
+    private string _userId;
 
 
     protected override async Task OnInitializedAsync()
@@ -96,6 +100,7 @@ else
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         user = authState.User;
         _username = user?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        _userId = user?.FindFirst(JwtRegisteredClaimNames.NameId)?.Value;
         var blogEnumerable = await BlogService.GetBlogsAsync();
         blogs = blogEnumerable.ToList();
         _titleDialog = "title";
