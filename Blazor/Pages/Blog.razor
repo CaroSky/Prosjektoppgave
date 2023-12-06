@@ -78,8 +78,8 @@ else
                     @if (blog.OwnerId == _userId)
                     {
                         <td>
-                            <button class="btn btn-success ml-auto" @onclick="@(() => EditBlogDialog("Update", blog))">Update</button>
-                            <button class="btn btn-success ml-auto" @onclick="@(() => DeleteBlog(blog))">Delete</button>
+                            <button class="btn btn-success mb-2" @onclick="@(() => EditBlogDialog("Update", blog))">Update</button>
+                            <button class="btn btn-success" @onclick="@(() => DeleteBlog(blog))">Delete</button>
                         </td>
                     }
             </tr>
