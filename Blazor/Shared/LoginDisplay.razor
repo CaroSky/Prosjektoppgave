@@ -5,7 +5,7 @@
 
 <AuthorizeView>
     <Authorized>
-        Hello, @_username!
+        Logged in!
         <a href="LogOut">Log out</a>
     </Authorized>
     <NotAuthorized>
@@ -13,18 +13,3 @@
         <a href="Login">Log in</a>
     </NotAuthorized>
 </AuthorizeView>
-
-@code {
-    private ClaimsPrincipal user;
-    private string _username;
-    private IdentityUser user2;
-
-    protected override async Task OnInitializedAsync()
-    {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        user = authState.User;
-        _username = user?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-        ;
-    }
-
-}
