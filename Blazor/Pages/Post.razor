@@ -1,11 +1,14 @@
 ﻿@using SharedModels.Entities
 @using SharedModels.ViewModels
 @using Blazor.Data;
+@using System.Security.Claims
+@using System.IdentityModel.Tokens.Jwt;
 
 @page "/post/{Id:int}"
 
 @inject NavigationManager NavigationManager
 @inject PostService PostService
+@inject CustomAuthenticationStateProvider AuthenticationStateProvider
 
 @if (posts == null)
 {
@@ -56,9 +59,16 @@ else
     private PostIndexViewModel postIndexViewModel;
     private bool allowed;
     private IEnumerable<SharedModels.Entities.Post> posts;
+    private ClaimsPrincipal user;
+    private string _username;
+    private string _userId;
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        user = authState.User;
+        _username = user?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        _userId = user?.FindFirst(JwtRegisteredClaimNames.NameId)?.Value;
         posts = await PostService.GetPostsByBlogIdAsync(Id);
 
 
@@ -105,6 +115,7 @@ else
 
     private async Task GetPostsForBlog(int blogId)
     {
+       
         var postsFromService = await PostService.GetPostsByBlogIdAsync(blogId);
         posts = postsFromService.ToList();
         allowed = postsFromService.Any() && postsFromService.First().IsCommentAllowed;

@@ -26,7 +26,6 @@ namespace WebAPI.Controllers
 
         private IAuthorizationService _authorizationService;
 
-        private string _username = "tli061@uit.no";
         private readonly ILogger<BlogController> _logger;
 
 
@@ -45,21 +44,27 @@ namespace WebAPI.Controllers
             _logger.LogInformation("Handling GET request for blogs");
             try
             {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                //find the user that is logged in 
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);   //it return a http://...:username so I need to get the username from the string
+  
+
 
                 if (userIdClaim != null)
                 {
                     var userId = userIdClaim.Value;
                     _logger.LogInformation($"User ID in blog Controller - GetBlogs: {userId}");
+                    string[] words = userIdClaim.ToString().Split(':');
+                    string username = words[words.Length - 1].Trim();
+                    var user = await _manager.FindByNameAsync(username);
                 }
                 else
                 {
                     _logger.LogWarning("User ID claim not found.");
                 }
-                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+                var username2 = User.FindFirst(ClaimTypes.Name)?.Value;
                 var blogs = await _repository.GetAllBlogs();
 
-                _logger.LogInformation($"Username: {username}");
+                _logger.LogInformation($"Username: {username2}");
                 return Ok(blogs); // This will return a 200 OK status with the blogs data
             }
             catch (Exception ex)
