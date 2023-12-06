@@ -22,6 +22,7 @@ namespace WebAPI.Controllers
         private IBlogRepository _repository;
 
         private UserManager<IdentityUser> _manager;
+        private SignInManager<IdentityUser> _signManager;
 
         private IAuthorizationService _authorizationService;
 
@@ -30,11 +31,12 @@ namespace WebAPI.Controllers
 
 
 
-        public BlogController(UserManager<IdentityUser> manager, IBlogRepository repository, ILogger<BlogController> logger)
+        public BlogController(UserManager<IdentityUser> manager, IBlogRepository repository, ILogger<BlogController> logger, SignInManager<IdentityUser> signManager)
         {
             this._repository = repository;
             this._manager = manager;
             _logger = logger;
+            _signManager = signManager;
         }
 
         [HttpGet]
@@ -43,8 +45,22 @@ namespace WebAPI.Controllers
             _logger.LogInformation("Handling GET request for blogs");
             try
             {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+                if (userIdClaim != null)
+                {
+                    var userId = userIdClaim.Value;
+                    _logger.LogInformation($"User ID in blog Controller - GetBlogs: {userId}");
+                }
+                else
+                {
+                    _logger.LogWarning("User ID claim not found.");
+                }
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
                 var blogs = await _repository.GetAllBlogs();
-            return Ok(blogs); // This will return a 200 OK status with the blogs data
+
+                _logger.LogInformation($"Username: {username}");
+                return Ok(blogs); // This will return a 200 OK status with the blogs data
             }
             catch (Exception ex)
             {
@@ -52,8 +68,6 @@ namespace WebAPI.Controllers
                 throw;
             }
         }
-
-
 
 
         //POST: Product/Create

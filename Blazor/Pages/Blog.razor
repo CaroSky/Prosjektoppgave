@@ -2,15 +2,28 @@
 @using SharedModels.Entities 
 @using Blazor.Data
 @using ViewModels
+@using System.Security.Claims
+@using System.IdentityModel.Tokens.Jwt;
+@using Microsoft.AspNetCore.Identity
 
 @inject BlogService BlogService
 @inject PostService PostService
 @inject NavigationManager NavigationManager
 @inject SearchService SearchService
+@inject CustomAuthenticationStateProvider AuthenticationStateProvider
 
 
 
 <h3>Blog Posts</h3>
+
+@if (user.Identity.IsAuthenticated)
+{
+    <p>Hello, @_username!</p>
+}
+else
+{
+    <p>User not authenticated</p>
+}
 
 @if (blogs == null)
 {
@@ -74,12 +87,19 @@ else
     private BlogDialogBox _dialog;
     private IEnumerable<SharedModels.Entities.Post> selectedPosts;
     private string tag;
+    private ClaimsPrincipal user;
+    private string _username;
+
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        user = authState.User;
+        _username = user?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
         var blogEnumerable = await BlogService.GetBlogsAsync();
         blogs = blogEnumerable.ToList();
         _titleDialog = "title";
+
     }
 
     private async Task OnSaveDialog()

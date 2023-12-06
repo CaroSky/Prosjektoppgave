@@ -39,9 +39,9 @@ namespace WebAPI.Data
                                                //.IsRequired(false); // Gjør dette valgfritt hvis en blogg ikke nødvendigvis trenger en bruker
 
 
-            //modelBuilder.Entity<Post>()
-            //   .HasMany(p => p.Tags)
-            //   .WithMany(t => t.Posts);
+           // //modelBuilder.Entity<Post>()
+           // //   .HasMany(p => p.Tags)
+           // //   .WithMany(t => t.Posts);
 
             // Seeding a user
            /*// var userId = Guid.NewGuid().ToString(); // Create a GUID for the user Id

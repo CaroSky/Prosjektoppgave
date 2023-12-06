@@ -1,0 +1,80 @@
+﻿@page "/register"
+@using SharedModels.Entities
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h1>Register</h1>
+
+@if (ShowErrors)
+{
+    <div class="alert alert-danger" role="alert">
+        @foreach (var error in Errors)
+        {
+            <p>@error</p>
+        }
+    </div>
+}
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Please enter your details</h5>
+        <EditForm Model="RegisterModel" OnValidSubmit="HandleRegistration">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="form-group">
+                <label for="email">Email address</label>
+                <InputText Id="email" class="form-control" @bind-Value="RegisterModel.Email" />
+                <ValidationMessage For="@(() => RegisterModel.Email)" />
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <InputText Id="password" type="password" class="form-control" @bind-Value="RegisterModel.Password" />
+                <ValidationMessage For="@(() => RegisterModel.Password)" />
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <InputText Id="confirmPassword" type="password" class="form-control" @bind-Value="RegisterModel.ConfirmPassword" />
+                <ValidationMessage For="@(() => RegisterModel.ConfirmPassword)" />
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private RegisterModel RegisterModel = new RegisterModel();
+    private List<string> Errors = new List<string>();
+    private bool ShowErrors;
+
+    private async Task HandleRegistration()
+    {
+        ShowErrors = false;
+        Errors.Clear();
+
+        var response = await Http.PostAsJsonAsync("api/Accounts/register", RegisterModel);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var result = await response.Content.ReadFromJsonAsync<RegisterResult>();
+
+            if (result.Successful)
+            {
+                // If registration is successful, redirect to login page or dashboard
+                NavigationManager.NavigateTo("/login");
+            }
+            else
+            {
+                // Handle the errors
+                Errors = result.Errors.ToList();
+                ShowErrors = true;
+            }
+        }
+        else
+        {
+            // Handle HTTP errors (e.g., server not responding)
+            Errors.Add("Server error occurred. Please try again.");
+            ShowErrors = true;
+        }
+    }
+}

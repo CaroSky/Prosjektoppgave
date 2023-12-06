@@ -1,10 +1,47 @@
 ﻿@page "/"
+@using System.Security.Claims
+@using System.IdentityModel.Tokens.Jwt;
+@using Microsoft.AspNetCore.Identity
+
+@inject NavigationManager NavigationManager
+@inject CustomAuthenticationStateProvider AuthenticationStateProvider
+
 <PageTitle>Index</PageTitle>
 
 <h1>Hello, world!</h1>
 
 Welcome to your new app.
 
+@if (user.Identity.IsAuthenticated)
+{
+    <p>Hello, @_username!</p>
+}
+else
+{
+    <p>User not authenticated</p>
+}
+<button class="btn btn-success ml-auto" @onclick="@(() => GoToBlogs())">Go to blogs</button>
+
 <SurveyPrompt Title="How is Blazor working for you?" />
 
 <Counter IncrementAmount="10" />
+
+@code {
+    private ClaimsPrincipal user;
+    private string _username;
+    private IdentityUser user2;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        user = authState.User;
+        _username = user?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+;
+    }
+
+    private void GoToBlogs()
+    {
+        NavigationManager.NavigateTo("/blogs");
+    }
+
+}

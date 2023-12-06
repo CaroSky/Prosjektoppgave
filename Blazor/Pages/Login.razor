@@ -1,0 +1,82 @@
+﻿@page "/login"
+@using SharedModels.Entities
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject TokenService TokenService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ILogger<CustomAuthenticationStateProvider> Ilogger
+<h1>Login</h1>
+
+@if (ShowErrors)
+{
+    <div class="alert alert-danger" role="alert">
+        <p>@Error</p>
+    </div>
+}
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Please enter your details</h5>
+        <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="form-group">
+                <label for="email">Email address</label>
+                <InputText Id="email" Class="form-control" @bind-Value="loginModel.Email" />
+                <ValidationMessage For="@(() => loginModel.Email)" />
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <InputText Id="password" type="password" Class="form-control" @bind-Value="loginModel.Password" />
+                <ValidationMessage For="@(() => loginModel.Password)" />
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private LoginModel loginModel = new LoginModel();
+    private bool ShowErrors;
+    private string Error;
+
+    private async Task HandleLogin()
+    {
+        ShowErrors = false;
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/Accounts/login", loginModel);
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<LoginResult>();
+                if (result.Successful)
+                {
+                    string receivedToken = result.Token;
+                    TokenService.JwtToken = receivedToken;
+                    Ilogger.LogInformation($"Token received and stored: {receivedToken}");
+   
+                    ((CustomAuthenticationStateProvider)AuthenticationStateProvider).NotifyUserAuthentication(receivedToken);
+                    NavigationManager.NavigateTo("/");
+                }
+                else
+                {
+                    Error = "Invalid credentials.";
+                    ShowErrors = true;
+                }
+            }
+            else
+            {
+                Error = "Login failed. Please try again.";
+                ShowErrors = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Error = $"An error occurred: {ex.Message}";
+            ShowErrors = true;
+        }
+        Ilogger.LogInformation($"TokenService.JwtToken: {TokenService.JwtToken}");
+    }
+}
