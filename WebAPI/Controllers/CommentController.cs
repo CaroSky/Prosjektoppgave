@@ -10,6 +10,7 @@ using System.Reflection.Metadata;
 using System.Security.Claims;
 using SharedModels.Entities;
 using SharedModels.ViewModels;
+using Microsoft.Extensions.Logging;
 
 namespace WebAPI.Controllers
 {
@@ -111,7 +112,7 @@ namespace WebAPI.Controllers
                 Content = commentCreateViewModel.Content,
                 Created = DateTime.Now,
                 //Author = await _manager.FindByNameAsync(User.Identity.Name),
-                //Må teste Tove//Post = await _repository.GetPostById(commentCreateViewModel.PostId)
+                Post = await _repository.GetPostById(commentCreateViewModel.PostId)
             };
 
 
@@ -123,26 +124,26 @@ namespace WebAPI.Controllers
         }
 
 
-      /*  // GET: Edit
+        // GET: Edit
         [HttpGet("{id}")]
         //[Authorize]
         public async Task<IActionResult> Get(int id, int postId)
         {
             //to be removed
           //  var user = await _manager.FindByNameAsync(_username);
-            if (user != null)
-            {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.UserName),
+           // if (user != null)
+            //{
+                //var claims = new List<Claim>
+              //  {
+                  //  new Claim(ClaimTypes.Name, user.UserName),
                     // Add other claims as needed
-                };
-                var identity = new ClaimsIdentity(claims, "custom");
-                var principal = new ClaimsPrincipal(identity);
+                //};
+                //var identity = new ClaimsIdentity(claims, "custom");
+                //var principal = new ClaimsPrincipal(identity);
 
                 // Set the principal to HttpContext.User
-                HttpContext.User = principal;
-            }
+                //HttpContext.User = principal;
+           // }
             //---------------------------------------------------------
 
             if (!ModelState.IsValid)
@@ -162,7 +163,7 @@ namespace WebAPI.Controllers
 
 
             var currentUser = await _manager.FindByNameAsync(User.Identity.Name);
-            if (currentUser.Id == comment.Author.Id)
+            //if (currentUser.Id == comment.Author.Id)
             {
                 return Ok(commentEdit);
             }
@@ -170,14 +171,15 @@ namespace WebAPI.Controllers
             return BadRequest(ModelState);
 
 
-        }*/
+        }
 
         //PUT: Edit
-       /* [HttpPut("{id}")]
+       [HttpPut("{id}")]
         //[Authorize]
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] CommentEditViewModel commentEditViewModel)
         {
             //to be removed
+            _logger.LogInformation($"Mottar PUT-forespørsel for å oppdatere kommentar med ID {id}");
             var user = await _manager.FindByNameAsync(_username);
             if (user != null)
             {
@@ -195,7 +197,9 @@ namespace WebAPI.Controllers
             //---------------------------------------------------------
 
             if (!ModelState.IsValid)
+                
             {
+                _logger.LogWarning("Modellen er ikke gyldig for kommentar med ID {id}");
                 return BadRequest(ModelState);
             }
 
@@ -209,12 +213,15 @@ namespace WebAPI.Controllers
                 CommentId = commentEditViewModel.CommentId,
                 Content = commentEditViewModel.Content,
                 Created = commentEditViewModel.Created,
-               // Post = await _repository.GetPostById(commentEditViewModel.PostId)
+                Post = await _repository.GetPostById(commentEditViewModel.PostId)
             };
             //find the owner (the person logged in)
-            comment.Author = await _manager.FindByNameAsync(User.Identity.Name);
+            // comment.Author = await _manager.FindByNameAsync(User.Identity.Name);
 
+            _logger.LogInformation("Oppdaterer kommentar med ID {id} i databasen");
             await _repository.UpdateComment(comment, User);
+            _logger.LogInformation("Kommentar med ID {id} er oppdatert i databasen");
+
             // _repository.Update(product);
             //tempdata
             //TempData["message"] = string.Format("The comment has been updated");
@@ -257,20 +264,20 @@ namespace WebAPI.Controllers
                 return NotFound();
             }
 
-            var currentUser = await _manager.FindByNameAsync(User.Identity.Name);
-            if (currentUser.Id == comment.Author.Id)
+           // var currentUser = await _manager.FindByNameAsync(User.Identity.Name);
+            //if (currentUser.Id == comment.Author.Id)
             {
                 await _repository.DeleteComment(comment, User);
                 //tempdata
                 //TempData["message"] = string.Format("The comment has been deleted");
                 return Ok(comment);
             }
-            else
-            {
-                return BadRequest(ModelState);
-            }
+            //else
+            //{
+              //  return BadRequest(ModelState);
+            //}
 
 
-        }*/
+        }
     }
 }

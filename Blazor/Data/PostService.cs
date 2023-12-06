@@ -26,6 +26,7 @@ namespace Blazor.Data
         }
 
         public async Task<PostIndexViewModel> GetPostsByBlogIdAsync(int blogId)
+
         {
             _logger.LogInformation($"Sending HTTP GET request to URL: api/post/{blogId}/posts");
 
