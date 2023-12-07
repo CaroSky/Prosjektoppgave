@@ -55,7 +55,7 @@ else
                 </td>
                 <td>@blog.Content</td>
                 <td>@blog.Created</td>
-                <td>@blog.OwnerId</td>
+                    <td>@blog.OwnerUsername</td>
                     <td>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" disabled="disabled" @bind="blog.IsPostAllowed" />
@@ -180,7 +180,8 @@ else
         {
             Created = DateTime.Now,
             OwnerId = "0",
-            IsPostAllowed = true
+            IsPostAllowed = true,
+            OwnerUsername = ""
 
         };
         _viewBlog = new BlogViewModel()

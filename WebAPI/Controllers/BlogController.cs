@@ -96,6 +96,7 @@ namespace WebAPI.Controllers
             
  
             blog.OwnerId = user.Id;
+            blog.OwnerUsername = user.UserName;
 
             await _repository.SaveBlog(blog, User);
 

@@ -30,6 +30,8 @@ namespace SharedModels.ViewModels
         public DateTime Created { get; set; }
         public int BlogId { get; set; }
         public bool IsCommentAllowed { get; set; }
+        public string OwnerId { get; set; } 
+        public virtual string OwnerUsername { get; set; }
 
     }
 }

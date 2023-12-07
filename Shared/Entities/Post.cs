@@ -18,6 +18,7 @@ namespace SharedModels.Entities
         public DateTime Created { get; set; }
         public Blog Blog { get; set; }
         public string OwnerId { get; set; } // Tove: Fremmednøkkel for brukeren
+        public virtual string OwnerUsername { get; set; }
         public bool IsCommentAllowed { get; set; }
 
         }

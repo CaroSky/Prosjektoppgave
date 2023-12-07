@@ -123,6 +123,7 @@ namespace WebAPI.Controllers
                 //Author = await _manager.FindByNameAsync(User.Identity.Name),
                 Post = await _repository.GetPostById(commentCreateViewModel.PostId),
                 OwnerId = user.Id,
+                OwnerUsername = user.UserName
             };
 
 
@@ -224,7 +225,8 @@ namespace WebAPI.Controllers
                 Content = commentEditViewModel.Content,
                 Created = commentEditViewModel.Created,
                 Post = await _repository.GetPostById(commentEditViewModel.PostId),
-                OwnerId = user.Id,
+                OwnerId = commentEditViewModel.OwnerId,
+                OwnerUsername = commentEditViewModel.OwnerUsername,
             };
             //find the owner (the person logged in)
             // comment.Author = await _manager.FindByNameAsync(User.Identity.Name);

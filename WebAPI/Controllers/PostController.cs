@@ -23,7 +23,6 @@ namespace WebAPI.Controllers
         private UserManager<IdentityUser> _manager;
         private readonly ILogger<PostController> _logger;
 
-        private string _username = "til061@uit.no";
 
 
 
@@ -98,10 +97,10 @@ namespace WebAPI.Controllers
                     Title = postCreateViewModel.Title,
                     Content = postCreateViewModel.Content,
                     Created = DateTime.Now,
-                   // Author = await _manager.FindByNameAsync(User.Identity.Name),
                     Blog = await _repository.GetBlogById(postCreateViewModel.BlogId),
                     IsCommentAllowed = true,
                     OwnerId = user.Id,
+                    OwnerUsername = user.UserName
                 };
             
             // Ekstraher tags fra innholdet
@@ -223,7 +222,8 @@ namespace WebAPI.Controllers
                 Created = postEditViewModel.Created,
                 IsCommentAllowed = postEditViewModel.IsCommentAllowed,
                 Blog = await _repository.GetBlogById(postEditViewModel.BlogId),
-                OwnerId = user.Id,
+                OwnerId = postEditViewModel.OwnerId,
+                OwnerUsername = postEditViewModel.OwnerUsername,
             };
             //find the owner (the person logged in)
            // post.Author = await _manager.FindByNameAsync(User.Identity.Name);

@@ -11,7 +11,13 @@
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider
 
 
-<h3>Posts for Blog " @_blogTitle "</h3>
+
+<div class="d-flex justify-content-between">
+    <h3>Posts for Blog "@_blogTitle"</h3>
+    <button class="btn btn-primary" @onclick="@(() => NavigateToBlogs())">Go back to blog list</button>
+</div>
+
+
 
 @if (posts == null)
 {
@@ -32,7 +38,7 @@ else
             <div class="card-body">
                 <h4 class="card-title">@post.Title</h4>
                 <p class="card-text">@post.Content</p>
-                <p class="card-text"><small class="text-muted">@post.OwnerId posted on @post.Created.ToString("yyyy-MM-dd")</small></p>
+                <p class="card-text"><small class="text-muted">@post.OwnerUsername posted on @post.Created.ToString("yyyy-MM-dd")</small></p>
 
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" disabled="disabled" @bind="post.IsCommentAllowed" />
@@ -187,7 +193,9 @@ else
                 Title = post.Title,
                 Content = post.Content,
                 Created = post.Created,
-                IsCommentAllowed = post.IsCommentAllowed
+                IsCommentAllowed = post.IsCommentAllowed,
+                OwnerId = post.OwnerId,
+                OwnerUsername = post.OwnerUsername
                     
             };
         // Legg til loggmeldinger for å sjekke verdier
@@ -207,6 +215,11 @@ else
     private void NavigateToComments(int postId)
     {
         NavigationManager.NavigateTo($"/comment/{postId}");
+    }
+
+    private void NavigateToBlogs()
+    {
+        NavigationManager.NavigateTo($"/blogs");
     }
 }
 

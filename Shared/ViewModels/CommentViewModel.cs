@@ -26,6 +26,8 @@ namespace SharedModels.ViewModels
         public string Content { get; set; }
         public DateTime Created { get; set; }
         public int PostId { get; set; }
+        public string OwnerId { get; set; } 
+        public virtual string OwnerUsername { get; set; }
 
     }
 }

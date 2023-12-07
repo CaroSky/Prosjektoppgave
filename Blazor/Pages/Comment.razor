@@ -10,9 +10,12 @@
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider
 
 
-<h3>Comments for Post " @_postTitle "</h3>
+<div class="d-flex justify-content-between">
+    <h3>Comments for Post " @_postTitle "</h3>
+    <button class="btn btn-primary" @onclick="@(() => NavigateToPosts(_blogId))">Go back to post list</button>
+</div>
 
-    @if (comments == null)
+@if (comments == null)
     {
         <p>Loading comments...</p>
     }
@@ -28,7 +31,7 @@
             <div class="card post-preview mb-4">
                 <div class="card-body">
                     <p class="card-text">@comment.Content</p>
-                <p class="card-text"><small class="text-muted">@comment.OwnerId posted on @comment.Created.ToString("yyyy-MM-dd")</small></p>
+                <p class="card-text"><small class="text-muted">@comment.OwnerUsername posted on @comment.Created.ToString("yyyy-MM-dd")</small></p>
 
                     @if (comment.OwnerId == _userId)
                     {
@@ -66,6 +69,7 @@
         private string _username;
         private string _userId;
         private string _postTitle;
+        private int _blogId;
 
 
         protected override async Task OnInitializedAsync()
@@ -121,6 +125,7 @@
         comments = commentIndexViewModel.Comments;
         allowed = commentIndexViewModel.IsCommentAllowed;
         _postTitle = commentIndexViewModel.PostTitle;
+        _blogId = commentIndexViewModel.BlogId;
     }
 
 
@@ -168,7 +173,9 @@
                 CommentId = commentId,
                 Content = comment.Content,
                 PostId = comment.Post.PostId,
-                Created = comment.Created
+                Created = comment.Created,
+                OwnerId = comment.OwnerId,
+                OwnerUsername = comment.OwnerUsername
 
                 // Andre nødvendige felt ...
             };
@@ -179,6 +186,11 @@
     void CancelDialog()
     {
         _dialog.CloseDialog();
+    }
+
+    private void NavigateToPosts(int blogId)
+    {
+        NavigationManager.NavigateTo($"/post/{blogId}");
     }
 }
 
