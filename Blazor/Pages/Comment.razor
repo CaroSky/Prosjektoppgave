@@ -10,7 +10,7 @@
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider
 
 
-<h3>Comments for Post @PostId</h3>
+<h3>Comments for Post " @_postTitle "</h3>
 
     @if (comments == null)
     {
@@ -18,38 +18,29 @@
     }
     else
 {
-    @if (user.Identity.IsAuthenticated)
+    @if (allowed && user.Identity.IsAuthenticated)
     {
         <button class="btn btn-success ml-auto" @onclick="@(() => CreateCommentDialog("Create"))">Add New Comment</button>
     }
-    <table class="table">
-            <thead>
-                <tr>
-                    <th>Content</th>
-                    <th>Created</th>
-                    <th>Author</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var comment in comments)
-                {
-                    <tr>
-                  
-                        <td>@comment.Created</td>
-                        <td>@comment.Content</td>
-                        <td>@comment.OwnerId</td>
+ 
+        @foreach (var comment in comments)
+        {
+            <div class="card post-preview mb-4">
+                <div class="card-body">
+                    <p class="card-text">@comment.Content</p>
+                <p class="card-text"><small class="text-muted">@comment.OwnerId posted on @comment.Created.ToString("yyyy-MM-dd")</small></p>
 
                     @if (comment.OwnerId == _userId)
                     {
-
-                        <button class="btn btn-secondary" @onclick="@(() => EditCommentDialog("Update", comment.CommentId, comment))">Edit</button>
-
-                        <button class="btn btn-danger" @onclick="@(() => DeleteComment(comment.CommentId))">Delete</button>
+                        <div class="mt-2">
+                                <button class="btn btn-secondary" @onclick="@(() => EditCommentDialog("Update", comment.CommentId, comment))">Edit</button>
+                                <button class="btn btn-danger ml-2" @onclick="@(() => DeleteComment(comment.CommentId))">Delete</button>
+                        </div>
                     }
-                    </tr>
-                }
-            </tbody>
-        </table>
+                </div>
+            </div>
+        }
+
     }
 
 
@@ -71,10 +62,10 @@
         private CommentIndexViewModel commentIndexViewModel;
         private bool allowed;
     private IEnumerable<SharedModels.Entities.Comment> comments;
-        //private IEnumerable<Comment> comments;
         private ClaimsPrincipal user;
         private string _username;
         private string _userId;
+        private string _postTitle;
 
 
         protected override async Task OnInitializedAsync()
@@ -83,11 +74,8 @@
             user = authState.User;
             _username = user?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
             _userId = user?.FindFirst(JwtRegisteredClaimNames.NameId)?.Value;
-        //var commentIndexViewModel =
-         //await CommentService.GetCommentsByPostIdAsync(Id);
-        //comments = commentIndexViewModel.Comments;
         
-        await GetCommentsForPost(PostId);
+            await GetCommentsForPost(PostId);
         
         }
 
@@ -132,6 +120,7 @@
         var commentIndexViewModel = await CommentService.GetCommentsByPostIdAsync(postId);
         comments = commentIndexViewModel.Comments;
         allowed = commentIndexViewModel.IsCommentAllowed;
+        _postTitle = commentIndexViewModel.PostTitle;
     }
 
 

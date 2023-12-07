@@ -10,6 +10,9 @@
 @inject PostService PostService
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider
 
+
+<h3>Posts for Blog " @_blogTitle "</h3>
+
 @if (posts == null)
 {
     <p>Loading posts...</p>
@@ -25,19 +28,29 @@ else
     }
     @foreach (var post in posts)
     {
-        <div class="post-preview">
-            <h4>@post.Title</h4>
-            <p>@post.Content</p>
-            <p>@post.Created.ToString("yyyy-MM-dd")</p>
-            <button class="btn btn-primary" @onclick="@(() => NavigateToComments(post.PostId))">View</button>
-        @if (post.OwnerId == _userId)
-        {
+        <div class="card post-preview mb-4">
+            <div class="card-body">
+                <h4 class="card-title">@post.Title</h4>
+                <p class="card-text">@post.Content</p>
+                <p class="card-text"><small class="text-muted">@post.OwnerId posted on @post.Created.ToString("yyyy-MM-dd")</small></p>
 
-            <button class="btn btn-secondary" @onclick="@(() => EditPostDialog("Update", post.PostId, post))">Edit</button>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" disabled="disabled" @bind="post.IsCommentAllowed" />
+                    <label class="form-check-label" for="commentCheckbox">Allow Comments</label>
+                </div>
 
-            <button class="btn btn-danger" @onclick="@(() => DeletePost(post.PostId))">Delete</button>
-        }
+                <button class="btn btn-primary mt-2" @onclick="@(() => NavigateToComments(post.PostId))">See Comments</button>
+
+                @if (post.OwnerId == _userId)
+                {
+                    <div class="mt-2">
+                        <button class="btn btn-secondary" @onclick="@(() => EditPostDialog("Update", post.PostId, post))">Edit</button>
+                        <button class="btn btn-danger ml-2" @onclick="@(() => DeletePost(post.PostId))">Delete</button>
+                    </div>
+                }
+            </div>
         </div>
+
     }
    
 
@@ -53,7 +66,6 @@ else
 @code {
     [Parameter]
     public int Id { get; set; }
-    //private List<SharedModels.Entities.Post> posts;
     private SharedModels.Entities.Post _post = new SharedModels.Entities.Post();
     private PostCreateViewModel _viewPost = new PostCreateViewModel();
     private PostEditViewModel _viewEditPost = new SharedModels.ViewModels.PostEditViewModel();
@@ -65,6 +77,7 @@ else
     private ClaimsPrincipal user;
     private string _username;
     private string _userId;
+    private string _blogTitle;
 
     protected override async Task OnInitializedAsync()
     {
@@ -72,11 +85,7 @@ else
         user = authState.User;
         _username = user?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
         _userId = user?.FindFirst(JwtRegisteredClaimNames.NameId)?.Value;
-        //posts = await PostService.GetPostsByBlogIdAsync(Id);
-        //posts = await PostService.GetPostsByBlogIdAsync(Id);
         await GetPostsForBlog(Id);
-
-
         _titleDialog = "title";
     }
 
@@ -123,6 +132,7 @@ else
         var postIndexViewModel = await PostService.GetPostsByBlogIdAsync(blogId);
         posts = postIndexViewModel.Posts;
         allowed = postIndexViewModel.IsPostAllowed;
+        _blogTitle = postIndexViewModel.BlogTitle;
     }
 
 
