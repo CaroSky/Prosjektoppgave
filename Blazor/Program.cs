@@ -45,11 +45,12 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseRouting();
-app.MapBlazorHub();
-app.MapFallbackToPage("/_Host");
-app.MapRazorPages();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapBlazorHub();
+app.MapRazorPages();
+app.MapFallbackToPage("/_Host");
 
 app.Run();
