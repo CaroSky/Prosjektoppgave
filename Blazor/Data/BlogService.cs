@@ -37,6 +37,7 @@ namespace Blazor.Data
         public async Task<IEnumerable<Blog>> GetBlogsAsync()
         {
             _logger.LogInformation($"Sending HTTP GET request to URL: {"api/blog"}");
+            _logger.LogInformation($"The token is: {_token}");
             var response = await _httpClient.GetAsync("api/blog");
             _logger.LogInformation("Sending request to get all blogs");
             _logger.LogInformation($"Received HTTP response with status code: {response.StatusCode}");
@@ -252,7 +253,11 @@ namespace Blazor.Data
         }
         public async Task<Dictionary<int, bool>> GetAllSubscriptionStatusesAsync()
         {
+            _token = _authenticationStateProvider._tokenService.JwtToken;
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+
             _logger.LogInformation("Sending HTTP GET request to retrieve all blog subscription statuses.");
+            _logger.LogInformation($"The token is: {_token}");
 
             var response = await _httpClient.GetAsync("api/blog/subscriptionStatuses"); // Adjust the URL as per your API
 
