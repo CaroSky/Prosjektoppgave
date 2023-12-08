@@ -6,6 +6,8 @@ using WebAPI.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using SharedModels.Entities;
 using SharedModels.ViewModels;
+using System;
+using System.Linq;
 
 namespace WebAPI.Models.Repositories
 {
@@ -13,16 +15,12 @@ namespace WebAPI.Models.Repositories
     {
         Task<IEnumerable<Blog>> GetAllBlogs();
         Task SaveBlog(Blog blog, IPrincipal principal);
-        //BlogCreateViewModel GetBlogCreateViewModel();
-        //BlogEditViewModel GetBlogEditViewModel();
         Task<BlogEditViewModel> GetBlogEditViewModelById(int Id);
         Task<Blog> GetBlogById(int Id);
         Task UpdateBlog(Blog blog);
         Task DeleteBlog(Blog blog, IPrincipal principal);
         Task<IEnumerable<Post>> GetAllPostByBlogId(int id);
         Task SavePost(Post post, IPrincipal principal);
-        //PostCreateViewModel GetPostCreateViewModel(int blogId);
-        //PostEditViewModel GetPostEditViewModel(int blogId);
         Task<PostEditViewModel> GetPostEditViewModelById(int blogId);
         Task<Post> GetPostById(int Id);
         Task UpdatePost(Post post, IPrincipal principal);
@@ -30,15 +28,14 @@ namespace WebAPI.Models.Repositories
 
         Task<IEnumerable<Comment>> GetAllCommentsByPostId(int postId);
         Task SaveComment(Comment comment, IPrincipal principal);
-        //CommentCreateViewModel GetCommentCreateViewModel(int postId);
-        //CommentEditViewModel GetCommentEditViewModel(int postId);
         Task<CommentEditViewModel> GetCommentEditViewModelById(int commentId);
         Task<Comment> GetCommentById(int Id);
         Task UpdateComment(Comment comment, IPrincipal principal);
         Task DeleteComment(Comment comment, IPrincipal principal);
         Task<IEnumerable<Tag>> GetTags();
         Task<Tag> GetTagByName(string name);
-        Task<IEnumerable<Post>> SearchPostByTag(string name);
+        Task<IEnumerable<Post>> SearchPostByTagOrUsername(string searchQuery);
+        Task<List<String>> SearchSuggestions(String searchQuery);
         Task SavePostTag(PostTag postTag);
         Task SaveTag(Tag tag);
         Task RemoveOrphanedTags();
@@ -388,18 +385,55 @@ namespace WebAPI.Models.Repositories
             return tag;
         }
 
-        public async Task<IEnumerable<Post>> SearchPostByTag(string name)
+        public async Task<List<String>> SearchSuggestions(String searchQuery)
         {
-            var tag = await GetTagByName(name);
-            if (tag == null)
+            List<String> suggestions = new List<String>();
+
+            //var tags = _db.Tag
+            //    .Where(item => EF.Functions.Like(item.Name, $"%{searchQuery}%"))
+            //    .ToList();
+            var tags = _db.Tag
+                .AsEnumerable()
+                .Where(item => item.Name.StartsWith(searchQuery, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            foreach (var tag in tags)
             {
-                return new List<Post>();
+                suggestions.Add(tag.Name);
             }
-            var postIdList = _db.PostTag.Where(item => item.TagsTagId == tag.TagId).ToList();
-            List<Post> postsList = new List<Post>();
-            foreach (var postTag in postIdList)
+            //var users = _db.Users
+            //    .Where(item => EF.Functions.Like(item.UserName, $"%{searchQuery}%"))
+            //    .ToList();
+            var users = _db.Users
+                .AsEnumerable()
+                .Where(item => item.UserName.StartsWith(searchQuery, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            foreach (var user in users)
             {
-                postsList.Add(await GetPostById(postTag.PostsPostId));
+                suggestions.Add(user.UserName);
+            }
+            return suggestions;
+
+        }
+
+        public async Task<IEnumerable<Post>> SearchPostByTagOrUsername(string searchQuery)
+        {
+
+            List<Post> postsList = new List<Post>();
+            var postListUser = _db.Post.Where(item => item.OwnerUsername == searchQuery).ToList();
+            foreach (var post in postListUser)
+            {
+                postsList.Add(post);
+            }
+
+            var tag = await GetTagByName(searchQuery);
+            if (tag != null)
+            {
+                var postIdListTag = _db.PostTag.Where(item => item.TagsTagId == tag.TagId).ToList();
+                foreach (var postTag in postIdListTag)
+                {
+                    postsList.Add(await GetPostById(postTag.PostsPostId));
+                }
             }
 
             return postsList;

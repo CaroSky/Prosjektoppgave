@@ -167,7 +167,7 @@ namespace WebAPI.Controllers
 
             if (user.Id != blog.OwnerId)
             {
-                return Ok("Unauthorized");
+                return Unauthorized();
             }
 
 

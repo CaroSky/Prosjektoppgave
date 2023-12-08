@@ -283,6 +283,40 @@ namespace Blazor.Data
             }
         }
 
+        public async Task<List<String>> SearchSuggestions(String _searchQuery)
+        {
+            _logger.LogInformation($"Sending HTTP search suggestions to URL: {$"api/suggestions/{_searchQuery}"}");
+
+            // Construct the URL with the parameter
+            string apiUrl = $"api/search/suggestions/{_searchQuery}";
+
+            var response = await _httpClient.GetAsync(apiUrl);
+            _logger.LogInformation("Sending request to search suggestions");
+            _logger.LogInformation($"Received HTTP response with status code: {response.StatusCode}");
+            foreach (var header in response.Headers)
+            {
+                _logger.LogInformation($"Header: {header.Key} Value: {string.Join(", ", header.Value)}");
+            }
+
+
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Request failed with status code {response.StatusCode} and content {errorContent}");
+            }
+            try
+            {
+                return await response.Content.ReadFromJsonAsync<List<String>>();
+            }
+            catch (JsonException ex)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                _logger.LogInformation($"Response content: {responseContent}");
+
+                throw new JsonException("Error parsing JSON response", ex);
+            }
+        }
 
     }
 }

@@ -23,8 +23,14 @@
 }
 else
 {
-    <input @bind="tag" />
+    <input @bind="_searchQuery" @oninput="SearchSuggestions" />
     <button class="btn btn-success ml-auto"  @onclick="Search">Search post</button>
+    <ul>
+        @foreach (var suggestion in _suggestions)
+        {
+            <li @onclick="() => SelectSuggestion(suggestion)">@suggestion</li>
+        }
+    </ul>
     <br/>
     <br />
     @if (user.Identity.IsAuthenticated)
@@ -99,11 +105,13 @@ else
     private string _titleDialog;
     private BlogDialogBox _dialog;
     private IEnumerable<SharedModels.Entities.Post> selectedPosts;
-    private string tag;
+    private string _searchQuery;
     private ClaimsPrincipal user;
     private string _username;
     private string _userId;
     private Dictionary<int, bool> _blogSubscriptionStatus;
+    private List<string> _suggestions;
+
 
 
     protected override async Task OnInitializedAsync()
@@ -115,6 +123,7 @@ else
         var blogEnumerable = await BlogService.GetBlogsAsync();
         blogs = blogEnumerable.ToList();
         _titleDialog = "title";
+        _suggestions = new List<String>();
         if (user.Identity.IsAuthenticated)
         {
         _blogSubscriptionStatus = await BlogService.GetAllSubscriptionStatusesAsync();
@@ -124,6 +133,11 @@ else
             _blogSubscriptionStatus = new Dictionary<int, bool>();
         }
 
+    }
+
+    protected void OnPropertyChanged()
+    {
+        StateHasChanged();
     }
 
     private async Task OnSaveDialog()
@@ -201,11 +215,6 @@ else
 
     }
 
-   // private async Task LoadPosts(int blogId)
-    //{
-      //  selectedPosts = await PostService.GetPostsByBlogIdAsync(blogId);
-       // selectedBlogTitle = blogs.FirstOrDefault(b => b.BlogId == blogId)?.Title;
-    //}
 
     private void NavigateToPosts(int blogId)
     {
@@ -214,9 +223,9 @@ else
 
     private void Search()
     {
-        if (!string.IsNullOrEmpty(tag))
+        if (!string.IsNullOrEmpty(_searchQuery))
         {
-            NavigationManager.NavigateTo($"/search/{Uri.EscapeDataString(tag)}");
+            NavigationManager.NavigateTo($"/search/{Uri.EscapeDataString(_searchQuery)}");
         }
     }
 
@@ -238,5 +247,22 @@ else
         _blogSubscriptionStatus[blogId] = false;
         StateHasChanged();
     }
+
+    private async Task SearchSuggestions(ChangeEventArgs args)
+    {
+    // Call backend API to get suggestions
+        _searchQuery = args.Value.ToString();
+        _suggestions = await BlogService.SearchSuggestions(_searchQuery);
+        //StateHasChanged(); // Ensure UI is updated
+
+    }
+
+    private void SelectSuggestion(string suggestion)
+    {
+        Console.WriteLine($"The _searchQuery is {_searchQuery}");
+        _searchQuery = suggestion;
+        _suggestions.Clear(); // Clear the suggestions after selecting one
+    }
+
 
 }
