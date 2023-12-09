@@ -11,6 +11,7 @@ namespace SharedModels.ViewModels
         public string BlogTitle { get; set; }
         public bool IsPostAllowed { get; set; }
         public int OwnerId { get; set; }
+        public bool IsInSearchMode { get; set; }
     }
 
     public class PostCreateViewModel

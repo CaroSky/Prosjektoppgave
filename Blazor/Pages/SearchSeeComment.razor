@@ -1,4 +1,5 @@
-﻿@page "/comment/{PostId:int}"
+﻿@page "/searchSeeComment/{PostId:int}/{SearchQuery}"
+
 @using SharedModels.Entities
 @using SharedModels.ViewModels;
 @using Blazor.Data
@@ -12,7 +13,7 @@
 
 <div class="d-flex justify-content-between">
     <h3>Comments for Post " @_postTitle "</h3>
-    <button class="btn btn-primary" @onclick="@(() => NavigateToPosts(_blogId))">Go back to post list</button>
+    <button class="btn btn-primary" @onclick="@(() => NavigateToPost())">Go back to the post</button>
 </div>
 
 @if (comments == null)
@@ -56,6 +57,8 @@
     @code {
         [Parameter]
         public int PostId { get; set; }
+        [Parameter]
+        public string SearchQuery { get; set; }
 
         private SharedModels.Entities.Comment _comment = new SharedModels.Entities.Comment();
         private CommentCreateViewModel _viewComment = new CommentCreateViewModel();
@@ -69,7 +72,7 @@
         private string _username;
         private string _userId;
         private string _postTitle;
-        private int _blogId;
+    private int _postId;
 
 
         protected override async Task OnInitializedAsync()
@@ -125,7 +128,7 @@
         comments = commentIndexViewModel.Comments;
         allowed = commentIndexViewModel.IsCommentAllowed;
         _postTitle = commentIndexViewModel.PostTitle;
-        _blogId = commentIndexViewModel.BlogId;
+        _postId = commentIndexViewModel.PostId;
     }
 
 
@@ -188,10 +191,10 @@
         _dialog.CloseDialog();
     }
 
-    private void NavigateToPosts(int blogId)
+    private void NavigateToPost()
     {
-        Console.WriteLine($"BlogId when getting the posts: {blogId}.");
-        NavigationManager.NavigateTo($"/post/{blogId}");
+        Console.WriteLine($"BlogId when getting the posts: {_postId}.");
+        NavigationManager.NavigateTo($"/searchSeePost/{_postId}/{SearchQuery}");
     }
 }
 

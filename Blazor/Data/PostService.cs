@@ -107,7 +107,32 @@ namespace Blazor.Data
             var response = await _httpClient.DeleteAsync($"api/post/{postId}");
             return response.IsSuccessStatusCode;
         }
-        
+
+        public async Task<PostIndexViewModel> GetPostByPostIdAsync(int postId)
+
+        {
+            _logger.LogInformation($"Sending HTTP GET request to URL: api/post/{postId}");
+
+            var response = await _httpClient.GetAsync($"api/post/{postId}");
+            _logger.LogInformation($"Received HTTP response with status code: {response.StatusCode}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Request failed with status code {response.StatusCode} and content {errorContent}");
+            }
+
+            try
+            {
+                return await response.Content.ReadFromJsonAsync<PostIndexViewModel>();
+            }
+            catch (JsonException ex)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError($"Error parsing JSON response: {responseContent}", ex);
+                throw;
+            }
+        }
 
 
 

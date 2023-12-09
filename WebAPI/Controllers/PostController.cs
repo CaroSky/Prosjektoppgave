@@ -145,24 +145,28 @@ namespace WebAPI.Controllers
 
         // GET: Edit
         [HttpGet("{id}")]
-        //[Authorize]
-        public async Task<IActionResult> Get(int id, int blogId)
+        public async Task<PostIndexViewModel> Get(int id, int blogId)
         //blogId is used to get back to the blog page if post not found
         {
             //find the user that is logged in 
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);   //it return a http://...:username so I need to get the username from the string
-            if (userIdClaim == null)
+            if (userIdClaim != null)
             {
-                return Unauthorized(); // Brukeren er ikke autentisert
+                var userId = userIdClaim.Value;
+                _logger.LogInformation($"User ID in blog Controller - GetBlogs: {userId}");
+                string[] words = userIdClaim.ToString().Split(':');
+                string username = words[words.Length - 1].Trim();
+                var user = await _manager.FindByNameAsync(username);
             }
-            string[] words = userIdClaim.ToString().Split(':');
-            string username = words[words.Length - 1].Trim();
-            var user = await _manager.FindByNameAsync(username);
+            else
+            {
+                _logger.LogWarning("User ID claim not found.");
+            }
 
             //---------------------------------------------------------
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                _logger.LogWarning("The model is not valid.");
             }
 
             //find post
@@ -170,18 +174,20 @@ namespace WebAPI.Controllers
 
             if (post == null)
             {
-                return NotFound();
+                _logger.LogWarning("No post found."); ;
             }
 
-            var postEdit = await _repository.GetPostEditViewModelById(id);
+            var posts = new List<Post>();
+            posts.Add(post);
+            var postIndexViewModel = new PostIndexViewModel
+            {
+                Posts = posts,
+                BlogId = 0,
+                BlogTitle = "",
+                IsPostAllowed = false,
+            };
 
-           // var currentUser = await _manager.FindByNameAsync(User.Identity.Name);
-            //if (currentUser.Id == post.Author.Id)
-            //{
-               return Ok(postEdit);
-           // }
-            //TempData["message"] = "You cannot edit this item";
-           // return BadRequest(ModelState);
+            return postIndexViewModel;
 
         }
 

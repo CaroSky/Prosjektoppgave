@@ -5,7 +5,7 @@
 @using System.IdentityModel.Tokens.Jwt;
 @using WebAPI.Migrations
 
-@page "/post/{Id:int}"
+@page "/searchSeePost/{Id:int}/{SearchQuery}"
 
 @inject NavigationManager NavigationManager
 @inject PostService PostService
@@ -14,8 +14,7 @@
 
 
 <div class="d-flex justify-content-between">
-        <h3>Posts for Blog "@_blogTitle"</h3>
-        <button class="btn btn-primary" @onclick="@(() => NavigateToBlogs())">Go back to blog list</button>
+        <button class="btn btn-primary" @onclick="@(() => NavigateToSearchPosts())">Go back to search list</button>
 </div>
 
 
@@ -28,11 +27,6 @@
 else
 {
 
-    @if (allowed && user.Identity.IsAuthenticated)
-    {
-
-        <button class="btn btn-success ml-auto" @onclick="@(() => CreatePostDialog("Create"))">Add New Post</button>
-    }
     @foreach (var post in posts)
     {
         <div class="card post-preview mb-4">
@@ -63,7 +57,7 @@ else
 
 
 }
-<PostDialogBox Title="@_titleDialog"
+<PostDialogBox Title="Details"
                post="@_viewEditPost"
                OnCancel="CancelPostDialog"
                OnSave="OnSavePostDialog"
@@ -73,11 +67,11 @@ else
 @code {
     [Parameter]
     public int Id { get; set; }
-
+    [Parameter]
+    public string SearchQuery { get; set; }
     private SharedModels.Entities.Post _post = new SharedModels.Entities.Post();
     private PostCreateViewModel _viewPost = new PostCreateViewModel();
     private PostEditViewModel _viewEditPost = new SharedModels.ViewModels.PostEditViewModel();
-    private string _titleDialog;
     private PostDialogBox _dialog;
     private PostIndexViewModel postIndexViewModel;
     private bool allowed;
@@ -88,6 +82,7 @@ else
     private string _blogTitle;
     private bool _isInSearchMode;
     private string _searchQuery;
+    private int _postId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -95,8 +90,9 @@ else
         user = authState.User;
         _username = user?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
         _userId = user?.FindFirst(JwtRegisteredClaimNames.NameId)?.Value;
-        await GetPostsForBlog(Id);
-        _titleDialog = "title";
+        _postId = Id;
+        await GetPost(Id);
+        _searchQuery = SearchQuery;
     }
 
     private void CancelPostDialog()
@@ -106,49 +102,26 @@ else
 
     private async Task OnSavePostDialog()
     {
-        if (_titleDialog == "Create")
-        {
-            // Konverter fra PostEditViewModel til PostCreateViewModel
-            //EditViewmodel er i dialogboxen siden den inneholder alle verdiene edit og create trenger
-            var createViewModel = new PostCreateViewModel
-                {
-                    Title = _viewEditPost.Title,
-                    Content = _viewEditPost.Content,
-                    BlogId = _viewEditPost.BlogId,
-                    IsCommentAllowed = _viewEditPost.IsCommentAllowed
-                };
-
-            Console.WriteLine("Creating new post...");
-            await PostService.CreatePostAsync(createViewModel);
-            Console.WriteLine("New post created.");
-        }
-        else if (_titleDialog == "Update")
-        {
-            // Send PostEditViewModel direkte
-            Console.WriteLine($"Updating post with ID {_viewEditPost.PostId}...");
-            await PostService.UpdatePostAsync(_viewEditPost.PostId, _viewEditPost);
-            Console.WriteLine($"Post with ID {_viewEditPost.PostId} updated.");
-        }
-
-        await GetPostsForBlog(Id);
+        // Send PostEditViewModel direkte
+        Console.WriteLine($"Updating post with ID {_viewEditPost.PostId}...");
+        await PostService.UpdatePostAsync(_viewEditPost.PostId, _viewEditPost);
+        Console.WriteLine($"Post with ID {_viewEditPost.PostId} updated.");
         Console.WriteLine("Posts updated after save operation.");
+        await GetPost(_postId);
         _dialog.CloseDialog();
         Console.WriteLine("Dialog closed.");
     }
 
 
-    private async Task GetPostsForBlog(int blogId)
+    private async Task GetPost(int postId)
     {
-        Console.WriteLine($"BlogId when getting the posts: {blogId}.");
-        Console.WriteLine("Not in search mode");
-        var postIndexViewModel = await PostService.GetPostsByBlogIdAsync(blogId);
+        Console.WriteLine($"BlogId when getting the posts: {postId}.");
+        Console.WriteLine("In search mode");
+        var postIndexViewModel = await PostService.GetPostByPostIdAsync(postId);
         posts = postIndexViewModel.Posts;
-        allowed = postIndexViewModel.IsPostAllowed;
-        _blogTitle = postIndexViewModel.BlogTitle;
+        _searchQuery = SearchQuery;
     }
 
-
-   
 
     private async Task DeletePost(int postId)
     {
@@ -157,7 +130,7 @@ else
             if (success)
             {
                 // Oppdater listen over innlegg her, eller naviger brukeren til en annen side
-                 await GetPostsForBlog(Id);
+                NavigateToSearchPosts();
             }
             else
             {
@@ -166,28 +139,6 @@ else
         }
     
 
-
-    private void CreatePostDialog(string title)
-    {
-        _post = new SharedModels.Entities.Post()
-            {
-                Created = DateTime.Now,
-               
-            };
-
-        // Overfør verdier fra '_post' til '_viewEditPost'
-        _viewEditPost = new PostEditViewModel()
-            {
-                BlogId = Id,
-                IsCommentAllowed = true,
-                Title = "", 
-                Content = "",
-                Created = _post.Created
-            };
-
-        _titleDialog = "Create";
-        _dialog.Show();
-    }
 
     private void EditPostDialog(string title, int postId, SharedModels.Entities.Post post)
     {
@@ -206,8 +157,6 @@ else
             };
         // Legg til loggmeldinger for å sjekke verdier
         Console.WriteLine("EditPostDialog - Start");
-       
-        _titleDialog = title;
         _dialog.Show();
     }
 
@@ -220,14 +169,14 @@ else
 
     private void NavigateToComments(int postId)
     {
-        NavigationManager.NavigateTo($"/comment/{postId}");
+        NavigationManager.NavigateTo($"/searchSeeComment/{postId}/{_searchQuery}");
     }
 
-    private void NavigateToBlogs()
+
+    private void NavigateToSearchPosts()
     {
-        NavigationManager.NavigateTo($"/blogs");
+        NavigationManager.NavigateTo($"/search/{_searchQuery}");
     }
-
 }
 
 

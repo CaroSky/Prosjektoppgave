@@ -2,11 +2,14 @@
 @using SharedModels.ViewModels
 @using Blazor.Data;
 
-@page "/search/{tag}"
+@page "/search/{SearchQuery}"
 
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 @inject SearchService SearchService
+
+
+<h3>Search results</h3>
 
 @if (posts == null)
 {
@@ -28,7 +31,7 @@ else
                     <input class="form-check-input" type="checkbox" disabled="disabled" @bind="post.IsCommentAllowed" />
                     <label class="form-check-label" for="commentCheckbox">Allow Comments</label>
                 </div>
-
+                <button class="btn btn-primary mt-2" @onclick="@(() => NavigateToPost(post.PostId))">See Post</button>
             </div>
         </div>
     }
@@ -41,7 +44,7 @@ else
 @code {
 
     [Parameter]
-    public string tag { get; set; }
+    public string SearchQuery { get; set; }
     private List<SharedModels.Entities.Post> posts;
     private SharedModels.Entities.Post _post = new SharedModels.Entities.Post();
     private PostCreateViewModel _viewPost = new PostCreateViewModel();
@@ -49,12 +52,10 @@ else
     private string _titleDialog;
     private PostDialogBox _dialog;
 
-    //private IEnumerable<Post> posts;
-    //private IEnumerable<SharedModels.Entities.Post> posts;
 
     protected override async Task OnInitializedAsync()
     {
-        var postEnumerable = await SearchService.SearchPostAsync(tag);
+        var postEnumerable = await SearchService.SearchPostAsync(SearchQuery);
         if (postEnumerable.Count() == 0)
         {
             posts = null;
@@ -66,6 +67,11 @@ else
         }
         
 
+    }
+
+    private void NavigateToPost(int postId)
+    {
+        NavigationManager.NavigateTo($"/searchSeePost/{postId}/{SearchQuery}");
     }
 
  
