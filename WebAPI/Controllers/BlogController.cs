@@ -106,53 +106,53 @@ namespace WebAPI.Controllers
         }
 
 
-        // GET: Product/Edit
-        [HttpGet("{id}")]
-        [Authorize]
-        public async Task<IActionResult> Get([FromRoute] int id)
-        {
+        //// GET: Product/Edit
+        //[HttpGet("{id}")]
+        //[Authorize]
+        //public async Task<IActionResult> Get([FromRoute] int id)
+        //{
 
-            //find the user that is logged in 
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);   //it return a http://...:username so I need to get the username from the string
-            string[] words = userIdClaim.ToString().Split(':');
-            string username = words[words.Length - 1].Trim();
-            var user = await _manager.FindByNameAsync(username);
+        //    //find the user that is logged in 
+        //    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);   //it return a http://...:username so I need to get the username from the string
+        //    string[] words = userIdClaim.ToString().Split(':');
+        //    string username = words[words.Length - 1].Trim();
+        //    var user = await _manager.FindByNameAsync(username);
 
-            //---------------------------------------------------------
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            //find product
-            var blog = await _repository.GetBlogById(id);
+        //    //---------------------------------------------------------
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
+        //    //find product
+        //    var blog = await _repository.GetBlogById(id);
 
-            if (blog == null)
-            {
-                return NotFound();
-            }
-
-
-            var blogEdit = await _repository.GetBlogEditViewModelById(id);
+        //    if (blog == null)
+        //    {
+        //        return NotFound();
+        //    }
 
 
-            if (user.Id == null)
-            {
-                return Unauthorized();
-            }
-
-            // Sjekk om den innloggede brukeren er eieren av bloggposten
-            if (user.Id == blog.OwnerId)
-                    {
-                return Ok(blog);
-            }
-            else
-            {
-                return BadRequest(ModelState);
-                //return Ok(blog);
-            }
+        //    var blogEdit = await _repository.GetBlogEditViewModelById(id);
 
 
-        }
+        //    if (user.Id == null)
+        //    {
+        //        return Unauthorized();
+        //    }
+
+        //    // Sjekk om den innloggede brukeren er eieren av bloggposten
+        //    if (user.Id == blog.OwnerId)
+        //            {
+        //        return Ok(blog);
+        //    }
+        //    else
+        //    {
+        //        return BadRequest(ModelState);
+        //        //return Ok(blog);
+        //    }
+
+
+        //}
 
         //PUT: Product/Edit
         [HttpPut("{id}")]
