@@ -110,11 +110,6 @@ namespace WebAPI.Controllers
 
 
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             //Kall til metoden save i repository
             var comment = new Comment()
             {
@@ -156,12 +151,6 @@ namespace WebAPI.Controllers
             }
 
 
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             //sjekk om id finnes i product list
             var comment = await _repository.GetCommentById(id);
             //var id = comment.Post.PostId;
@@ -174,12 +163,10 @@ namespace WebAPI.Controllers
 
 
             var currentUser = await _manager.FindByNameAsync(User.Identity.Name);
-            //if (currentUser.Id == comment.Author.Id)
             {
                 return Ok(commentEdit);
             }
-            TempData["message"] = "You cannot edit this item";
-            return BadRequest(ModelState);
+
 
 
         }
@@ -199,13 +186,6 @@ namespace WebAPI.Controllers
             {
                 return Unauthorized(); // Brukeren er ikke autentisert
             }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-
 
             if (!ModelState.IsValid)
                 
@@ -228,15 +208,10 @@ namespace WebAPI.Controllers
                 OwnerId = commentEditViewModel.OwnerId,
                 OwnerUsername = commentEditViewModel.OwnerUsername,
             };
-            //find the owner (the person logged in)
-            // comment.Author = await _manager.FindByNameAsync(User.Identity.Name);
-
+ 
             _logger.LogInformation("Oppdaterer kommentar med ID {id} i databasen");
             await _repository.UpdateComment(comment, User);
             _logger.LogInformation("Kommentar med ID {id} er oppdatert i databasen");
-
-             //_repository.UpdateComment(product);
-
 
             return Ok(comment);
         }
@@ -264,11 +239,6 @@ namespace WebAPI.Controllers
             }
 
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var comment = await _repository.GetCommentById(id);
 
             if (comment == null)
@@ -276,18 +246,11 @@ namespace WebAPI.Controllers
                 return NotFound();
             }
 
-           // var currentUser = await _manager.FindByNameAsync(User.Identity.Name);
-            //if (currentUser.Id == comment.Author.Id)
             {
                 await _repository.DeleteComment(comment, User);
-                //tempdata
-                //TempData["message"] = string.Format("The comment has been deleted");
                 return Ok(comment);
             }
-            //else
-            //{
-              //  return BadRequest(ModelState);
-            //}
+
 
 
         }

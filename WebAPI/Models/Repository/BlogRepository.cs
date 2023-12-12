@@ -82,12 +82,7 @@ namespace WebAPI.Models.Repositories
             }
         }
 
-        //public BlogCreateViewModel GetBlogCreateViewModel()
-        //{
-        //    var blog = new BlogCreateViewModel();
-        //    blog.IsPostAllowed = true;
-        //    return blog;
-        //}
+
 
         public async Task SaveBlog(Blog blog, IPrincipal principal)
         {
@@ -104,11 +99,7 @@ namespace WebAPI.Models.Repositories
 
         }
 
-        //public BlogEditViewModel GetBlogEditViewModel()
-        //{
-        //    var blog = new BlogEditViewModel();
-        //    return blog;
-        //}
+
 
         public async Task<BlogEditViewModel> GetBlogEditViewModelById(int Id)
         {
