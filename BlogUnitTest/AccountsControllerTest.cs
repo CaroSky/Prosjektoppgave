@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using SharedModels.Entities;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 
 namespace BlogUnitTest
 {
@@ -144,6 +145,25 @@ namespace BlogUnitTest
             var registerResult = result.Value as RegisterResult;
             Assert.IsFalse(registerResult.Successful);
             Assert.IsTrue(registerResult.Errors.Contains("Test Error"));
+        }
+
+        [TestMethod]
+        public void Logout_ReturnsSuccessfulMessage()
+        {
+            // Arrange
+            var loggerMock = new Mock<ILogger<AccountsController>>();
+            var controller = new AccountsController(null, null, null, loggerMock.Object);
+
+            // Act
+            var result = controller.Logout() as OkObjectResult;
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Value);
+
+            // Serialize the result to JSON and check if it contains the expected message
+            var jsonResult = JsonConvert.SerializeObject(result.Value);
+            Assert.IsTrue(jsonResult.Contains("Logout successful. Please clear the token on the client side."));
         }
     }
 

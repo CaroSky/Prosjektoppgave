@@ -63,18 +63,11 @@ namespace WebAPI.Controllers
             return Unauthorized(new LoginResult { Successful = false, Error = "Invalid login attempt." });
         }
         [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
+        public IActionResult Logout()
         {
-            // Assuming you have a method to clear the JWT token from server-side storage
-            ClearJwtToken();
-
-            return Ok(new { message = "Logout successful." });
-        }
-
-        private void ClearJwtToken()
-        {
-            // Implement logic to remove the JWT token from server-side storage
-            // This could be clearing a session, memory cache, etc.
+            // Note: JWT token needs to be cleared by the client application (e.g., removing it from local storage)
+            _logger.LogInformation("Logout requested");
+            return Ok(new { message = "Logout successful. Please clear the token on the client side." });
         }
 
         private string GenerateJwtToken(IdentityUser user)
