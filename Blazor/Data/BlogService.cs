@@ -248,13 +248,15 @@ namespace Blazor.Data
             }
 
             var responseContent = await response.Content.ReadAsStringAsync();
-            return bool.Parse(responseContent); // Assuming the API returns 'true' or 'false' as plain text
+            return bool.Parse(responseContent); 
         }
         public async Task<Dictionary<int, bool>> GetAllSubscriptionStatusesAsync()
         {
+            _token = _authenticationStateProvider._tokenService.JwtToken;
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
             _logger.LogInformation("Sending HTTP GET request to retrieve all blog subscription statuses.");
 
-            var response = await _httpClient.GetAsync("api/blog/subscriptionStatuses"); // Adjust the URL as per your API
+            var response = await _httpClient.GetAsync("api/blog/subscriptionStatuses"); 
 
             if (!response.IsSuccessStatusCode)
             {
