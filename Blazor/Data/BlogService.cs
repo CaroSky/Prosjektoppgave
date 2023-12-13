@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.Extensions.Logging;
@@ -21,16 +22,27 @@ namespace Blazor.Data
         private readonly ILogger<BlogService> _logger;
         private readonly CustomAuthenticationStateProvider _authenticationStateProvider;
         private string _token;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public BlogService(HttpClient httpClient, ILogger<BlogService> logger, CustomAuthenticationStateProvider AuthenticationStateProvider)
+        public BlogService(HttpClient httpClient, ILogger<BlogService> logger, CustomAuthenticationStateProvider AuthenticationStateProvider, UserManager<IdentityUser> userManager)
         {
             _logger = logger;
             _authenticationStateProvider = AuthenticationStateProvider;
             _token = _authenticationStateProvider._tokenService.JwtToken;
             _httpClient = httpClient;
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+            _userManager = userManager;
 
 
+        }
+        public async Task<string> GetUsernameByOwnerIdAsync(string ownerId)
+        {
+            var user = await _userManager.FindByIdAsync(ownerId);
+            if (user != null)
+            {
+                return user.UserName;
+            }
+            return null;
         }
 
 

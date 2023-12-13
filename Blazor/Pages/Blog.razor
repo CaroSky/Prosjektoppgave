@@ -39,7 +39,7 @@ else
             <th>Title</th>
             <th>Content</th>
             <th>Created</th>
-            <th>OwnerId</th>
+            <th>Owner</th>
             <th>New post allowed</th>
             <th></th>
         </tr>
@@ -55,7 +55,7 @@ else
                 </td>
                 <td>@blog.Content</td>
                 <td>@blog.Created</td>
-                <td>@blog.OwnerId</td>
+                    <td>@blogOwnerUsernames[blog.BlogId]</td>
                     <td>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" disabled="disabled" @bind="blog.IsPostAllowed" />
@@ -104,6 +104,8 @@ else
     private string _username;
     private string _userId;
     private Dictionary<int, bool> _blogSubscriptionStatus;
+    private Dictionary<int, string> blogOwnerUsernames = new Dictionary<int, string>();
+
 
 
     protected override async Task OnInitializedAsync()
@@ -122,6 +124,11 @@ else
         else
         {
             _blogSubscriptionStatus = new Dictionary<int, bool>();
+        }
+        foreach (var blog in blogs)
+        {
+            var username = await BlogService.GetUsernameByOwnerIdAsync(blog.OwnerId);
+            blogOwnerUsernames[blog.BlogId] = username ?? "Unknown";
         }
 
     }
