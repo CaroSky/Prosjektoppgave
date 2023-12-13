@@ -28,15 +28,15 @@ namespace WebAPI.Controllers
         }
 
 
-        [HttpGet("{tag}")]
+        [HttpGet("{searchQuery}")]
 
-        public async Task<IActionResult> SearchPosts([FromRoute] string tag)
+        public async Task<IActionResult> SearchPosts([FromRoute] string searchQuery)
         {
             _logger.LogInformation("Handling GET search posts");
             try
             {
-                var posts = await _repository.SearchPostByTag(tag);
-                return Ok(posts); // This will return a 200 OK status with the post data
+                var posts = await _repository.SearchPostByTagOrUsername(searchQuery);
+                return Ok(posts); 
             }
             catch (Exception ex)
             {
@@ -44,15 +44,25 @@ namespace WebAPI.Controllers
                 throw;
             }
 
-                //var postIndexViewModel = new PostIndexViewModel
-                //{
-                //    Posts = posts,
-                //    BlogId = id,
-                //    BlogTitle = blog.Title,
-                //    IsPostAllowed = blog.IsPostAllowed,
-                //};
 
-                //return postIndexViewModel;
+        }
+
+
+        [HttpGet("suggestions/{searchQuery}")]
+
+        public async Task<IActionResult> SearchSuggestions([FromRoute] string searchQuery)
+        {
+            _logger.LogInformation("Handling GET search suggestions");
+            try
+            {
+                var suggestions = await _repository.SearchSuggestions(searchQuery);
+                return Ok(suggestions); 
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while searching suggestions");
+                throw;
+            }
 
 
         }

@@ -23,10 +23,25 @@
 }
 else
 {
-    <input @bind="tag" />
-    <button class="btn btn-success ml-auto"  @onclick="Search">Search post</button>
-    <br/>
-    <br />
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" @bind="_searchQuery" @oninput="SearchSuggestions" placeholder="Search...">
+        <div class="input-group-append">
+            <button class="btn btn-primary" type="button" @onclick="Search">Search</button>
+        </div>
+    </div>
+
+    @if (_suggestions.Any())
+    {
+        <div class="dropdown-menu show" style="position: absolute; z-index: 1000;">
+            @foreach (var suggestion in _suggestions)
+            {
+                <a class="dropdown-item" @onclick="() => SelectSuggestion(suggestion)">
+                    @suggestion
+                </a>
+            }
+        </div>
+    }
+
     @if (user.Identity.IsAuthenticated)
     {
         <button class="btn btn-success ml-auto" @onclick="@(() => CreateBlogDialog("Create"))">Add a blog</button>
@@ -105,8 +120,8 @@ else
     private string _userId;
     private Dictionary<int, bool> _blogSubscriptionStatus;
     private Dictionary<int, string> blogOwnerUsernames = new Dictionary<int, string>();
-
-
+    private string _searchQuery;
+    private List<string> _suggestions;
 
     protected override async Task OnInitializedAsync()
     {
@@ -117,6 +132,7 @@ else
         var blogEnumerable = await BlogService.GetBlogsAsync();
         blogs = blogEnumerable.ToList();
         _titleDialog = "title";
+        _suggestions = new List<String>();
         if (user.Identity.IsAuthenticated)
         {
         _blogSubscriptionStatus = await BlogService.GetAllSubscriptionStatusesAsync();
@@ -220,9 +236,9 @@ else
 
     private void Search()
     {
-        if (!string.IsNullOrEmpty(tag))
+        if (!string.IsNullOrEmpty(_searchQuery))
         {
-            NavigationManager.NavigateTo($"/search/{Uri.EscapeDataString(tag)}");
+            NavigationManager.NavigateTo($"/search/{Uri.EscapeDataString(_searchQuery)}");
         }
     }
 
@@ -243,6 +259,20 @@ else
         await BlogService.UnsubscribeFromBlogAsync(blogId);
         _blogSubscriptionStatus[blogId] = false;
         StateHasChanged();
+    }
+
+    private async Task SearchSuggestions(ChangeEventArgs args)
+    {
+   
+        _searchQuery = args.Value.ToString();
+        _suggestions = await BlogService.SearchSuggestions(_searchQuery);
+
+    }
+
+    private void SelectSuggestion(string suggestion)
+    {
+        _searchQuery = suggestion;
+        _suggestions.Clear(); 
     }
 
 }

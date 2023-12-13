@@ -2,7 +2,7 @@
 @using SharedModels.ViewModels
 @using Blazor.Data;
 
-@page "/search/{tag}"
+@page "/search/{SearchQuery}"
 
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
@@ -32,7 +32,7 @@ else
 @code {
 
     [Parameter]
-    public string tag { get; set; }
+    public string SearchQuery { get; set; }
     private List<SharedModels.Entities.Post> posts;
     private SharedModels.Entities.Post _post = new SharedModels.Entities.Post();
     private PostCreateViewModel _viewPost = new PostCreateViewModel();
@@ -45,7 +45,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var postEnumerable = await SearchService.SearchPostAsync(tag);
+        var postEnumerable = await SearchService.SearchPostAsync(SearchQuery);
         if (postEnumerable.Count() == 0)
         {
             posts = null;

@@ -291,7 +291,29 @@ namespace Blazor.Data
                 throw;
             }
         }
+        public async Task<List<String>> SearchSuggestions(String _searchQuery)
+        {
 
+            string apiUrl = $"api/search/suggestions/{_searchQuery}";
+            var response = await _httpClient.GetAsync(apiUrl);
+
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Request failed with status code {response.StatusCode} and content {errorContent}");
+            }
+            try
+            {
+                return await response.Content.ReadFromJsonAsync<List<String>>();
+            }
+            catch (JsonException ex)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                throw new JsonException("Error parsing JSON response", ex);
+            }
+        }
 
     }
 }

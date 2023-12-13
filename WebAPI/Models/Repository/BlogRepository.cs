@@ -48,6 +48,8 @@ namespace WebAPI.Models.Repositories
         Task UnsubscribeFromBlog(string userId, int blogId);
         Task<bool> IsSubscribed(string userId, int blogId);
         Task<Dictionary<int, bool>> GetAllSubscriptionStatuses(string userId);
+        Task<IEnumerable<Post>> SearchPostByTagOrUsername(string searchQuery);
+        Task<List<String>> SearchSuggestions(String searchQuery);
 
     } 
 
@@ -470,6 +472,63 @@ namespace WebAPI.Models.Repositories
             _db.Subscriptions.Add(subscription);
             await _db.SaveChangesAsync();
         }
+
+        public async Task<List<String>> SearchSuggestions(String searchQuery)
+        {
+            List<String> suggestions = new List<String>();
+
+            //var tags = _db.Tag
+            //    .Where(item => EF.Functions.Like(item.Name, $"%{searchQuery}%"))
+            //    .ToList();
+            var tags = _db.Tag
+                .AsEnumerable()
+                .Where(item => item.Name.StartsWith(searchQuery, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            foreach (var tag in tags)
+            {
+                suggestions.Add(tag.Name);
+            }
+            //var users = _db.Users
+            //    .Where(item => EF.Functions.Like(item.UserName, $"%{searchQuery}%"))
+            //    .ToList();
+            var users = _db.Users
+                .AsEnumerable()
+                .Where(item => item.UserName.StartsWith(searchQuery, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            foreach (var user in users)
+            {
+                suggestions.Add(user.UserName);
+            }
+            return suggestions;
+
+        }
+
+        public async Task<IEnumerable<Post>> SearchPostByTagOrUsername(string searchQuery)
+        {
+            List<Post> postsList = new List<Post>();
+
+            var user = await _manager.FindByNameAsync(searchQuery);
+            if (user != null)
+            {
+ 
+                var postListUser = _db.Post.Where(item => item.OwnerId == user.Id).ToList();
+                postsList.AddRange(postListUser);
+            }
+
+            var tag = await GetTagByName(searchQuery);
+            if (tag != null)
+            {
+                var postIdListTag = _db.PostTag.Where(item => item.TagsTagId == tag.TagId).ToList();
+                foreach (var postTag in postIdListTag)
+                {
+                    postsList.Add(await GetPostById(postTag.PostsPostId));
+                }
+            }
+
+            return postsList.Distinct(); 
+        }
+
 
         public async Task UnsubscribeFromBlog(string userId, int blogId)
         {
