@@ -12,10 +12,7 @@
 @inject SearchService SearchService
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider
 
-
-
-<h3>Blog Posts</h3>
-
+<h3>Blog List</h3>
 
 @if (blogs == null)
 {
@@ -44,62 +41,87 @@ else
 
     @if (user.Identity.IsAuthenticated)
     {
+        <h4>My Blogs</h4>
         <button class="btn btn-success ml-auto" @onclick="@(() => CreateBlogDialog("Create"))">Add a blog</button>
+        <table class="table border border-dark">
+            <thead>
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Created</th>
+                <th>Owner</th>
+                <th>New post allowed</th>
+                <th>Manage blog</th>
+            </tr>
+            </thead>
+            <tbody>
+                @foreach (var blog in blogs.Where(b => b.OwnerId == _userId))
+                {
+
+                    <tr>
+                        <td>
+                            <a href="post/@blog.BlogId">@blog.Title</a>
+                        </td>
+                        <td>@blog.Content</td>
+                        <td>@blog.Created</td>
+                        <td>@blogOwnerUsernames[blog.BlogId]</td>
+                        <td>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" disabled="disabled" @bind="blog.IsPostAllowed" />
+                            </div>
+                        </td>
+                        <td>
+                            <button class="btn btn-primary" @onclick="@(() => EditBlogDialog("Update", blog))">Update</button>
+                            <button class="btn btn-danger" @onclick="@(() => DeleteBlog(blog))">Delete</button>
+                        </td>                  
+                    </tr>
+                }
+            </tbody>
+        </table>
     }
 
-    <br/>
+    <h4>Other Blogs</h4>
     <table class="table">
         <thead>
         <tr>
             <th>Title</th>
-            <th>Content</th>
+            <th>Description</th>
             <th>Created</th>
             <th>Owner</th>
             <th>New post allowed</th>
-            <th></th>
+            <th>Subscribe</th>
         </tr>
         </thead>
         <tbody>
-
-        @foreach (var blog in blogs)
+        @foreach (var blog in blogs.Where(b => b.OwnerId != _userId))
         {
-
-                <tr>
+            <tr>
+            <td>
+                <a href="post/@blog.BlogId">@blog.Title</a>
+            </td>
+            <td>@blog.Content</td>
+            <td>@blog.Created</td>
+            <td>@blogOwnerUsernames[blog.BlogId]</td>
+            <td>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" disabled="disabled" @bind="blog.IsPostAllowed" />
+                </div>
+            </td>
+            @if (user.Identity.IsAuthenticated)
+            {
                 <td>
-                        <a class="btn btn-outline-primary" @onclick="@(() => NavigateToPosts(blog.BlogId))">@blog.Title</a>
+                @if (IsSubscribed(blog.BlogId))
+                {
+                    <button class="btn btn-outline-danger" @onclick="@(() => Unsubscribe(blog.BlogId))">Unsubscribe</button>
+                }
+                else
+                {
+                    <button class="btn btn-outline-success" @onclick="@(() => Subscribe(blog.BlogId))">Subscribe</button>
+                }
                 </td>
-                <td>@blog.Content</td>
-                <td>@blog.Created</td>
-                    <td>@blogOwnerUsernames[blog.BlogId]</td>
-                    <td>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" disabled="disabled" @bind="blog.IsPostAllowed" />
-                        </div>
-                    </td>
-                        @if (user.Identity.IsAuthenticated)
-                        {
-                        <td>
-                            @if (IsSubscribed(blog.BlogId))
-                            {
-                                <button class="btn btn-danger" @onclick="@(() => Unsubscribe(blog.BlogId))">Unsubscribe</button>
-                            }
-                            else
-                            {
-                                <button class="btn btn-primary" @onclick="@(() => Subscribe(blog.BlogId))">Subscribe</button>
-                            }
-                        </td>
-                        }
-                    
-                    @if (blog.OwnerId == _userId)
-                    {
-                        <td>
-                            <button class="btn btn-success mb-2" @onclick="@(() => EditBlogDialog("Update", blog))">Update</button>
-                            <button class="btn btn-success" @onclick="@(() => DeleteBlog(blog))">Delete</button>
-                        </td>
-                    }
+            }
             </tr>
         }
-
         </tbody>
         </table>
 }
