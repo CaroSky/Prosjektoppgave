@@ -1,4 +1,9 @@
 ﻿@using SharedModels.ViewModels
+@inherits ComponentBase
+
+
+<EditForm Model="@comment" OnValidSubmit="OnSave">
+    <DataAnnotationsValidator />
 
 <div class="modal" tabindex="-1" role="dialog" style="display: @(_show ? "block" : "none")">
     <div class="modal-dialog" role="document">
@@ -18,11 +23,12 @@
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" @onclick="OnCancel">Cancel</button>
-                <button type="submit" class="btn btn-primary" @onclick="OnSave">Save</button>
+                <button type="submit" class="btn btn-primary">Save</button>
             </div>
         </div>
     </div>
 </div>
+</EditForm>
 
 
 @code {

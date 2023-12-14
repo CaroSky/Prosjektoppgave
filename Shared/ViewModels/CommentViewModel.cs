@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
 using SharedModels.Entities;
+using System.ComponentModel.DataAnnotations;
 
 namespace SharedModels.ViewModels
 {
@@ -15,6 +16,7 @@ namespace SharedModels.ViewModels
     }
     public class CommentCreateViewModel
     {
+        [Required(ErrorMessage = "Content is required")]
         public string Content { get; set; }
         public int PostId { get; set; }
 
@@ -23,6 +25,8 @@ namespace SharedModels.ViewModels
     public class CommentEditViewModel
     {
         public int CommentId { get; set; }
+
+        [Required(ErrorMessage = "Content is required")]
         public string Content { get; set; }
         public DateTime Created { get; set; }
         public int PostId { get; set; }

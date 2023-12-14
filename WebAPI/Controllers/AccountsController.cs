@@ -42,8 +42,8 @@ namespace WebAPI.Controllers
                 return Ok(new RegisterResult { Successful = false, Errors = errors });
             }
 
-            var token = GenerateJwtToken(newUser);
-            return Ok(new RegisterResult { Successful = true, Token = token });
+           var token = GenerateJwtToken(newUser);
+           return Ok(new RegisterResult { Successful = true, Token = token });
         }
 
         [HttpPost("login")]

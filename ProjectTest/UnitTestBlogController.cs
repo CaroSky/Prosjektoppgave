@@ -251,6 +251,92 @@ namespace ProjectTest
             Assert.AreEqual(subscriptionStatuses, okResult.Value);
         }
 
+        [TestMethod]
+        public async Task Post_NotSignedIN_ReturnsUnauthorizedResult()
+        {
+            // Arrange
+            var userIdClaim = new Claim(ClaimTypes.NameIdentifier, "test");
+            var userClaimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { userIdClaim }));
+            _blogController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaimsPrincipal }
+            };
+            _mockUserManager.Setup(m => m.FindByNameAsync(It.IsAny<string>()))
+                .ReturnsAsync((IdentityUser)null);
 
+            var blog = new Blog();
+
+            // Act
+            var result = await _blogController.Post(blog);
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(UnauthorizedResult));
+        }
+
+        [TestMethod]
+        public async Task Subscribe_NotSignedIN_ReturnsUnauthorizedResult()
+        {
+            // Arrange
+            var userIdClaim = new Claim(ClaimTypes.NameIdentifier, "test");
+            var userClaimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { userIdClaim }));
+            _blogController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaimsPrincipal }
+            };
+            _mockUserManager.Setup(m => m.FindByNameAsync(It.IsAny<string>()))
+                .ReturnsAsync((IdentityUser)null);
+
+            _blogController.ModelState.AddModelError("Content", "Content is required.");
+
+            // Act
+            var result = await _blogController.Subscribe(1);
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(UnauthorizedResult));
+        }
+
+        [TestMethod]
+        public async Task Unsubscribe_NotSignedIN_ReturnsUnauthorizedResult()
+        {
+            // Arrange
+            var userIdClaim = new Claim(ClaimTypes.NameIdentifier, "test");
+            var userClaimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { userIdClaim }));
+            _blogController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaimsPrincipal }
+            };
+            _mockUserManager.Setup(m => m.FindByNameAsync(It.IsAny<string>()))
+                .ReturnsAsync((IdentityUser)null);
+
+            _blogController.ModelState.AddModelError("Content", "Content is required.");
+
+            // Act
+            var result = await _blogController.Unsubscribe(1);
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(UnauthorizedResult));
+        }
+
+        [TestMethod]
+        public async Task SubscriptionStatus_NotSignedIN_ReturnsUnauthorizedResult()
+        {
+            // Arrange
+            var userIdClaim = new Claim(ClaimTypes.NameIdentifier, "test");
+            var userClaimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { userIdClaim }));
+            _blogController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaimsPrincipal }
+            };
+            _mockUserManager.Setup(m => m.FindByNameAsync(It.IsAny<string>()))
+                .ReturnsAsync((IdentityUser)null);
+
+            _blogController.ModelState.AddModelError("Content", "Content is required.");
+
+            // Act
+            var result = await _blogController.GetAllSubscriptionStatuses();
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(UnauthorizedResult));
+        }
     }
 }
