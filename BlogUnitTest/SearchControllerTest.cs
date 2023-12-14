@@ -10,7 +10,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WebAPI.Controllers;
 using WebAPI.Models.Repositories;
 
-namespace YourProject.Tests
+namespace BlogUnitTest
 {
     [TestClass]
     public class SearchControllerTests
