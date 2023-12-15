@@ -1,4 +1,5 @@
-﻿@using SharedModels.Entities
+﻿@using Blazored.Toast.Services;
+@using SharedModels.Entities
 @using SharedModels.ViewModels
 @using Blazor.Data;
 @using System.Security.Claims
@@ -10,6 +11,7 @@
 @inject PostService PostService
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider
 @inject SignalRService SignalRService
+@inject IToastService ToastService
 
 <div>
     Hardkodet test utenfor if-betingelsen
@@ -20,7 +22,7 @@
     {
 
         <p>@toast</p>
-       
+
     }
 </div>
 
@@ -46,16 +48,16 @@ else
             <p>@post.Content</p>
             <p>@post.Created.ToString("yyyy-MM-dd")</p>
             <button class="btn btn-primary" @onclick="@(() => NavigateToComments(post.PostId))">View</button>
-        @if (post.OwnerId == _userId)
-        {
+            @if (post.OwnerId == _userId)
+            {
 
-            <button class="btn btn-secondary" @onclick="@(() => EditPostDialog("Update", post.PostId, post))">Edit</button>
+                <button class="btn btn-secondary" @onclick="@(() => EditPostDialog("Update", post.PostId, post))">Edit</button>
 
-            <button class="btn btn-danger" @onclick="@(() => DeletePost(post.PostId))">Delete</button>
-        }
+                <button class="btn btn-danger" @onclick="@(() => DeletePost(post.PostId))">Delete</button>
+            }
         </div>
     }
-   
+
 
 
 }
@@ -91,49 +93,24 @@ else
         user = authState.User;
         _username = user?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
         _userId = user?.FindFirst(JwtRegisteredClaimNames.NameId)?.Value;
-        //await SignalRService.InitializeConnection();
-        //SignalRService.OnMessageReceived += AddToastMessage;
+
 
         await GetPostsForBlog(Id);
+        _ = StartSignalRMessageListening();
 
-        //Console.WriteLine("Registrerer AddToastMessage med SignalRService.OnMessageReceived event...");
-        // SignalRService.RegisterMessageHandler(AddToastMessage);
-        // SignalRService.OnMessageReceived += HandleSignalRMessage;
 
-        //AddToastMessage("Hei hei");
-        //await Task.Delay(1000); // Vent litt for å se toast
-        //// StateHasChanged();
-         _ = StartSignalRMessageListening();
-       // Console.WriteLine("AddToastMessage er registrert.");
-       // await foreach (var message in WaitForMessages())
-        //{
-          //  HandleSignalRMessage(message);
-        //}
 
-        
         Console.WriteLine("Sjekker SignalR-forbindelsesstatus...");
         if (user.Identity.IsAuthenticated)
         {
             //_blogSubscriptionStatus = await BlogService.GetAllSubscriptionStatusesAsync();
-              await SignalRService.InitializeConnection();
+            await SignalRService.InitializeConnection();
         }
         else
         {
 
             Console.WriteLine("ingen user");
         }
-
-        if (!SignalRService.IsConnected)
-        {
-            Console.WriteLine("SignalR-forbindelse er ikke tilkoblet. Initialiserer forbindelse...");
-            //await SignalRService.InitializeConnection();
-            Console.WriteLine("SignalR-forbindelse er initialisert.");
-        }
-        else
-        {
-            Console.WriteLine("SignalR-forbindelse er allerede tilkoblet.");
-        }
-
 
 
         _titleDialog = "title";
@@ -157,10 +134,10 @@ else
     }
     private async IAsyncEnumerable<string> WaitForMessages()
     {
-       
-        
-            yield return await SignalRService.WaitForMessageAsync();
-        
+
+
+        yield return await SignalRService.WaitForMessageAsync();
+
     }
 
     private async Task OnSavePostDialog()
@@ -204,23 +181,23 @@ else
     }
 
 
-   
+
 
     private async Task DeletePost(int postId)
     {
-       
-            var success = await PostService.DeletePostAsync(postId);
-            if (success)
-            {
-                // Oppdater listen over innlegg her, eller naviger brukeren til en annen side
-                 await GetPostsForBlog(Id);
-            }
-            else
-            {
-                // Vis en feilmelding til brukeren
-            }
+
+        var success = await PostService.DeletePostAsync(postId);
+        if (success)
+        {
+
+            await GetPostsForBlog(Id);
         }
-    
+        else
+        {
+            ToastService.ShowError("Kunne ikke slette innlegget.");
+        }
+    }
+
 
 
     private void CreatePostDialog(string title)
@@ -228,15 +205,15 @@ else
         _post = new SharedModels.Entities.Post()
             {
                 Created = DateTime.Now,
-               
+
             };
 
-        // Overfør verdier fra '_post' til '_viewEditPost'
+        // Overfører verdier fra '_post' til '_viewEditPost'
         _viewEditPost = new PostEditViewModel()
             {
                 BlogId = Id,
                 IsCommentAllowed = true,
-                Title = "", 
+                Title = "",
                 Content = "",
                 Created = _post.Created
             };
@@ -250,17 +227,14 @@ else
         _post = post;
         _viewEditPost = new PostEditViewModel()
             {
-                PostId = postId, // Sett postens ID
+                PostId = postId, // Setter postens ID
                 BlogId = Id,
                 Title = post.Title,
                 Content = post.Content,
                 Created = post.Created,
                 IsCommentAllowed = post.IsCommentAllowed
-                    
+
             };
-        // Legg til loggmeldinger for å sjekke verdier
-        Console.WriteLine("EditPostDialog - Start");
-       
         _titleDialog = title;
         _dialog.Show();
     }
@@ -295,17 +269,15 @@ else
 
     {
         disposed = true;
-        //SignalRService.OnMessageReceived -= AddToastMessage;
-       // SignalRService.UnregisterMessageHandler(AddToastMessage);
         SignalRService.OnMessageReceived -= HandleSignalRMessage;
     }
     private async void HandleSignalRMessage(string message)
     {
-       await InvokeAsync(() =>
-        {
-            AddToastMessage(message);
-            StateHasChanged();
-        });
+        await InvokeAsync(() =>
+         {
+             AddToastMessage(message);
+             StateHasChanged();
+         });
     }
 }
 

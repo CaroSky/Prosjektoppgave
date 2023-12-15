@@ -145,8 +145,7 @@ else
         var blogEnumerable = await BlogService.GetBlogsAsync();
         blogs = blogEnumerable.ToList();
         _titleDialog = "title";
-        //SignalRService.OnMessageReceived += AddToastMessage;
-        //Console.WriteLine("SignalRService.OnMessageReceived event is bound to AddToastMessage");
+
         if (user.Identity.IsAuthenticated)
         {
         _blogSubscriptionStatus = await BlogService.GetAllSubscriptionStatusesAsync();

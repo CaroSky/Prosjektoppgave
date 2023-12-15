@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using WebAPI.Data;
 using WebAPI.Models.Repositories;
 using Blazor.ViewModels;
+using Blazored.Toast;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -30,7 +31,7 @@ builder.Services.AddScoped<PostService>();
 builder.Services.AddScoped<SearchService>();
 builder.Services.AddScoped<CommentService>();
 builder.Services.AddScoped<SignalRService>();
-
+builder.Services.AddBlazoredToast();
 
 
 var app = builder.Build();

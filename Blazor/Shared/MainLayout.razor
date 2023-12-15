@@ -8,6 +8,8 @@
 @inject SignalRService SignalRService
 @using System.IdentityModel.Tokens.Jwt;
 @using System.Security.Claims
+@using Blazored.Toast
+@using Blazored.Toast.Services
 
 @using Microsoft.AspNetCore.SignalR.Client
 
@@ -31,7 +33,7 @@
     }
 </style>
 
-
+<BlazoredToasts />
 <PageTitle>Blazor</PageTitle>
 
 <div class="page">
