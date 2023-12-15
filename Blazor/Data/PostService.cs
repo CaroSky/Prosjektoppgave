@@ -107,12 +107,6 @@ namespace Blazor.Data
             var response = await _httpClient.DeleteAsync($"api/post/{postId}");
             return response.IsSuccessStatusCode;
         }
-        
-
-
-
     }
-
-
 }
 

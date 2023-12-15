@@ -9,6 +9,22 @@
 @inject NavigationManager NavigationManager
 @inject PostService PostService
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider
+@inject SignalRService SignalRService
+
+<div>
+    Hardkodet test utenfor if-betingelsen
+</div>
+
+<div>
+    @foreach (var toast in toasts)
+    {
+
+        <p>@toast</p>
+       
+    }
+</div>
+
+
 
 @if (posts == null)
 {
@@ -55,6 +71,7 @@ else
     public int Id { get; set; }
     //private List<SharedModels.Entities.Post> posts;
     private SharedModels.Entities.Post _post = new SharedModels.Entities.Post();
+    private List<string> toasts = new List<string>();
     private PostCreateViewModel _viewPost = new PostCreateViewModel();
     private PostEditViewModel _viewEditPost = new SharedModels.ViewModels.PostEditViewModel();
     private string _titleDialog;
@@ -65,6 +82,8 @@ else
     private ClaimsPrincipal user;
     private string _username;
     private string _userId;
+    private bool disposed = false;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -72,17 +91,76 @@ else
         user = authState.User;
         _username = user?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
         _userId = user?.FindFirst(JwtRegisteredClaimNames.NameId)?.Value;
-        //posts = await PostService.GetPostsByBlogIdAsync(Id);
-        //posts = await PostService.GetPostsByBlogIdAsync(Id);
+        //await SignalRService.InitializeConnection();
+        //SignalRService.OnMessageReceived += AddToastMessage;
+
         await GetPostsForBlog(Id);
+
+        //Console.WriteLine("Registrerer AddToastMessage med SignalRService.OnMessageReceived event...");
+        // SignalRService.RegisterMessageHandler(AddToastMessage);
+        // SignalRService.OnMessageReceived += HandleSignalRMessage;
+
+        //AddToastMessage("Hei hei");
+        //await Task.Delay(1000); // Vent litt for å se toast
+        //// StateHasChanged();
+         _ = StartSignalRMessageListening();
+       // Console.WriteLine("AddToastMessage er registrert.");
+       // await foreach (var message in WaitForMessages())
+        //{
+          //  HandleSignalRMessage(message);
+        //}
+
+        
+        Console.WriteLine("Sjekker SignalR-forbindelsesstatus...");
+        if (user.Identity.IsAuthenticated)
+        {
+            //_blogSubscriptionStatus = await BlogService.GetAllSubscriptionStatusesAsync();
+              await SignalRService.InitializeConnection();
+        }
+        else
+        {
+
+            Console.WriteLine("ingen user");
+        }
+
+        if (!SignalRService.IsConnected)
+        {
+            Console.WriteLine("SignalR-forbindelse er ikke tilkoblet. Initialiserer forbindelse...");
+            //await SignalRService.InitializeConnection();
+            Console.WriteLine("SignalR-forbindelse er initialisert.");
+        }
+        else
+        {
+            Console.WriteLine("SignalR-forbindelse er allerede tilkoblet.");
+        }
+
 
 
         _titleDialog = "title";
     }
 
+    private async Task StartSignalRMessageListening()
+    {
+        while (!disposed)
+        {
+            var message = await SignalRService.WaitForMessageAsync();
+            if (!string.IsNullOrEmpty(message))
+            {
+                HandleSignalRMessage(message);
+            }
+        }
+    }
+
     private void CancelPostDialog()
     {
         _dialog.CloseDialog();
+    }
+    private async IAsyncEnumerable<string> WaitForMessages()
+    {
+       
+        
+            yield return await SignalRService.WaitForMessageAsync();
+        
     }
 
     private async Task OnSavePostDialog()
@@ -197,6 +275,37 @@ else
     private void NavigateToComments(int postId)
     {
         NavigationManager.NavigateTo($"/comment/{postId}");
+    }
+
+    private void AddToastMessage(string message)
+    {
+        toasts.Add(message);
+        Console.WriteLine($"Toast added: {message}");
+        Console.WriteLine($"Total toasts: {toasts.Count}");
+        this.InvokeAsync(() => this.StateHasChanged()); // Tvinger komponenten til å oppdatere UI
+    }
+
+    private void RemoveToast(string message)
+    {
+        toasts.Remove(message);
+        //StateHasChanged();
+    }
+    //Unngå minnelekasjer:
+    public void Dispose()
+
+    {
+        disposed = true;
+        //SignalRService.OnMessageReceived -= AddToastMessage;
+       // SignalRService.UnregisterMessageHandler(AddToastMessage);
+        SignalRService.OnMessageReceived -= HandleSignalRMessage;
+    }
+    private async void HandleSignalRMessage(string message)
+    {
+       await InvokeAsync(() =>
+        {
+            AddToastMessage(message);
+            StateHasChanged();
+        });
     }
 }
 

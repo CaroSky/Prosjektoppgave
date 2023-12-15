@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using WebAPI.Data;
 using WebAPI.Models.Repositories;
+using WebAPI.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,8 @@ builder.Services.AddDefaultIdentity<IdentityUser>().AddEntityFrameworkStores<App
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddSignalR();
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -35,14 +38,33 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = builder.Configuration["JwtAudience"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
+        //SignalR
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+
+                // Hvis request er for vår hub...
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    path.StartsWithSegments("/notificationhub"))
+                {
+                    // Legg tokenet til context slik at SignalR kan autorisere brukeren
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
+        };
     });
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyCorsPolicy", policy =>
     {
-        policy.AllowAnyOrigin() // Not recommended for production msut be changed later
+        policy.WithOrigins("https://localhost:7153")// Not recommended for production msut be changed later
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
@@ -62,5 +84,7 @@ app.UseCors("MyCorsPolicy"); // Apply CORS policy
 app.UseHttpsRedirection();
 
 app.MapControllers();
+
+app.MapHub<NotificationHub>("/notificationhub");
 
 app.Run();

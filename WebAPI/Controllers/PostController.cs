@@ -11,6 +11,8 @@ using WebAPI.Models.Repositories;
 using WebAPI.Models.ViewModels;
 using SharedModels.Entities;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.SignalR;
+using WebAPI.Hubs;
 
 namespace WebAPI.Controllers
 {
@@ -27,11 +29,14 @@ namespace WebAPI.Controllers
 
 
 
-        public PostController(UserManager<IdentityUser> manager, IBlogRepository repository, ILogger<PostController> logger)
+        private readonly IHubContext<NotificationHub> _hubContext;
+
+        public PostController(UserManager<IdentityUser> manager, IBlogRepository repository, ILogger<PostController> logger, IHubContext<NotificationHub> hubContext)
         {
-            this._repository = repository;
-            this._manager = manager;
+            _repository = repository;
+            _manager = manager;
             _logger = logger;
+            _hubContext = hubContext;
         }
 
 
@@ -106,28 +111,54 @@ namespace WebAPI.Controllers
             
             // Ekstraher tags fra innholdet
             var tags = ExtractHashtags(post.Content);
+            var userNames = ExtractUsernames(post.Content);
+            _logger.LogInformation($"Extracted hashtags: {string.Join(", ", tags)}");
+            _logger.LogInformation($"Extracted usernames: {string.Join(", ", userNames)}");
             //Lagrer post
             await _repository.SavePost(post, User);
+            _logger.LogInformation("Post saved successfully.");
             //tempdata
             //TempData["message"] = string.Format("{0} has been created", post.Title);
 
-            foreach (var tagName in tags)
+            var allTags = tags.Concat(userNames).ToList();
+
+            foreach (var tagName in allTags)
             {
-                // Sjekk om taggen finnes, hvis ikke opprett ny
                 var tag = await _repository.GetTagByName(tagName) ?? new Tag { Name = tagName };
 
-
-
-                // Lagre taggen om den er ny
                 if (tag.TagId == 0)
                 {
                     await _repository.SaveTag(tag);
+                    _logger.LogInformation($"New tag created: {tagName}");
                 }
 
-                // Opprett og lagre PostTag-forbindelse
                 var postTag = new PostTag { PostsPostId = post.PostId, TagsTagId = tag.TagId };
                 await _repository.SavePostTag(postTag);
+                _logger.LogInformation($"Tag {tagName} associated with the post.");
             }
+            foreach (var userName in userNames)
+            {
+                var taggedUser = await _manager.FindByNameAsync(userName);
+                if (taggedUser != null)
+                {
+                    _logger.LogInformation($"Bruker funnet, sender notifikasjon: {userName}");
+                    try
+                    {
+                        _logger.LogInformation($"Sending tag notification to user: {taggedUser.UserName}");
+                        await _hubContext.Clients.User(taggedUser.UserName).SendAsync("ReceiveTagNotification", $"Du har blitt tagget i et innlegg av {user.UserName}.");
+                        _logger.LogInformation($"Notifikasjon sendt til bruker: {userName}");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Feil ved sending av notifikasjon til bruker: {userName}");
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning($"Fant ingen bruker med brukernavn: {userName}");
+                }
+            }
+            _logger.LogInformation("Post creation process completed.");
             return CreatedAtAction("Get", new { id = post.PostId }, post);
 
 
@@ -141,6 +172,16 @@ namespace WebAPI.Controllers
                         .ToList();
             _logger.LogInformation("Extracted Tags: {Tags}", string.Join(", ", tags));
             return tags;
+        }
+
+        private List<string> ExtractUsernames(string content)
+        { //Oppdatert slik at den tar emailadresser også som username
+            var userNames = Regex.Matches(content, @"@\w+([.-]\w+)*@\w+([.-]\w+)*")
+                                  .Cast<Match>()
+                                  .Select(match => match.Value.TrimStart('@'))
+                                  .ToList();
+            _logger.LogInformation("Extracted Usernames: {Usernames}", string.Join(", ", userNames));
+            return userNames;
         }
 
 

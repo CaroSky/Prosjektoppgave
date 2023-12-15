@@ -11,10 +11,38 @@
 @inject NavigationManager NavigationManager
 @inject SearchService SearchService
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider
+@inject SignalRService SignalRService
 
 
 
 <h3>Blog Posts</h3>
+@if (toasts.Count > 0)
+{
+    <div class="toasts-container">
+        @foreach (var toast in toasts)
+        {
+            <div class="toast">
+                @toast
+            </div>
+        }
+    </div>
+}
+
+<style>
+    .toasts-container {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 10000;
+    }
+
+    .toast {
+        background-color: white;
+        padding: 10px;
+        border: 1px solid #ddd;
+        margin-bottom: 10px;
+    }
+</style>
 
 
 @if (blogs == null)
@@ -83,6 +111,7 @@ else
                         </td>
                     }
             </tr>
+               
         }
 
         </tbody>
@@ -94,6 +123,7 @@ else
 
 @code {
     private List<SharedModels.Entities.Blog> blogs;
+    private List<string> toasts = new List<string>();
     private SharedModels.Entities.Blog _blog = new SharedModels.Entities.Blog();
     private BlogViewModel _viewBlog = new BlogViewModel();
     private string _titleDialog;
@@ -115,9 +145,12 @@ else
         var blogEnumerable = await BlogService.GetBlogsAsync();
         blogs = blogEnumerable.ToList();
         _titleDialog = "title";
+        //SignalRService.OnMessageReceived += AddToastMessage;
+        //Console.WriteLine("SignalRService.OnMessageReceived event is bound to AddToastMessage");
         if (user.Identity.IsAuthenticated)
         {
         _blogSubscriptionStatus = await BlogService.GetAllSubscriptionStatusesAsync();
+          //  await SignalRService.InitializeConnection();
         }
         else
         {
@@ -236,6 +269,26 @@ else
         await BlogService.UnsubscribeFromBlogAsync(blogId);
         _blogSubscriptionStatus[blogId] = false;
         StateHasChanged();
+    }
+   
+    
+    private void AddToastMessage(string message)
+    {
+        toasts.Add(message);
+        Console.WriteLine($"Toast added: {message}");
+        Console.WriteLine($"Total toasts: {toasts.Count}");
+        StateHasChanged(); // Tvinger komponenten til å oppdatere UI
+    }
+
+    private void RemoveToast(string message)
+    {
+        toasts.Remove(message);
+        StateHasChanged();
+    }
+    //Unngå minnelekasjer: 
+   public void Dispose()
+   {
+        SignalRService.OnMessageReceived -= AddToastMessage;
     }
 
 }

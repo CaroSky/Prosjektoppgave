@@ -1,4 +1,36 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject CustomAuthenticationStateProvider AuthenticationStateProvider
+@inject TokenService TokenService
+@inject ILogger<MainLayout> Logger
+@using Blazor.Data
+@inject SignalRService SignalRService
+@using System.IdentityModel.Tokens.Jwt;
+@using System.Security.Claims
+
+@using Microsoft.AspNetCore.SignalR.Client
+
+@foreach (var toast in toasts)
+{
+    <div class="toast" @key=toast>
+        @toast
+        <button class="btn btn-close" @onclick="() => RemoveToast(toast)"></button>
+    </div>
+}
+
+<style>
+    .toast {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background-color: white;
+        padding: 10px;
+        border: 1px solid #ddd;
+        z-index: 10000;
+    }
+</style>
+
 
 <PageTitle>Blazor</PageTitle>
 
@@ -18,3 +50,50 @@
         </article>
     </main>
 </div>
+@code {
+    //private List<string> toasts = new List<string>();
+    private ClaimsPrincipal user;
+    private string _username;
+    private string _userId;
+        
+    protected override async Task OnInitializedAsync()
+    {
+       
+        Logger.LogInformation("MainLayout er initialisert");
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        _username = user?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        _userId = user?.FindFirst(JwtRegisteredClaimNames.NameId)?.Value;
+
+       
+        Logger.LogInformation($"Bruker er autentisert: {user.Identity.Name}");
+        await SignalRService.InitializeConnection();
+        Logger.LogInformation("SignalR-tjenesten er initialisert");
+        SignalRService.OnMessageReceived += ShowToast;
+        
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await SignalRService.Disconnect();
+    }
+
+    private List<string> toasts = new List<string>();
+
+    private void ShowToast(string message)
+    {
+        toasts.Add(message);
+        StateHasChanged();
+    }
+
+    private void RemoveToast(string message)
+    {
+        toasts.Remove(message);
+        StateHasChanged();
+    }
+    public void Dispose()
+    {
+        SignalRService.OnMessageReceived -= RemoveToast;
+    }
+    
+}

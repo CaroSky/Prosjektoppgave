@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Configuration;
 
+
 namespace Blazor
 {
     public class CustomAuthenticationStateProvider : AuthenticationStateProvider
@@ -70,6 +71,10 @@ namespace Blazor
 
             var user = new ClaimsPrincipal(identity);
             return Task.FromResult(new AuthenticationState(user));
+        }
+        public string GetJwtToken()
+        {
+            return _tokenService.JwtToken;
         }
 
         public void NotifyUserAuthentication(string token)

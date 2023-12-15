@@ -13,8 +13,15 @@
         get => _jwtToken;
         set
         {
-            _jwtToken = value;
-            _logger.LogInformation("Token has been set in TokenService.");
+            if (_jwtToken != value)
+            {
+                _jwtToken = value;
+                _logger.LogInformation("Token has been set in TokenService.");
+                NotifyStateChanged(); // Inform subscribers that the token has changed.
+            }
         }
     }
+    public event Action OnChange;
+
+    private void NotifyStateChanged() => OnChange?.Invoke();
 }
