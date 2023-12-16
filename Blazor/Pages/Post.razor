@@ -29,7 +29,6 @@
 
 else
 {
-
     @if (allowed && user.Identity.IsAuthenticated)
     {
 
@@ -40,58 +39,96 @@ else
         <div class="card post-preview mb-4">
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-6"> <!-- Adjust the column size as needed -->
+                    <div class="col-auto">
+                        <!-- Adjust the column size as needed -->
                         <h4 class="card-title">@post.Post.Title</h4>
                     </div>
-                    <div class="col-md-6">
-                        <div class="row">
-                            <div class="col-md-1">
-                                <label for="likes">@post.Post.CountLike Likes</label>
+                    <div class="col-auto">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-auto">
+                                    <label for="likes" class="mr-2">@post.Post.CountLike Likes</label>
+                                </div>
+
+
+                                @if (user.Identity.IsAuthenticated && post.Post.OwnerId != _userId)
+                                {
+                                    <div class="col-auto">
+                                        <button class="btn btn-primary btn-sm" @onclick="@(() => Like(post))">
+                                            <i class="fas fa-thumbs-up"></i>
+                                        </button>
+                                    </div>
+                                    <div class="col-auto">
+                                        <label for="vote" class="mr-2">@post.Like</label>
+                                    </div>
+                                }
                             </div>
-                            @if (user.Identity.IsAuthenticated && post.Post.OwnerId != _userId)
-                        {
-                            <div class="col-md-1">
-                                <button class="btn btn-success" @onclick="@(() => Like(post))">
-                                    <i class="fas fa-thumbs-up"></i>
-                                </button>
-                            </div>
-                        <div class="col-md-1">
-                            <label for="dislikes">@post.Like</label>
-                        </div>
-                        }
                         </div>
                     </div>
                 </div>
-                <p class="card-text">@post.Post.Content</p>
                 <p class="card-text"><small class="text-muted">@post.Post.OwnerUsername posted on @post.Post.Created.ToString("yyyy-MM-dd")</small></p>
 
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" disabled="disabled" @bind="post.Post.IsCommentAllowed"/>
-                    <label class="form-check-label" for="commentCheckbox">Allow Comments</label>
-                </div>
-
-                <button class="btn btn-primary mt-2" @onclick="@(() => NavigateToComments(post.Post.PostId))">See Comments</button>
-
+                
                 @if (post.Post.OwnerId == _userId)
                 {
                     <div class="mt-2">
-                        <button class="btn btn-secondary" @onclick="@(() => EditPostDialog("Update", post.Post.PostId, post.Post))">Edit</button>
-                        <button class="btn btn-danger ml-2" @onclick="@(() => DeletePost(post.Post.PostId))">Delete</button>
+                        <button class="btn btn-secondary btn-sm" @onclick="@(() => EditPostDialog("Update", post.Post.PostId, post.Post))">Edit</button>
+                        <button class="btn btn-danger btn-sm ml-2" @onclick="@(() => DeletePost(post.Post.PostId))">Delete</button>
                     </div>
                 }
+                <br/>
+            <div class="row">
+                    <div class="col-auto">
+                    <p class="card-text">@post.Post.Content</p>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" disabled="disabled" @bind="post.Post.IsCommentAllowed"/>
+                        <label class="form-check-label" for="commentCheckbox">Allow Comments</label>
+                    </div>
+                    <button class="btn btn-primary mt-2" @onclick="@(() => NavigateToComments(post.Post.PostId))">See Comments</button>
+                </div>
+
+                    <div class="col-auto">
+                    @if (post.Post.ImageBase64 != "")
+                    {
+                        <div>
+                            <img src="@($"data:image/png;base64,{post.Post.ImageBase64}")"/>
+                        </div>
+                    }
+                    <div>
+                        @if (post.Post.OwnerId == _userId)
+                        {
+                            if (post.Post.ImageBase64 == "")
+                            {
+                                <button class="btn btn-link btn-sm ml-2" @onclick="@(() => InsertImage(post.Post))">Add Image</button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-link btn-sm ml-2" @onclick="@(() => InsertImage(post.Post))">Change Image</button>
+                                <button class="btn btn-link btn-sm ml-2" @onclick="@(() => DeleteImage(post.Post))">Delete Image</button>
+                            }
+                        
+                        }
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
 
     }
-   
-
 
 }
+
 <PostDialogBox Title="@_titleDialog"
                post="@_viewEditPost"
                OnCancel="CancelPostDialog"
                OnSave="OnSavePostDialog"
-@ref="_dialog"></PostDialogBox>
+               @ref="_dialog"></PostDialogBox>
+
+<ImageUpload   post="@_post"
+               OnCancel="CancelImageDialog"
+               OnSave="OnSaveImageDialog"
+                @ref="_dialogImage"></ImageUpload>
 
 
 @code {
@@ -103,6 +140,7 @@ else
     private PostEditViewModel _viewEditPost = new SharedModels.ViewModels.PostEditViewModel();
     private string _titleDialog;
     private PostDialogBox _dialog;
+    private ImageUpload _dialogImage;
     private PostIndexViewModel postIndexViewModel;
     private bool allowed;
     private IEnumerable<PostWithLike> posts;
@@ -225,7 +263,9 @@ else
                 Created = post.Created,
                 IsCommentAllowed = post.IsCommentAllowed,
                 OwnerId = post.OwnerId,
-                OwnerUsername = post.OwnerUsername
+                OwnerUsername = post.OwnerUsername,
+                CountLike = post.CountLike,
+                ImageBase64 = post.ImageBase64
                     
             };
         // Legg til loggmeldinger for å sjekke verdier
@@ -237,9 +277,9 @@ else
 
 
 
-    void CancelDialog()
+    void CancelImageDialog()
     {
-        _dialog.CloseDialog();
+        _dialogImage.CloseDialog();
     }
 
     private async Task Like(PostWithLike post)
@@ -258,6 +298,62 @@ else
         }
 
         await GetPostsForBlog(Id);
+    }
+
+    private void InsertImage(SharedModels.Entities.Post post)
+    {
+        _post = post;
+        Console.WriteLine("InsertImageDialog - Start");
+        _dialogImage.Show();
+    }
+
+    private async Task OnSaveImageDialog()
+    {
+        _viewEditPost = new PostEditViewModel()
+        {
+            PostId = _post.PostId, // Sett postens ID
+            BlogId = _post.Blog.BlogId,
+            Title = _post.Title,
+            Content = _post.Content,
+            Created = _post.Created,
+            IsCommentAllowed = _post.IsCommentAllowed,
+            OwnerId = _post.OwnerId,
+            OwnerUsername = _post.OwnerUsername,
+            CountLike = _post.CountLike,
+            ImageBase64 = _post.ImageBase64
+        };
+        await PostService.UpdatePostAsync(_viewEditPost.PostId, _viewEditPost);
+        await GetPostsForBlog(Id);
+        Console.WriteLine("Posts updated after save operation.");
+        _dialogImage.CloseDialog();
+        Console.WriteLine("Dialog closed.");
+    }
+
+    private async Task DeleteImage(SharedModels.Entities.Post post)
+    {
+        _post = post;
+        _viewEditPost = new PostEditViewModel()
+        {
+            PostId = _post.PostId, // Sett postens ID
+            BlogId = _post.Blog.BlogId,
+            Title = _post.Title,
+            Content = _post.Content,
+            Created = _post.Created,
+            IsCommentAllowed = _post.IsCommentAllowed,
+            OwnerId = _post.OwnerId,
+            OwnerUsername = _post.OwnerUsername,
+            CountLike = _post.CountLike,
+            ImageBase64 = ""
+        };
+        await PostService.UpdatePostAsync(_viewEditPost.PostId, _viewEditPost);
+        await GetPostsForBlog(Id);
+        Console.WriteLine("Posts updated after save operation.");
+        _dialogImage.CloseDialog();
+        Console.WriteLine("Dialog closed.");
+    }
+    void CancelDialog()
+    {
+        _dialog.CloseDialog();
     }
 
     private void NavigateToComments(int postId)

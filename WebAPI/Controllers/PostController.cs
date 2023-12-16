@@ -138,7 +138,9 @@ namespace WebAPI.Controllers
                     Blog = await _repository.GetBlogById(postCreateViewModel.BlogId),
                     IsCommentAllowed = true,
                     OwnerId = user.Id,
-                    OwnerUsername = user.UserName
+                    OwnerUsername = user.UserName,
+                    CountLike = 0,
+                    ImageBase64 = ""
                 };
             
             // Ekstraher tags fra innholdet
@@ -290,6 +292,8 @@ namespace WebAPI.Controllers
                 Blog = await _repository.GetBlogById(postEditViewModel.BlogId),
                 OwnerId = postEditViewModel.OwnerId,
                 OwnerUsername = postEditViewModel.OwnerUsername,
+                CountLike = postEditViewModel.CountLike,
+                ImageBase64 = postEditViewModel.ImageBase64,
             };
             //find the owner (the person logged in)
            // post.Author = await _manager.FindByNameAsync(User.Identity.Name);

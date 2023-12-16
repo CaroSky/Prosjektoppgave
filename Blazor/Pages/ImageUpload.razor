@@ -1,0 +1,87 @@
+﻿@using SharedModels.ViewModels
+@using SharedModels.Entities
+@using Microsoft.Extensions.FileProviders
+
+<EditForm Model="@post" OnValidSubmit="OnSave">
+    <DataAnnotationsValidator />
+
+    <div class="modal" tabindex="-1" role="dialog" style="display: @(_show ? "block" : "none")">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Select an image</h5>
+                    <button type="button" class="close" @onclick="OnCancel">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="image">Image</label>
+                        <InputFile class="form-control-file" id="image" OnChange="HandleFileChange" />
+                    </div>
+                    @if (!string.IsNullOrEmpty(post.ImageBase64))
+                    {
+                        <div class="mt-3">
+                            <img src="@($"data:image/png;base64,{post.ImageBase64}")" class="img-fluid" alt="Uploaded Image" />
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="OnCancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+
+
+
+
+@code {
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+    [Parameter] public SharedModels.Entities.Post post { get; set; }
+
+   // private ImageModel uploadedImage;
+    private bool _show;
+    private bool uploadedImage;
+
+    public void Show()
+    {
+        _show = true;
+        StateHasChanged();
+    }
+
+    public void CloseDialog()
+    {
+        _show = false;
+        StateHasChanged();
+    }
+
+    private async Task HandleFileChange(InputFileChangeEventArgs e)
+    {
+        var file = e.File;// as IFileInfo;
+
+        if (file != null)
+        {
+    // Convert the image to Base64 and store it in the Post model
+            using (var stream = file.OpenReadStream())
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await stream.CopyToAsync(memoryStream);
+                    post.ImageBase64 = Convert.ToBase64String(memoryStream.ToArray());
+                }
+            }
+        }
+    }
+
+    private async Task SaveImage()
+    {
+    // Implement your image upload logic here
+    // Call OnSave if the image upload is successful
+        await OnSave.InvokeAsync();
+    }
+}

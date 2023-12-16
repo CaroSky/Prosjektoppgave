@@ -11,8 +11,8 @@ namespace SharedModels.ViewModels
         public int BlogId { get; set; }
         public string BlogTitle { get; set; }
         public bool IsPostAllowed { get; set; }
-        public int OwnerId { get; set; }
-        public bool IsInSearchMode { get; set; }
+        //public int OwnerId { get; set; }
+        //public bool IsInSearchMode { get; set; }
     }
 
     public class PostCreateViewModel
@@ -41,6 +41,8 @@ namespace SharedModels.ViewModels
         public bool IsCommentAllowed { get; set; }
         public string OwnerId { get; set; } 
         public virtual string OwnerUsername { get; set; }
+        public int CountLike { get; set; }
+        public string ImageBase64 { get; set; }
 
     }
 
@@ -49,4 +51,5 @@ namespace SharedModels.ViewModels
         public Post Post { get; set; }
         public string Like { get; set; }
     }
+
 }

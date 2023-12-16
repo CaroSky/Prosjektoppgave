@@ -21,7 +21,8 @@ namespace SharedModels.Entities
         public virtual string OwnerUsername { get; set; }
         public bool IsCommentAllowed { get; set; }
         public int CountLike { get; set; }
+        public string ImageBase64 { get; set; }
 
-        }
+    }
     
 }

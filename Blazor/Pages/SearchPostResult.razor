@@ -24,13 +24,21 @@ else
         <div class="card post-preview mb-4">
             <div class="card-body">
                 <h4 class="card-title">@post.Title</h4>
-                <p class="card-text">@post.Content</p>
                 <p class="card-text"><small class="text-muted">@post.OwnerUsername posted on @post.Created.ToString("yyyy-MM-dd")</small></p>
+                <p class="card-text">@post.Content</p>
 
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" disabled="disabled" @bind="post.IsCommentAllowed" />
                     <label class="form-check-label" for="commentCheckbox">Allow Comments</label>
                 </div>
+                </div>
+                @if (post.ImageBase64 != "")
+                {
+                    <div>
+                        <img src="@($"data:image/png;base64,{post.ImageBase64}")"/>
+                    </div>
+                }
+                <div>
                 <button class="btn btn-primary mt-2" @onclick="@(() => NavigateToPost(post.PostId))">See Post</button>
             </div>
         </div>
