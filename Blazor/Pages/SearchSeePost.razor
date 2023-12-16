@@ -11,7 +11,9 @@
 @inject PostService PostService
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider
 
-
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous">
+</head>
 
 <div class="d-flex justify-content-between">
         <button class="btn btn-primary" @onclick="@(() => NavigateToSearchPosts())">Go back to search list</button>
@@ -31,22 +33,44 @@ else
     {
         <div class="card post-preview mb-4">
             <div class="card-body">
-                <h4 class="card-title">@post.Title</h4>
-                <p class="card-text">@post.Content</p>
-                <p class="card-text"><small class="text-muted">@post.OwnerUsername posted on @post.Created.ToString("yyyy-MM-dd")</small></p>
+                <div class="row">
+                    <div class="col-md-6"> <!-- Adjust the column size as needed -->
+                        <h4 class="card-title">@post.Post.Title</h4>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-auto">
+                                <label for="likes">@post.Post.CountLike Likes</label>
+                            </div>
+                            @if (user.Identity.IsAuthenticated && post.Post.OwnerId != _userId)
+                            {
+                                <div class="col-md-1">
+                                    <button class="btn btn-success" @onclick="@(() => Like(post))">
+                                        <i class="fas fa-thumbs-up"></i>
+                                    </button>
+                                </div>
+                                <div class="col-md-1">
+                                    <label for="dislikes">@post.Like</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <p class="card-text">@post.Post.Content</p>
+                <p class="card-text"><small class="text-muted">@post.Post.OwnerUsername posted on @post.Post.Created.ToString("yyyy-MM-dd")</small></p>
 
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" disabled="disabled" @bind="post.IsCommentAllowed" />
+                    <input class="form-check-input" type="checkbox" disabled="disabled" @bind="post.Post.IsCommentAllowed" />
                     <label class="form-check-label" for="commentCheckbox">Allow Comments</label>
                 </div>
 
-                <button class="btn btn-primary mt-2" @onclick="@(() => NavigateToComments(post.PostId))">See Comments</button>
+                <button class="btn btn-primary mt-2" @onclick="@(() => NavigateToComments(post.Post.PostId))">See Comments</button>
 
-                @if (post.OwnerId == _userId)
+                @if (post.Post.OwnerId == _userId)
                 {
                     <div class="mt-2">
-                        <button class="btn btn-secondary" @onclick="@(() => EditPostDialog("Update", post.PostId, post))">Edit</button>
-                        <button class="btn btn-danger ml-2" @onclick="@(() => DeletePost(post.PostId))">Delete</button>
+                        <button class="btn btn-secondary" @onclick="@(() => EditPostDialog("Update", post.Post.PostId, post.Post))">Edit</button>
+                        <button class="btn btn-danger ml-2" @onclick="@(() => DeletePost(post.Post.PostId))">Delete</button>
                     </div>
                 }
             </div>
@@ -75,7 +99,7 @@ else
     private PostDialogBox _dialog;
     private PostIndexViewModel postIndexViewModel;
     private bool allowed;
-    private IEnumerable<SharedModels.Entities.Post> posts;
+    private IEnumerable<PostWithLike> posts;
     private ClaimsPrincipal user;
     private string _username;
     private string _userId;
@@ -165,6 +189,24 @@ else
     void CancelDialog()
     {
         _dialog.CloseDialog();
+    }
+
+    private async Task Like(PostWithLike post)
+    {
+        if (post.Like == "Liked!")
+        {
+            Console.WriteLine("Deleting like...");
+            await PostService.DeleteLikeAsync(post.Post.PostId);
+            Console.WriteLine("Like deleted."); 
+        }
+        else
+        {
+            Console.WriteLine("Creating new like...");
+            await PostService.CreateLikeAsync(post.Post.PostId);
+            Console.WriteLine("New like created."); 
+        }
+
+        await GetPost(Id);
     }
 
     private void NavigateToComments(int postId)

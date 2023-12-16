@@ -11,6 +11,8 @@ using WebAPI.Models.Repositories;
 using WebAPI.Models.ViewModels;
 using SharedModels.Entities;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace WebAPI.Controllers
 {
@@ -38,6 +40,8 @@ namespace WebAPI.Controllers
 
         public async Task<PostIndexViewModel> GetPosts([FromRoute] int id)
         {
+            IdentityUser user = null;
+
             //find the user that is logged in 
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);   //it return a http://...:username so I need to get the username from the string
             if (userIdClaim != null)
@@ -46,7 +50,9 @@ namespace WebAPI.Controllers
                 _logger.LogInformation($"User ID in blog Controller - GetBlogs: {userId}");
                 string[] words = userIdClaim.ToString().Split(':');
                 string username = words[words.Length - 1].Trim();
-                var user = await _manager.FindByNameAsync(username);
+                user = await _manager.FindByNameAsync(username);
+
+
             }
             else
             {
@@ -56,9 +62,41 @@ namespace WebAPI.Controllers
 
             var blog = await _repository.GetBlogById(id);
             var posts = await _repository.GetAllPostByBlogId(id);
+            List<PostWithLike> postsWithLikeList = new List<PostWithLike>();
+
+            foreach (var post in posts)
+            {
+                var newPost = new PostWithLike()
+                {
+                    Post = post,
+                    Like = ""
+                };
+                postsWithLikeList.Add(newPost);
+            }
+
+            if (user != null)
+            {
+                var likes = await _repository.GetAllLikesForUser(user.Id);
+                // Use LINQ to create a list of just the PostIds
+                List<int> postIdLikeList = likes.Select(post => post.PostId).ToList();
+
+                foreach (var post in postsWithLikeList)
+                {
+                    if (postIdLikeList.Contains(post.Post.PostId))
+                    {
+                        post.Like = "Liked!";
+
+                    }
+
+                }
+            }
+
+
+            // Convert the list to IEnumerable<PostWithLike>
+            IEnumerable<PostWithLike> postsWithLike = postsWithLikeList;
             var postIndexViewModel = new PostIndexViewModel
             {
-                Posts = posts,
+                Posts = postsWithLike,
                 BlogId = id,
                 BlogTitle = blog.Title,
                 IsPostAllowed = blog.IsPostAllowed,
@@ -148,6 +186,7 @@ namespace WebAPI.Controllers
         public async Task<PostIndexViewModel> Get(int id, int blogId)
         //blogId is used to get back to the blog page if post not found
         {
+            IdentityUser user = null;
             //find the user that is logged in 
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);   //it return a http://...:username so I need to get the username from the string
             if (userIdClaim != null)
@@ -156,7 +195,7 @@ namespace WebAPI.Controllers
                 _logger.LogInformation($"User ID in blog Controller - GetBlogs: {userId}");
                 string[] words = userIdClaim.ToString().Split(':');
                 string username = words[words.Length - 1].Trim();
-                var user = await _manager.FindByNameAsync(username);
+                user = await _manager.FindByNameAsync(username);
             }
             else
             {
@@ -176,9 +215,30 @@ namespace WebAPI.Controllers
             {
                 _logger.LogWarning("No post found."); ;
             }
+            List<PostWithLike> postsWithLikeList = new List<PostWithLike>();
 
-            var posts = new List<Post>();
-            posts.Add(post);
+            var postWithLike = new PostWithLike()
+            {
+                Post = post,
+                Like = ""
+            };
+
+            if (user != null)
+            {
+                var likes = await _repository.GetAllLikesForUser(user.Id);
+                // Use LINQ to create a list of just the PostIds
+                List<int> postIdLikeList = likes.Select(post => post.PostId).ToList();
+
+                if (postIdLikeList.Contains(postWithLike.Post.PostId))
+                {
+                    postWithLike.Like = "Liked!";
+
+                }
+
+            }
+
+            var posts = new List<PostWithLike>();
+            posts.Add(postWithLike);
             var postIndexViewModel = new PostIndexViewModel
             {
                 Posts = posts,

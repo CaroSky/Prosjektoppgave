@@ -134,6 +134,37 @@ namespace Blazor.Data
             }
         }
 
+        public async Task<bool> CreateLikeAsync(int postId)
+        {
+            _logger.LogInformation("Sending request to create new like");
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("api/like", postId);
+                if (response.IsSuccessStatusCode)
+                {
+                    _logger.LogInformation("New like created successfully");
+                    return true;
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError($"Error creating like: {errorContent}");
+                    return false;
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError($"HTTP request exception: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteLikeAsync(int postId)
+        {
+            var response = await _httpClient.DeleteAsync($"api/like/{postId}");
+            return response.IsSuccessStatusCode;
+        }
+
 
 
     }

@@ -8,6 +8,7 @@ using SharedModels.Entities;
 using SharedModels.ViewModels;
 using System;
 using System.Linq;
+using Microsoft.EntityFrameworkCore.Design;
 
 namespace WebAPI.Models.Repositories
 {
@@ -15,13 +16,13 @@ namespace WebAPI.Models.Repositories
     {
         Task<IEnumerable<Blog>> GetAllBlogs();
         Task SaveBlog(Blog blog, IPrincipal principal);
-        Task<BlogEditViewModel> GetBlogEditViewModelById(int Id);
+        //Task<BlogEditViewModel> GetBlogEditViewModelById(int Id);
         Task<Blog> GetBlogById(int Id);
         Task UpdateBlog(Blog blog);
         Task DeleteBlog(Blog blog, IPrincipal principal);
         Task<IEnumerable<Post>> GetAllPostByBlogId(int id);
         Task SavePost(Post post, IPrincipal principal);
-        Task<PostEditViewModel> GetPostEditViewModelById(int blogId);
+        //Task<PostEditViewModel> GetPostEditViewModelById(int blogId);
         Task<Post> GetPostById(int Id);
         Task UpdatePost(Post post, IPrincipal principal);
         Task DeletePost(Post post, IPrincipal principal);
@@ -39,13 +40,17 @@ namespace WebAPI.Models.Repositories
         Task SavePostTag(PostTag postTag);
         Task SaveTag(Tag tag);
         Task RemoveOrphanedTags();
-        Task<PostTag> GetPostTag(int postId, int tagId);
+        //Task<PostTag> GetPostTag(int postId, int tagId);
         Task RemovePostTags(int postId);
         Task SubscribeToBlog(string userId, int blogId);
         Task UnsubscribeFromBlog(string userId, int blogId);
         Task<bool> IsSubscribed(string userId, int blogId);
         Task<Dictionary<int, bool>> GetAllSubscriptionStatuses(string userId);
-
+        Task<IEnumerable<Like>> GetAllLikes();
+        Task<Like> GetLike(int postId, string userId);
+        Task SaveLike(Like vote);
+        Task DeleteLike(Like like);
+        Task<IEnumerable<Like>> GetAllLikesForUser(String userId);
     } 
 
 
@@ -101,23 +106,23 @@ namespace WebAPI.Models.Repositories
 
 
 
-        public async Task<BlogEditViewModel> GetBlogEditViewModelById(int Id)
-        {
-            var blogs = _db.Blog.ToList();
-            var blog = blogs.Where(b => b.BlogId == Id).First();
-            ;
+        //public async Task<BlogEditViewModel> GetBlogEditViewModelById(int Id)
+        //{
+        //    var blogs = _db.Blog.ToList();
+        //    var blog = blogs.Where(b => b.BlogId == Id).First();
+        //    ;
 
-            var editBlog = new BlogEditViewModel
-            {
-                BlogId = blog.BlogId,
-                Title = blog.Title,
-                Content = blog.Content,
-                Created = blog.Created,
-                IsPostAllowed = blog.IsPostAllowed,
-            };
+        //    var editBlog = new BlogEditViewModel
+        //    {
+        //        BlogId = blog.BlogId,
+        //        Title = blog.Title,
+        //        Content = blog.Content,
+        //        Created = blog.Created,
+        //        IsPostAllowed = blog.IsPostAllowed,
+        //    };
 
-            return editBlog;
-        }
+        //    return editBlog;
+        //}
 
         public async Task<Blog> GetBlogById(int blogId)
         {
@@ -208,24 +213,24 @@ namespace WebAPI.Models.Repositories
         //    return post;
         //}
 
-        public async Task<PostEditViewModel> GetPostEditViewModelById(int PostId)
-        {
-            var posts = _db.Post.Include(item => item.Blog).ToList();
-            var post = posts.Where(item => item.PostId == PostId).First();
-            ;
+        //public async Task<PostEditViewModel> GetPostEditViewModelById(int PostId)
+        //{
+        //    var posts = _db.Post.Include(item => item.Blog).ToList();
+        //    var post = posts.Where(item => item.PostId == PostId).First();
+        //    ;
 
-            var editPost = new PostEditViewModel
-            {
-                PostId = post.PostId,
-                Title = post.Title,
-                Content = post.Content,
-                Created = post.Created,
-                BlogId = post.Blog.BlogId,
-                IsCommentAllowed = post.IsCommentAllowed,
-            };
+        //    var editPost = new PostEditViewModel
+        //    {
+        //        PostId = post.PostId,
+        //        Title = post.Title,
+        //        Content = post.Content,
+        //        Created = post.Created,
+        //        BlogId = post.Blog.BlogId,
+        //        IsCommentAllowed = post.IsCommentAllowed,
+        //    };
 
-            return editPost;
-        }
+        //    return editPost;
+        //}
 
         public async Task<Post> GetPostById(int PostId)
         {
@@ -275,12 +280,12 @@ namespace WebAPI.Models.Repositories
             return comments;
         }
 
-        public CommentCreateViewModel GetCommentCreateViewModel(int postId)
-        {
-            var comment = new CommentCreateViewModel();
-            comment.PostId = postId;
-           return comment;
-        }
+        //public CommentCreateViewModel GetCommentCreateViewModel(int postId)
+        //{
+        //    var comment = new CommentCreateViewModel();
+        //    comment.PostId = postId;
+        //   return comment;
+        //}
 
        public async Task SaveComment(Comment comment, IPrincipal principal)
         {
@@ -297,12 +302,12 @@ namespace WebAPI.Models.Repositories
 
         }
 
-        public CommentEditViewModel GetCommentEditViewModel(int postId)
-        {
-           var comment = new CommentEditViewModel();
-           comment.PostId = postId;
-           return comment;
-        }
+        //public CommentEditViewModel GetCommentEditViewModel(int postId)
+        //{
+        //   var comment = new CommentEditViewModel();
+        //   comment.PostId = postId;
+        //   return comment;
+        //}
 
         public async Task<CommentEditViewModel> GetCommentEditViewModelById(int commentId)
         {
@@ -484,11 +489,12 @@ namespace WebAPI.Models.Repositories
             }
         }
 
-        public async Task<PostTag> GetPostTag(int postId, int tagId)
-        {
-            return await _db.PostTag
-                            .FirstOrDefaultAsync(pt => pt.PostsPostId == postId && pt.TagsTagId == tagId);
-        }
+        //public async Task<PostTag> GetPostTag(int postId, int tagId)
+        //{
+        //    return await _db.PostTag
+        //                    .FirstOrDefaultAsync(pt => pt.PostsPostId == postId && pt.TagsTagId == tagId);
+        //}
+
         public async Task SubscribeToBlog(string userId, int blogId)
         {
             var subscription = new Subscription { UserId = userId, BlogId = blogId };
@@ -527,6 +533,123 @@ namespace WebAPI.Models.Repositories
             }
 
             return subscriptionStatuses;
+        }
+
+        public async Task<IEnumerable<Like>> GetAllLikes()
+        {
+            try
+            {
+                _logger.LogInformation("Getting all likes");
+                var likes = await _db.Like.ToListAsync();
+                return likes;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all likes");
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<Like>> GetAllLikesForUser(String userId)
+        {
+            try
+            {
+                _logger.LogInformation("Getting all likes");
+                var likes = await _db.Like
+                    .Where(s => s.UserId == userId)
+                    .ToListAsync();
+                return likes;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all likes");
+                throw;
+            }
+        }
+
+        public async Task<Like> GetLike(int postId, string userId)
+        {
+            var like = await _db.Like
+                        .Where(item => item.PostId == postId && item.UserId == userId)
+                        .FirstAsync();
+            return like;
+        }
+
+
+        public async Task SaveLike(Like like)
+        {
+            try
+            {
+                _db.Like.Add(like);
+                IncrementLikes(like.PostId);
+                _db.SaveChanges();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
+        }
+
+        public async Task DeleteLike(Like like)
+        {
+            try
+            {
+                _db.Like.Remove(like);
+                DecrementLikes(like.PostId);
+                _db.SaveChanges();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
+        }
+
+        public void IncrementLikes(int postId)
+        {
+
+            try
+            {
+                var post = _db.Post.Find(postId);
+                if (post != null)
+                {
+                    post.CountLike++;
+                    _db.SaveChanges();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
+        }
+
+        public void DecrementLikes(int postId)
+        {
+
+            try
+            {
+                var post = _db.Post.Find(postId);
+                if (post != null)
+                {
+                    if (post.CountLike > 0)
+                    {
+                        post.CountLike--;
+                        _db.SaveChanges();
+                    }
+
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
         }
 
     }

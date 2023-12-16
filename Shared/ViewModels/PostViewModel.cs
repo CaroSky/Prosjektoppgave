@@ -7,7 +7,7 @@ namespace SharedModels.ViewModels
 
     public class PostIndexViewModel
     {
-        public IEnumerable<Post> Posts { get; set; }
+        public IEnumerable<PostWithLike> Posts { get; set; }
         public int BlogId { get; set; }
         public string BlogTitle { get; set; }
         public bool IsPostAllowed { get; set; }
@@ -42,5 +42,11 @@ namespace SharedModels.ViewModels
         public string OwnerId { get; set; } 
         public virtual string OwnerUsername { get; set; }
 
+    }
+
+    public class PostWithLike
+    {
+        public Post Post { get; set; }
+        public string Like { get; set; }
     }
 }

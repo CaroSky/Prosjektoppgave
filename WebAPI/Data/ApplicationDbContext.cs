@@ -26,12 +26,16 @@ namespace WebAPI.Data
 
         public DbSet<Subscription> Subscriptions { get; set; }
 
+        public DbSet<Like> Like { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<PostTag>()
                 .HasKey(pt => new { pt.PostsPostId, pt.TagsTagId });
+            modelBuilder.Entity<Like>()
+                .HasKey(pt => new { pt.UserId, pt.PostId });
 
             // Her legger du til konfigurasjonen for relasjonen mellom Blog og IdentityUser
             modelBuilder.Entity<Blog>()

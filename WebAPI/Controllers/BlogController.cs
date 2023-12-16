@@ -206,6 +206,8 @@ namespace WebAPI.Controllers
             return Ok(blog);
 
         }
+
+
         [HttpPost("{blogId}/subscribe")]
         [Authorize]
         public async Task<IActionResult> Subscribe(int blogId)
