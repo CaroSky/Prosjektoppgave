@@ -1,7 +1,8 @@
 ﻿@page "/"
 @using System.Security.Claims
 @using System.IdentityModel.Tokens.Jwt;
-@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Identity;
+@using SharedModels.Entities
 
 @inject NavigationManager NavigationManager
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider
@@ -15,6 +16,7 @@ Welcome to our Blogs.
 @if (user.Identity.IsAuthenticated)
 {
     <p>Hello, @_username!</p>
+    <Blog /> @* Her brukes Blog-komponenten *@
 }
 else
 {
@@ -27,6 +29,7 @@ else
     private ClaimsPrincipal user;
     private string _username;
     private IdentityUser user2;
+    private string tag;
 
     protected override async Task OnInitializedAsync()
     {
@@ -40,5 +43,6 @@ else
     {
         NavigationManager.NavigateTo("/blogs");
     }
+    
 
 }

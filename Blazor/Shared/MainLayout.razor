@@ -61,17 +61,17 @@
     protected override async Task OnInitializedAsync()
     {
        
-        Logger.LogInformation("MainLayout er initialisert");
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        _username = user?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-        _userId = user?.FindFirst(JwtRegisteredClaimNames.NameId)?.Value;
+        //Logger.LogInformation("MainLayout er initialisert");
+        //var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        //var user = authState.User;
+        //_username = user?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        //_userId = user?.FindFirst(JwtRegisteredClaimNames.NameId)?.Value;
 
        
-        Logger.LogInformation($"Bruker er autentisert: {user.Identity.Name}");
-        await SignalRService.InitializeConnection();
-        Logger.LogInformation("SignalR-tjenesten er initialisert");
-        SignalRService.OnMessageReceived += ShowToast;
+        //Logger.LogInformation($"Bruker er autentisert: {user.Identity.Name}");
+        //await SignalRService.InitializeConnection();
+        //Logger.LogInformation("SignalR-tjenesten er initialisert");
+        //SignalRService.OnMessageReceived += ShowToast;
         
     }
 

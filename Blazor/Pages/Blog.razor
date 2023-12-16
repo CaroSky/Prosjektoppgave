@@ -1,4 +1,4 @@
-﻿@page "/blogs"
+﻿
 @using SharedModels.Entities 
 @using Blazor.Data
 @using ViewModels
@@ -14,40 +14,17 @@
 @inject SignalRService SignalRService
 
 
-
-<h3>Blog Posts</h3>
-@if (toasts.Count > 0)
-{
-    <div class="toasts-container">
-        @foreach (var toast in toasts)
-        {
-            <div class="toast">
-                @toast
-            </div>
-        }
+    <div class="col-sm-9">
+        <h4><small>RECENT BLOGS</small></h4>
     </div>
-}
-
-<style>
-    .toasts-container {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        z-index: 10000;
-    }
-
-    .toast {
-        background-color: white;
-        padding: 10px;
-        border: 1px solid #ddd;
-        margin-bottom: 10px;
-    }
-</style>
-
 
 @if (blogs == null)
 {
     <p>Loading...</p>
+    @if (user.Identity.IsAuthenticated)
+    {
+        <button class="btn btn-success ml-auto" @onclick="@(() => CreateBlogDialog("Create"))">Add a blog</button>
+    }
 }
 else
 {
@@ -106,8 +83,10 @@ else
                     @if (blog.OwnerId == _userId)
                     {
                         <td>
-                            <button class="btn btn-success mb-2" @onclick="@(() => EditBlogDialog("Update", blog))">Update</button>
-                            <button class="btn btn-success" @onclick="@(() => DeleteBlog(blog))">Delete</button>
+                            <div class="d-flex flex-column">
+                                <button class="btn btn-success mb-2" @onclick="@(() => EditBlogDialog("Update", blog))">Update</button>
+                                <button class="btn btn-success" @onclick="@(() => DeleteBlog(blog))">Delete</button>
+                            </div>
                         </td>
                     }
             </tr>
@@ -115,7 +94,7 @@ else
         }
 
         </tbody>
-        </table>
+    </table>
 }
 
 
@@ -232,11 +211,7 @@ else
 
     }
 
-   // private async Task LoadPosts(int blogId)
-    //{
-      //  selectedPosts = await PostService.GetPostsByBlogIdAsync(blogId);
-       // selectedBlogTitle = blogs.FirstOrDefault(b => b.BlogId == blogId)?.Title;
-    //}
+ 
 
     private void NavigateToPosts(int blogId)
     {
