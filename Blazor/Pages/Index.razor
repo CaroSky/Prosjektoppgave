@@ -9,9 +9,9 @@
 
 <PageTitle>Index</PageTitle>
 
-<h1>BlogWorld</h1>
+<h1 class="blog-title">BlogWorld</h1>
 
-Welcome to our Blogs.
+<h1 class="centered-large-text">Welcome to our Blogs</h1>
 
 @if (user.Identity.IsAuthenticated)
 {
@@ -20,9 +20,11 @@ Welcome to our Blogs.
 }
 else
 {
-    <p>User not authenticated. Please log in</p>
+    <p class="centered-large-text">To log in, click the <a href="Login">Log in</a> button</p>
+    <p class="centered-large-text">   If you are not registered, please click the <a href="Register">Register</a> button.</p>
 }
-<button class="btn btn-success ml-auto" @onclick="@(() => GoToBlogs())">Go to blogs</button>
+
+
 
 
 @code {

@@ -28,73 +28,56 @@
 }
 else
 {
-    <input @bind="tag" />
-    <button class="btn btn-success ml-auto"  @onclick="Search">Search post</button>
-    <br/>
-    <br />
+    
     @if (user.Identity.IsAuthenticated)
     {
         <button class="btn btn-success ml-auto" @onclick="@(() => CreateBlogDialog("Create"))">Add a blog</button>
     }
+    
+    
 
-    <br/>
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Title</th>
-            <th>Content</th>
-            <th>Created</th>
-            <th>OwnerId</th>
-            <th>New post allowed</th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody>
+   
 
         @foreach (var blog in blogs)
         {
+        var blogClass = index % 2 == 0 ? "blog-post blog-post-even" : "blog-post blog-post-odd";
 
-                <tr>
-                <td>
-                        <a class="btn btn-outline-primary" @onclick="@(() => NavigateToPosts(blog.BlogId))">@blog.Title</a>
-                </td>
-                <td>@blog.Content</td>
-                <td>@blog.Created</td>
-                <td>@blog.OwnerId</td>
-                    <td>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" disabled="disabled" @bind="blog.IsPostAllowed" />
-                        </div>
-                    </td>
-                        @if (user.Identity.IsAuthenticated)
-                        {
-                        <td>
-                            @if (IsSubscribed(blog.BlogId))
-                            {
-                                <button class="btn btn-danger" @onclick="@(() => Unsubscribe(blog.BlogId))">Unsubscribe</button>
-                            }
-                            else
-                            {
-                                <button class="btn btn-primary" @onclick="@(() => Subscribe(blog.BlogId))">Subscribe</button>
-                            }
-                        </td>
-                        }
-                    
-                    @if (blog.OwnerId == _userId)
-                    {
-                        <td>
-                            <div class="d-flex flex-column">
-                                <button class="btn btn-success mb-2" @onclick="@(() => EditBlogDialog("Update", blog))">Update</button>
-                                <button class="btn btn-success" @onclick="@(() => DeleteBlog(blog))">Delete</button>
-                            </div>
-                        </td>
-                    }
-            </tr>
-               
+        <div class="@blogClass">
+            <h2>
+                <a class="blog-post-title" @onclick="@(() => NavigateToPosts(blog.BlogId))">@blog.Title</a>
+            </h2>
+            <p class="blog-post-meta">@blog.Created by <a href="#">@blog.OwnerId</a></p>
+            <p>@blog.Content</p>
+
+        <div class="d-flex justify-content-between align-items-center">
+            @if (user.Identity.IsAuthenticated)
+            {
+                <button class="btn btn-sm btn-outline-secondary"
+                @onclick="@(() => HandleSubscription(blog.BlogId))">
+                    @(IsSubscribed(blog.BlogId) ? "Unsubscribe" : "Subscribe")
+                </button>
+            }
+            @if (blog.OwnerId == _userId)
+            {
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-secondary" @onclick="@(() => EditBlogDialog("Update", blog))">Edit</button>
+                        <button class="btn btn-sm btn-outline-secondary" @onclick="@(() => DeleteBlog(blog))">Delete</button>
+                    </div>
+                    <small class="text-muted">@blog.Created.ToString("dd MMM yyyy")</small>
+                </div>
+                <div>
+                    <input class="form-check-input" type="checkbox"
+                           disabled="disabled" @bind="blog.IsPostAllowed" />
+                    <label class="form-check-label">Post Allowed</label>
+                </div>
+            }
+            </div>
+        </div>
+        index++;
         }
 
-        </tbody>
-    </table>
+     
 }
 
 
@@ -113,6 +96,7 @@ else
     private string _username;
     private string _userId;
     private Dictionary<int, bool> _blogSubscriptionStatus;
+    private int index = 0;
 
 
     protected override async Task OnInitializedAsync()
@@ -243,6 +227,18 @@ else
         await BlogService.UnsubscribeFromBlogAsync(blogId);
         _blogSubscriptionStatus[blogId] = false;
         StateHasChanged();
+    }
+
+    private async Task HandleSubscription(int blogId)
+    {
+        if (IsSubscribed(blogId))
+        {
+            await Unsubscribe(blogId);
+        }
+        else
+        {
+            await Subscribe(blogId);
+        }
     }
    
     

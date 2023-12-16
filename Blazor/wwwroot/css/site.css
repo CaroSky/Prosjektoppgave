@@ -34,6 +34,54 @@ a, .btn-link {
     color: red;
 }
 
+.navbar-custom {
+    background-color: #feb640 !important;
+    
+}
+
+.blog-title {
+    font-size: 48px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.blog-post-title {
+    cursor: pointer;
+    color: black;
+    text-align: center;
+    text-decoration: none;
+}
+
+    .blog-post-title:hover {
+        color: #0056b3;
+        text-decoration: none;
+    }
+
+.blog-post {
+    margin-bottom: 0.5rem;
+    padding: 10px;
+}
+
+.blog-post-meta {
+    margin-bottom: 1.25rem;
+    color: #6c757d;
+}
+
+.centered-large-text {
+    text-align: center;
+    font-size: 20px; 
+}
+.blog-post-even {
+    background-color: #ffdf7c /* Lett grå for partallselementer */
+}
+
+.blog-post-odd {
+    background-color: #ffffff; /* Hvit for oddetallselementer */
+}
+
+
+
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;
@@ -62,3 +110,4 @@ a, .btn-link {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+
