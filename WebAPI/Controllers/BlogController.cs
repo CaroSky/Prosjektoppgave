@@ -100,7 +100,7 @@ namespace WebAPI.Controllers
 
             await _repository.SaveBlog(blog, User);
 
-            return CreatedAtAction("Get", new { id = blog.BlogId }, blog);
+            return Ok(blog);
 
 
         }

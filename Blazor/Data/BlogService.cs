@@ -140,7 +140,7 @@ namespace Blazor.Data
             _logger.LogInformation($"Sending HTTP POST request to URL: {"api/blog"}");
 
             // Construct the URL with the parameter
-            string apiUrl = $"api/blog/";
+            string apiUrl = $"api/blog";
 
             var response = await _httpClient.PostAsJsonAsync(apiUrl, blog);
             _logger.LogInformation("Sending request to post a blog");

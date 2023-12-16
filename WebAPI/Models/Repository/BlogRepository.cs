@@ -16,13 +16,11 @@ namespace WebAPI.Models.Repositories
     {
         Task<IEnumerable<Blog>> GetAllBlogs();
         Task SaveBlog(Blog blog, IPrincipal principal);
-        //Task<BlogEditViewModel> GetBlogEditViewModelById(int Id);
         Task<Blog> GetBlogById(int Id);
         Task UpdateBlog(Blog blog);
         Task DeleteBlog(Blog blog, IPrincipal principal);
         Task<IEnumerable<Post>> GetAllPostByBlogId(int id);
         Task SavePost(Post post, IPrincipal principal);
-        //Task<PostEditViewModel> GetPostEditViewModelById(int blogId);
         Task<Post> GetPostById(int Id);
         Task UpdatePost(Post post, IPrincipal principal);
         Task DeletePost(Post post, IPrincipal principal);
@@ -40,7 +38,6 @@ namespace WebAPI.Models.Repositories
         Task SavePostTag(PostTag postTag);
         Task SaveTag(Tag tag);
         Task RemoveOrphanedTags();
-        //Task<PostTag> GetPostTag(int postId, int tagId);
         Task RemovePostTags(int postId);
         Task SubscribeToBlog(string userId, int blogId);
         Task UnsubscribeFromBlog(string userId, int blogId);
@@ -72,8 +69,6 @@ namespace WebAPI.Models.Repositories
 
         public async Task<IEnumerable<Blog>> GetAllBlogs()
         {
-            //var blogs = _db.Blog.Include(b => b.Owner).ToList();
-            //return blogs;
             try
             {
                 _logger.LogInformation("Getting all blogs");
@@ -105,31 +100,8 @@ namespace WebAPI.Models.Repositories
         }
 
 
-
-        //public async Task<BlogEditViewModel> GetBlogEditViewModelById(int Id)
-        //{
-        //    var blogs = _db.Blog.ToList();
-        //    var blog = blogs.Where(b => b.BlogId == Id).First();
-        //    ;
-
-        //    var editBlog = new BlogEditViewModel
-        //    {
-        //        BlogId = blog.BlogId,
-        //        Title = blog.Title,
-        //        Content = blog.Content,
-        //        Created = blog.Created,
-        //        IsPostAllowed = blog.IsPostAllowed,
-        //    };
-
-        //    return editBlog;
-        //}
-
         public async Task<Blog> GetBlogById(int blogId)
         {
-            //var blogs = _db.Blog.Include(item => item.Owner).ToList();
-            //var blog = blogs.Where(item => item.BlogId == blogId).First(); ;
-
-            // return blog;
 
             // Anta at _db er din DbContext-instans
             var blog = await _db.Blog
@@ -156,7 +128,7 @@ namespace WebAPI.Models.Repositories
             _db.SaveChanges();
         }
 
-        // public void Delete(Product product)
+        
         public async Task DeleteBlog(Blog blog, IPrincipal principal)
         {
 
@@ -178,18 +150,10 @@ namespace WebAPI.Models.Repositories
         public async Task<IEnumerable<Post>> GetAllPostByBlogId(int id)
         {
             var allPosts = _db.Post.Include(item => item.Blog).ToList();
-            // var allPosts = _db.Post.Include(item => item.Blog).Include(item => item.Author).ToList();
             var posts = allPosts.Where(item => item.Blog.BlogId == id);
             return posts;
         }
 
-        //public PostCreateViewModel GetPostCreateViewModel(int blogId)
-        //{
-        //    var post = new PostCreateViewModel();
-        //    post.BlogId = blogId;
-        //    post.IsCommentAllowed = true;
-        //    return post;
-        //}
 
         public async Task SavePost(Post post, IPrincipal principal)
         {
@@ -206,35 +170,9 @@ namespace WebAPI.Models.Repositories
 
         }
 
-        //public PostEditViewModel GetPostEditViewModel(int blogId)
-        //{
-        //    var post = new PostEditViewModel();
-        //    post.BlogId = blogId;
-        //    return post;
-        //}
-
-        //public async Task<PostEditViewModel> GetPostEditViewModelById(int PostId)
-        //{
-        //    var posts = _db.Post.Include(item => item.Blog).ToList();
-        //    var post = posts.Where(item => item.PostId == PostId).First();
-        //    ;
-
-        //    var editPost = new PostEditViewModel
-        //    {
-        //        PostId = post.PostId,
-        //        Title = post.Title,
-        //        Content = post.Content,
-        //        Created = post.Created,
-        //        BlogId = post.Blog.BlogId,
-        //        IsCommentAllowed = post.IsCommentAllowed,
-        //    };
-
-        //    return editPost;
-        //}
 
         public async Task<Post> GetPostById(int PostId)
         {
-            //var posts = _db.Post.Include(item => item.Blog).Include(item => item.Author).ToList();
             var posts = _db.Post.Include(item => item.Blog).ToList();
 
             var post = posts.Where(item => item.PostId == PostId).First();
@@ -280,12 +218,6 @@ namespace WebAPI.Models.Repositories
             return comments;
         }
 
-        //public CommentCreateViewModel GetCommentCreateViewModel(int postId)
-        //{
-        //    var comment = new CommentCreateViewModel();
-        //    comment.PostId = postId;
-        //   return comment;
-        //}
 
        public async Task SaveComment(Comment comment, IPrincipal principal)
         {
@@ -302,12 +234,6 @@ namespace WebAPI.Models.Repositories
 
         }
 
-        //public CommentEditViewModel GetCommentEditViewModel(int postId)
-        //{
-        //   var comment = new CommentEditViewModel();
-        //   comment.PostId = postId;
-        //   return comment;
-        //}
 
         public async Task<CommentEditViewModel> GetCommentEditViewModelById(int commentId)
         {
@@ -385,9 +311,6 @@ namespace WebAPI.Models.Repositories
         {
             List<String> suggestions = new List<String>();
 
-            //var tags = _db.Tag
-            //    .Where(item => EF.Functions.Like(item.Name, $"%{searchQuery}%"))
-            //    .ToList();
             var tags = _db.Tag
                 .AsEnumerable()
                 .Where(item => item.Name.StartsWith(searchQuery, StringComparison.OrdinalIgnoreCase))
@@ -397,9 +320,7 @@ namespace WebAPI.Models.Repositories
             {
                 suggestions.Add(tag.Name);
             }
-            //var users = _db.Users
-            //    .Where(item => EF.Functions.Like(item.UserName, $"%{searchQuery}%"))
-            //    .ToList();
+
             var users = _db.Users
                 .AsEnumerable()
                 .Where(item => item.UserName.StartsWith(searchQuery, StringComparison.OrdinalIgnoreCase))
@@ -489,11 +410,6 @@ namespace WebAPI.Models.Repositories
             }
         }
 
-        //public async Task<PostTag> GetPostTag(int postId, int tagId)
-        //{
-        //    return await _db.PostTag
-        //                    .FirstOrDefaultAsync(pt => pt.PostsPostId == postId && pt.TagsTagId == tagId);
-        //}
 
         public async Task SubscribeToBlog(string userId, int blogId)
         {
