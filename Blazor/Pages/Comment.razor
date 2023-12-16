@@ -1,4 +1,4 @@
-﻿@page "/comment/{PostId:int}"
+﻿
 @using SharedModels.Entities
 @using SharedModels.ViewModels;
 @using Blazor.Data
@@ -50,7 +50,7 @@
                 }
             </tbody>
         </table>
-    }
+}
 
 
 <CommentDialogBox Title="@_titleDialog"
@@ -70,11 +70,12 @@
         private CommentDialogBox _dialog;
         private CommentIndexViewModel commentIndexViewModel;
         private bool allowed;
-    private IEnumerable<SharedModels.Entities.Comment> comments;
+        private IEnumerable<SharedModels.Entities.Comment> comments;
         //private IEnumerable<Comment> comments;
         private ClaimsPrincipal user;
         private string _username;
         private string _userId;
+      
 
 
         protected override async Task OnInitializedAsync()
@@ -87,7 +88,7 @@
          //await CommentService.GetCommentsByPostIdAsync(Id);
         //comments = commentIndexViewModel.Comments;
         
-        await GetCommentsForPost(PostId);
+         await GetCommentsForPost(PostId);
         
         }
 

@@ -79,6 +79,37 @@ a, .btn-link {
     background-color: #ffffff; /* Hvit for oddetallselementer */
 }
 
+.blog-post {
+    background-color: #fdefc0; /* Lett bakgrunnsfarge */
+    padding: 20px;
+    margin-bottom: 10px;
+    border-left: 5px solid #feb640; /* Accentfarge fra paletten din */
+}
+
+.blog-post-title {
+    color: #243127; /* Tittel farge fra paletten */
+    text-decoration: none; /* Ingen understrek */
+}
+
+    .blog-post-title:hover {
+        color: #a46379; /* Hover farge fra paletten */
+    }
+
+.blog-post-meta {
+    color: #243127; /* Meta-info farge fra paletten */
+    margin-bottom: 15px;
+}
+
+.comment {
+    padding: 10px;
+    border-bottom: 1px solid #e1e1e1; /* Skille mellom kommentarer */
+}
+
+    .comment .rounded-circle {
+        border: 3px solid #feb640; /* Ramme farge som matcher paletten */
+    }
+
+
 
 
 
