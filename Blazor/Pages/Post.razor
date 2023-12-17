@@ -1,65 +1,80 @@
-﻿@using SharedModels.Entities
+﻿@page "/post/{Id:int}"
+
+@using SharedModels.Entities
 @using SharedModels.ViewModels
 @using Blazor.Data;
 @using System.Security.Claims
 @using System.IdentityModel.Tokens.Jwt;
-
-@page "/post/{Id:int}"
-
 @inject NavigationManager NavigationManager
 @inject PostService PostService
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider
+@inject CommentService CommentService
 
 @if (posts == null)
 {
     <p>Loading posts...</p>
 }
-
 else
 {
-
     @if (allowed && user.Identity.IsAuthenticated)
     {
-
-        <button class="btn btn-success ml-auto" @onclick="@(() => CreatePostDialog("Create"))">Add New Post</button>
+        <button class="btn btn-success ml-auto btn-sm" @onclick="@(() => CreatePostDialog("Create"))">Add New Post</button>
     }
+
     @foreach (var post in posts)
     {
-        <div class="post-preview">
-            <h4>@post.Title</h4>
-            <p>@post.Content</p>
-            <p>@post.Created.ToString("yyyy-MM-dd")</p>
+        <div class="post-card card mb-3">
+            <div class="card-body">
+                <div class="text-center">
+                    <h2 class="card-title">@post.Title</h2>
+                    <p class="card-text">@post.Content</p>
 
-            <!-- Display the image if ImageBase64 is not empty -->
-            @if (!string.IsNullOrWhiteSpace(post.ImageBase64))
+                    <!-- Display the image if ImageBase64 is not empty -->
+                    @if (!string.IsNullOrWhiteSpace(post.ImageBase64))
+                    {
+                        <img src="@($"data:image/jpeg;base64,{post.ImageBase64}")" alt="Image" class="img-thumbnail" />
+                    }
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <div>
+                        <button class="btn btn-primary btn-sm" @onclick="@(() => ToggleLikePost(post))">
+                            @(likeStatusCache.TryGetValue(post.PostId, out var isLiked) && isLiked ? "Unlike" : "Like")
+                        </button>
+                        <span class="likes-count ml-2" @onclick="@(() => ToggleShowLikedUsernames(post.PostId))">
+                            Likes: @(likesByPostIdCache.ContainsKey(post.PostId)
+                         ? (showLikedUsernames.ContainsKey(post.PostId) && showLikedUsernames[post.PostId]
+                         ? string.Join(", ", GetLikedUsernames(post.PostId))
+                         : GetLikesCount(post.PostId).ToString())
+                         : "0")
+                        </span>
+                    </div>
+                    <div class="button-bar">
+                        @if (post.OwnerId == _userId)
+                        {
+                            <button class="btn btn-secondary btn-sm" @onclick="@(() => EditPostDialog("Update", post.PostId, post))">Edit</button>
+                            <br>
+                            <button class="btn btn-danger btn-sm mt-2" @onclick="@(() => DeletePost(post.PostId))">Delete</button>
+                        }
+                    </div>
+                </div>
+
+                <div>
+                    <button class="btn mt-2" @onclick="ToggleComments">@buttonText</button>
+                </div>
+            </div>
+
+            @if (showComments)
             {
-                <img src="@($"data:image/jpeg;base64,{post.ImageBase64}")" alt="Image" class="img-thumbnail" width="400" height="300" />
+                <div class="comments-section">
+                    <Comment PostId="@post.PostId" />
+                </div>
             }
-            <button class="btn btn-primary" @onclick="@(() => NavigateToComments(post.PostId))">View</button>
-            <button class="btn btn-primary" @onclick="@(() => ToggleLikePost(post))">
-                @(likeStatusCache.TryGetValue(post.PostId, out var isLiked) && isLiked ? "Unlike" : "Like")
-            </button>
-
-
-        @if (post.OwnerId == _userId)
-        {
-
-            <button class="btn btn-secondary" @onclick="@(() => EditPostDialog("Update", post.PostId, post))">Edit</button>
-
-            <button class="btn btn-danger" @onclick="@(() => DeletePost(post.PostId))">Delete</button>
-        }
         </div>
-        <span class="likes-count" @onclick="@(() => ToggleShowLikedUsernames(post.PostId))">
-            Likes: @(likesByPostIdCache.ContainsKey(post.PostId)
-         ? (showLikedUsernames.ContainsKey(post.PostId) && showLikedUsernames[post.PostId]
-         ? string.Join(", ", GetLikedUsernames(post.PostId))
-         : GetLikesCount(post.PostId).ToString())
-         : "0")
-        </span>
-
     }
-
 }
+
+
 <PostDialogBox Title="@_titleDialog"
                post="@_viewEditPost"
                OnCancel="CancelPostDialog"
@@ -86,6 +101,8 @@ else
     private Dictionary<int, bool> likeStatusCache = new Dictionary<int, bool>();
     private Dictionary<int, LikeInfo> likesByPostIdCache = new Dictionary<int, LikeInfo>();
     private Dictionary<int, bool> showLikedUsernames = new Dictionary<int, bool>();
+    private bool showComments = false;
+    private string buttonText = "Show Comments";
 
 
 
@@ -336,6 +353,19 @@ else
         {
             LikesCount = 0;
             Usernames = new List<string>();
+        }
+    }
+
+    private void ToggleComments()
+    {
+        showComments = !showComments;
+        if (buttonText == "Show Comments")
+        {
+            buttonText = "Hide Comments";
+        }
+        else
+        {
+            buttonText = "Show Comments";
         }
     }
 
