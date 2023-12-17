@@ -20,6 +20,7 @@ namespace SharedModels.Entities
         public string OwnerId { get; set; } // Tove: Fremmednøkkel for brukeren
         public bool IsCommentAllowed { get; set; }
         public string ImageBase64 { get; set; }
+        public List<Like> Likes { get; set; }
 
     }
     

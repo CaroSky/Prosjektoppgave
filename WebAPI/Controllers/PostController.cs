@@ -36,38 +36,57 @@ namespace WebAPI.Controllers
 
 
         [HttpGet("{id}/posts")]
-
-        public async Task<PostIndexViewModel> GetPosts([FromRoute] int id)
+        public async Task<ActionResult<PostIndexViewModel>> GetPosts([FromRoute] int id)
         {
-            //find the user that is logged in 
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);   //it return a http://...:username so I need to get the username from the string
+            string userId = null;
+
+            // Extract the username from the claim and find the user
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim != null)
             {
-                var userId = userIdClaim.Value;
-                _logger.LogInformation($"User ID in blog Controller - GetBlogs: {userId}");
-                string[] words = userIdClaim.ToString().Split(':');
+                var claimValue = userIdClaim.Value;
+                _logger.LogInformation($"Claim value in blog Controller - GetBlogs: {claimValue}");
+                string[] words = claimValue.Split(':');
                 string username = words[words.Length - 1].Trim();
+
                 var user = await _manager.FindByNameAsync(username);
+                if (user != null)
+                {
+                    userId = user.Id; // Use the user's ID for like checking
+                }
             }
             else
             {
                 _logger.LogWarning("User ID claim not found.");
+                // Optionally, handle unauthenticated scenario here
             }
-
 
             var blog = await _repository.GetBlogById(id);
             var posts = await _repository.GetAllPostByBlogId(id);
+
+            var userLikedPosts = new Dictionary<int, bool>();
+            foreach (var post in posts)
+            {
+                bool isLiked = false;
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    isLiked = await _repository.CheckIfUserLikedPost(post.PostId, userId);
+                    _logger.LogInformation($"Post ID: {post.PostId}, Liked by User ID: {userId} = {isLiked}");
+                }
+                userLikedPosts[post.PostId] = isLiked;
+            }
+
             var postIndexViewModel = new PostIndexViewModel
             {
                 Posts = posts,
                 BlogId = id,
                 BlogTitle = blog.Title,
                 IsPostAllowed = blog.IsPostAllowed,
+                UserLiked = userLikedPosts
             };
 
             return postIndexViewModel;
         }
-
 
 
         //POST: Create
@@ -285,8 +304,22 @@ namespace WebAPI.Controllers
              await _repository.DeletePost(post, User);
             //await _repository.RemoveOrphanedTags();
             return Ok(post);
-
-            
         }
+        // POST: Like a Post
+        [HttpPost("{postId}/like")]
+        [Authorize]
+        public async Task<IActionResult> LikePost([FromRoute] int postId)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            string[] words = userIdClaim.ToString().Split(':');
+            string username = words[words.Length - 1].Trim();
+            var user = await _manager.FindByNameAsync(username);
+            _logger.LogInformation($"Inside LikePost with postid {postId} and userId {user.Id}");
+
+            await _repository.ToggleLikePost(postId, user.Id);
+
+            return Ok();
+        }
+
     }
 }

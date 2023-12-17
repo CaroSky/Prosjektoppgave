@@ -36,6 +36,10 @@ else
                 <img src="@($"data:image/jpeg;base64,{post.ImageBase64}")" alt="Image" class="img-thumbnail" width="400" height="300" />
             }
             <button class="btn btn-primary" @onclick="@(() => NavigateToComments(post.PostId))">View</button>
+            <button class="btn btn-primary" @onclick="@(() => ToggleLikePost(post))">
+                @(likeStatusCache.TryGetValue(post.PostId, out var isLiked) && isLiked ? "Unlike" : "Like")
+            </button>
+
         @if (post.OwnerId == _userId)
         {
 
@@ -44,9 +48,8 @@ else
             <button class="btn btn-danger" @onclick="@(() => DeletePost(post.PostId))">Delete</button>
         }
         </div>
-    }
-   
 
+    }
 
 }
 <PostDialogBox Title="@_titleDialog"
@@ -72,6 +75,7 @@ else
     private ClaimsPrincipal user;
     private string _username;
     private string _userId;
+    private Dictionary<int, bool> likeStatusCache = new Dictionary<int, bool>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -80,9 +84,7 @@ else
         _username = user?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
         _userId = user?.FindFirst(JwtRegisteredClaimNames.NameId)?.Value;
         //posts = await PostService.GetPostsByBlogIdAsync(Id);
-        //posts = await PostService.GetPostsByBlogIdAsync(Id);
         await GetPostsForBlog(Id);
-
 
         _titleDialog = "title";
     }
@@ -131,11 +133,21 @@ else
         var postIndexViewModel = await PostService.GetPostsByBlogIdAsync(blogId);
         posts = postIndexViewModel.Posts;
         allowed = postIndexViewModel.IsPostAllowed;
+
+        // Update the like status cache directly here
+        likeStatusCache.Clear();
+        if (postIndexViewModel.UserLiked != null)
+        {
+            foreach (var kvp in postIndexViewModel.UserLiked)
+            {
+                likeStatusCache[kvp.Key] = kvp.Value;
+            }
+        }
+
+        StateHasChanged(); // Refresh the UI
     }
 
-
    
-
     private async Task DeletePost(int postId)
     {
        
@@ -211,7 +223,25 @@ else
     private void NavigateToComments(int postId)
     {
         NavigationManager.NavigateTo($"/comment/{postId}");
+
     }
+
+    private async Task ToggleLikePost(SharedModels.Entities.Post post)
+    {
+        bool success = await PostService.LikePostAsync(post.PostId);
+        if (success)
+        {
+            likeStatusCache[post.PostId] = !likeStatusCache.TryGetValue(post.PostId, out var isLiked) || !isLiked;
+            StateHasChanged(); // Refresh UI
+        }
+        else
+        {
+            // Handle error case
+        }
+    }
+
+
+
 }
 
 

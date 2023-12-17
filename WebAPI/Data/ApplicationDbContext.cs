@@ -25,6 +25,7 @@ namespace WebAPI.Data
         public DbSet<PostTag> PostTag { get; set; }
 
         public DbSet<Subscription> Subscriptions { get; set; }
+        public DbSet<Like> Likes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

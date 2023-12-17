@@ -12,6 +12,8 @@ namespace SharedModels.ViewModels
         public bool IsPostAllowed { get; set; }
         public int OwnerId { get; set; }
         public string ImageBase64 { get; set; }
+        public Dictionary<int, int> LikesCount { get; set; } 
+        public Dictionary<int, bool> UserLiked { get; set; }
     }
 
     public class PostCreateViewModel

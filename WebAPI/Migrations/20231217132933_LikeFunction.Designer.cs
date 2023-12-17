@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebAPI.Data;
 
@@ -11,9 +12,10 @@ using WebAPI.Data;
 namespace WebAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231217132933_LikeFunction")]
+    partial class LikeFunction
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -254,7 +256,7 @@ namespace WebAPI.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("Blog", (string)null);
+                    b.ToTable("Blog");
                 });
 
             modelBuilder.Entity("SharedModels.Entities.Comment", b =>
@@ -283,7 +285,7 @@ namespace WebAPI.Migrations
 
                     b.HasIndex("PostId");
 
-                    b.ToTable("Comment", (string)null);
+                    b.ToTable("Comment");
                 });
 
             modelBuilder.Entity("SharedModels.Entities.Like", b =>
@@ -311,7 +313,7 @@ namespace WebAPI.Migrations
 
                     b.HasIndex("PostId");
 
-                    b.ToTable("Likes", (string)null);
+                    b.ToTable("Likes");
                 });
 
             modelBuilder.Entity("SharedModels.Entities.Post", b =>
@@ -351,7 +353,7 @@ namespace WebAPI.Migrations
 
                     b.HasIndex("BlogId");
 
-                    b.ToTable("Post", (string)null);
+                    b.ToTable("Post");
                 });
 
             modelBuilder.Entity("SharedModels.Entities.PostTag", b =>
@@ -364,7 +366,7 @@ namespace WebAPI.Migrations
 
                     b.HasKey("PostsPostId", "TagsTagId");
 
-                    b.ToTable("PostTag", (string)null);
+                    b.ToTable("PostTag");
                 });
 
             modelBuilder.Entity("SharedModels.Entities.Subscription", b =>
@@ -388,7 +390,7 @@ namespace WebAPI.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Subscriptions", (string)null);
+                    b.ToTable("Subscriptions");
                 });
 
             modelBuilder.Entity("SharedModels.Entities.Tag", b =>
@@ -405,7 +407,7 @@ namespace WebAPI.Migrations
 
                     b.HasKey("TagId");
 
-                    b.ToTable("Tag", (string)null);
+                    b.ToTable("Tag");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

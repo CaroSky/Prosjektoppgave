@@ -50,7 +50,8 @@ namespace WebAPI.Models.Repositories
         Task<Dictionary<int, bool>> GetAllSubscriptionStatuses(string userId);
         Task<IEnumerable<Post>> SearchPostByTagOrUsername(string searchQuery);
         Task<List<String>> SearchSuggestions(String searchQuery);
-
+        Task ToggleLikePost(int postId, string userId);
+        Task<bool> CheckIfUserLikedPost(int postId, string userId);
     } 
 
 
@@ -563,6 +564,45 @@ namespace WebAPI.Models.Repositories
 
             return subscriptionStatuses;
         }
+        public async Task ToggleLikePost(int postId, string userId)
+        {
+            var post = await _db.Post.FindAsync(postId);
+            if (post == null)
+            {
+                // Handle post not found
+                return;
+            }
+
+            var existingLike = await _db.Likes.FirstOrDefaultAsync(like =>
+                like.PostId == postId && like.UserId == userId);
+
+            if (existingLike == null)
+            {
+                // User has not liked the post yet, so add a new like
+                var like = new Like
+                {
+                    PostId = postId,
+                    UserId = userId,
+                    IsLiked = true,
+                    LikedDate = DateTime.Now
+                };
+                _db.Likes.Add(like);
+                post.Likes.Add(like);
+            }
+            else
+            {
+                // User has already liked the post, toggle the like (undo like)
+                existingLike.IsLiked = !existingLike.IsLiked;
+            }
+
+            await _db.SaveChangesAsync();
+        }
+        public async Task<bool> CheckIfUserLikedPost(int postId, string userId)
+        {
+            var like = await _db.Likes.FirstOrDefaultAsync(l => l.PostId == postId && l.UserId == userId && l.IsLiked);
+            return like != null;
+        }
+
 
     }
 

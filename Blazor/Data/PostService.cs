@@ -26,7 +26,6 @@ namespace Blazor.Data
         }
 
         public async Task<PostIndexViewModel> GetPostsByBlogIdAsync(int blogId)
-
         {
             _logger.LogInformation($"Sending HTTP GET request to URL: api/post/{blogId}/posts");
 
@@ -36,12 +35,22 @@ namespace Blazor.Data
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError($"Request failed with status code {response.StatusCode} and content {errorContent}");
                 throw new HttpRequestException($"Request failed with status code {response.StatusCode} and content {errorContent}");
             }
 
             try
             {
-                return await response.Content.ReadFromJsonAsync<PostIndexViewModel>();
+                var postIndexViewModel = await response.Content.ReadFromJsonAsync<PostIndexViewModel>();
+
+                // Log the details of the PostIndexViewModel
+                _logger.LogInformation($"Received PostIndexViewModel with {postIndexViewModel.Posts?.Count()} posts");
+                foreach (var post in postIndexViewModel.Posts)
+                {
+                    _logger.LogInformation($"Post ID: {post.PostId}, Liked: {postIndexViewModel.UserLiked.GetValueOrDefault(post.PostId)}");
+                }
+
+                return postIndexViewModel;
             }
             catch (JsonException ex)
             {
@@ -50,6 +59,7 @@ namespace Blazor.Data
                 throw;
             }
         }
+
 
         // Andre metoder for å opprette, oppdatere, og slette poster
 
@@ -107,12 +117,41 @@ namespace Blazor.Data
             var response = await _httpClient.DeleteAsync($"api/post/{postId}");
             return response.IsSuccessStatusCode;
         }
-        
 
+        public async Task<bool> LikePostAsync(int postId)
+        {
+            _logger.LogInformation($"Sending request to like post with ID {postId}");
 
+            try
+            {
+                // The token in the header includes the user information
+                var response = await _httpClient.PostAsJsonAsync($"api/post/{postId}/like", postId);
+                if (response.IsSuccessStatusCode)
+                {
+                    _logger.LogInformation($"Post with ID {postId} liked successfully");
+                    return true;
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError($"Error liking post: {errorContent}");
+                    return false;
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError($"HTTP request exception: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteLikeAsync(int postId)
+        {
+            var response = await _httpClient.DeleteAsync($"api/like");
+            return response.IsSuccessStatusCode;
+        }
 
     }
-
 
 }
 
