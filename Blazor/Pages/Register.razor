@@ -14,6 +14,12 @@
         }
     </div>
 }
+@if (ShowSuccessMessage)
+{
+    <div class="alert alert-success" role="alert">
+        Registration successful! You can now <a href="/login">log in</a>.
+    </div>
+}
 
 <div class="card">
     <div class="card-body">
@@ -46,6 +52,7 @@
     private RegisterModel RegisterModel = new RegisterModel();
     private List<string> Errors = new List<string>();
     private bool ShowErrors;
+    private bool ShowSuccessMessage;
 
     private async Task HandleRegistration()
     {
@@ -60,8 +67,7 @@
 
             if (result.Successful)
             {
-                // If registration is successful, redirect to login page or dashboard
-                NavigationManager.NavigateTo("/login");
+                ShowSuccessMessage = true;
             }
             else
             {
