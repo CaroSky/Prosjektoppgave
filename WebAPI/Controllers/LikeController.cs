@@ -15,11 +15,10 @@ namespace WebAPI.Controllers
     {
         private IBlogRepository _repository;
         private UserManager<IdentityUser> _manager;
-        private readonly ILogger<PostController> _logger;
+        private readonly ILogger<LikeController> _logger;
 
 
-        public LikeController(UserManager<IdentityUser> manager, IBlogRepository repository,
-            ILogger<PostController> logger)
+        public LikeController(UserManager<IdentityUser> manager, IBlogRepository repository, ILogger<LikeController> logger)
         {
             this._repository = repository;
             this._manager = manager;

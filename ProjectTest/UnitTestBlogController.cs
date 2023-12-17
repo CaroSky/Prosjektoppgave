@@ -53,10 +53,10 @@ namespace ProjectTest
             };
 
             _mockUserManager.Setup(m => m.FindByNameAsync(It.IsAny<string>()))
-                .ReturnsAsync(new IdentityUser { /* configure the user properties as needed */ });
+                .ReturnsAsync(new IdentityUser { });
 
             _mockRepository.Setup(r => r.GetAllBlogs())
-                .ReturnsAsync(new List<Blog>()); // You may need to replace 'Blog' with your actual blog class
+                .ReturnsAsync(new List<Blog>()); 
 
             // Act
             var result = await _blogController.GetBlogs() as ObjectResult;

@@ -53,10 +53,11 @@ namespace ProjectTest
 
             // Set up repository to return dummy data
             _mockRepository.Setup(repo => repo.GetBlogById(id))
-                .ReturnsAsync(new Blog
-                    { BlogId = id, Title = "Test Blog", IsPostAllowed = true });
+                .ReturnsAsync(new Blog { BlogId = id, Title = "Test Blog", IsPostAllowed = true });
             _mockRepository.Setup(repo => repo.GetAllPostByBlogId(id))
-                .ReturnsAsync(new List<Post>()); 
+                .ReturnsAsync(new List<Post>());
+            _mockRepository.Setup(repo => repo.GetAllLikesForUser(It.IsAny<string>()))
+                .ReturnsAsync(new List<Like> { new Like { PostId = 1 } });
 
             // Act
             var result = await _postController.GetPosts(id);
