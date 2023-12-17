@@ -49,7 +49,13 @@ else
             <button class="btn btn-danger" @onclick="@(() => DeletePost(post.PostId))">Delete</button>
         }
         </div>
-        <span class="likes-count">Likes: @(GetLikesCount(post.PostId))</span>
+        <span class="likes-count" @onclick="@(() => ToggleShowLikedUsernames(post.PostId))">
+            Likes: @(likesByPostIdCache.ContainsKey(post.PostId)
+         ? (showLikedUsernames.ContainsKey(post.PostId) && showLikedUsernames[post.PostId]
+         ? string.Join(", ", GetLikedUsernames(post.PostId))
+         : GetLikesCount(post.PostId).ToString())
+         : "0")
+        </span>
 
     }
 
@@ -79,6 +85,7 @@ else
     private string _userId;
     private Dictionary<int, bool> likeStatusCache = new Dictionary<int, bool>();
     private Dictionary<int, LikeInfo> likesByPostIdCache = new Dictionary<int, LikeInfo>();
+    private Dictionary<int, bool> showLikedUsernames = new Dictionary<int, bool>();
 
 
 
@@ -248,7 +255,7 @@ else
 
     }
 
-    private void ToggleLikePost(SharedModels.Entities.Post post)
+    private async Task ToggleLikePost(SharedModels.Entities.Post post)
     {
         if (!likesByPostIdCache.TryGetValue(post.PostId, out var likeInfo))
         {
@@ -267,6 +274,7 @@ else
             likeInfo.LikesCount--;
             // Remove the username from the list of liked users
             likeInfo.Usernames.Remove(_username);
+
         }
         else
         {
@@ -274,8 +282,9 @@ else
             likeInfo.LikesCount++;
             // Add the username to the list of liked users
             likeInfo.Usernames.Add(_username);
-        }
 
+        }
+        await PostService.LikePostAsync(post.PostId);
         // Toggle the like status
         likeStatusCache[post.PostId] = !isLiked;
 
@@ -291,6 +300,26 @@ else
             return likeInfo.LikesCount;
         }
         return 0; // Default to 0 likes if not found
+    }
+    private List<string> GetLikedUsernames(int postId)
+    {
+        if (likesByPostIdCache.TryGetValue(postId, out var likeInfo))
+        {
+            return likeInfo.Usernames;
+        }
+        return new List<string>(); // Return an empty list if not found
+    }
+
+    private void ToggleShowLikedUsernames(int postId)
+    {
+        if (showLikedUsernames.ContainsKey(postId))
+        {
+            showLikedUsernames[postId] = !showLikedUsernames[postId];
+        }
+        else
+        {
+            showLikedUsernames[postId] = true;
+        }
     }
 
     public class LikeInfo

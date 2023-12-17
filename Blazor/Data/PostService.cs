@@ -146,12 +146,6 @@ namespace Blazor.Data
             }
         }
 
-        public async Task<bool> DeleteLikeAsync(int postId)
-        {
-            var response = await _httpClient.DeleteAsync($"api/like");
-            return response.IsSuccessStatusCode;
-        }
-
     }
 
 }
