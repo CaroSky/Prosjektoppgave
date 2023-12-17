@@ -9,49 +9,36 @@
 @inject NavigationManager NavigationManager
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider
 
-
-<h3>Comments for Post @PostId</h3>
-
-    @if (comments == null)
-    {
-        <p>Loading comments...</p>
-    }
-    else
+@if (comments == null)
+{
+    <p>Loading comments...</p>
+}
+else
 {
     @if (user.Identity.IsAuthenticated)
     {
         <button class="btn btn-success ml-auto" @onclick="@(() => CreateCommentDialog("Create"))">Add New Comment</button>
     }
-    <table class="table">
-            <thead>
-                <tr>
-                    <th>Content</th>
-                    <th>Created</th>
-                    <th>Author</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var comment in comments)
-                {
-                    <tr>
-                  
-                        <td>@comment.Created</td>
-                        <td>@comment.Content</td>
-                        <td>@comment.OwnerId</td>
 
+    @foreach (var comment in comments.OrderByDescending(c => c.Created))
+    {
+        <div class="card mb-2">
+            <div class="card-body">
+                <p class="card-text">@comment.Content</p>
+                <small class="text-muted">@comment.Created</small>
+                <small class="text-muted">@comment.OwnerId</small>
+
+                <div class="float-right">
                     @if (comment.OwnerId == _userId)
                     {
-
-                        <button class="btn btn-secondary" @onclick="@(() => EditCommentDialog("Update", comment.CommentId, comment))">Edit</button>
-
-                        <button class="btn btn-danger" @onclick="@(() => DeleteComment(comment.CommentId))">Delete</button>
+                        <button class="btn btn-secondary btn-sm" @onclick="@(() => EditCommentDialog("Update", comment.CommentId, comment))">Edit</button>
+                        <button class="btn btn-danger btn-sm" @onclick="@(() => DeleteComment(comment.CommentId))">Delete</button>
                     }
-                    </tr>
-                }
-            </tbody>
-        </table>
+                </div>
+            </div>
+        </div>
     }
-
+}
 
 <CommentDialogBox Title="@_titleDialog"
                   comment="@_viewEditComment"
