@@ -147,8 +147,7 @@ namespace WebAPI.Controllers
             var tags = ExtractHashtags(post.Content);
             //Lagrer post
             await _repository.SavePost(post, User);
-            //tempdata
-            //TempData["message"] = string.Format("{0} has been created", post.Title);
+
 
             foreach (var tagName in tags)
             {
@@ -167,6 +166,41 @@ namespace WebAPI.Controllers
                 var postTag = new PostTag { PostsPostId = post.PostId, TagsTagId = tag.TagId };
                 await _repository.SavePostTag(postTag);
             }
+
+
+            var subscribeUserList = await _repository.GetSubscriptionsByBlogId(post.Blog.BlogId);
+            var notifications = new List<Notfication>();
+
+            if (post.OwnerId != post.Blog.OwnerId)
+            {
+                var newNotification = new Notfication()
+                {
+                    PostId = post.PostId,
+                    UserId = post.Blog.OwnerId
+                };
+                notifications.Add(newNotification);
+            }
+
+            if (subscribeUserList != null)
+            {
+                foreach (var subscription in subscribeUserList)
+                {
+                    var newNotification = new Notfication()
+                    {
+                        PostId = post.PostId,
+                        UserId = subscription.UserId
+                    };
+                    notifications.Add(newNotification);
+                }
+
+                
+            }
+
+            if (notifications.Count > 0)
+            {
+                await _repository.InsertMultipleNotifications(notifications);
+            }
+            
             return CreatedAtAction("Get", new { id = post.PostId }, post);
 
 

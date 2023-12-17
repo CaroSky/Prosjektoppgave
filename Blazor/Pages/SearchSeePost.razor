@@ -10,6 +10,7 @@
 @inject NavigationManager NavigationManager
 @inject PostService PostService
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider
+@inject NotificationService NotificationService
 
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous">
@@ -142,6 +143,7 @@ else
     private bool _isInSearchMode;
     private string _searchQuery;
     private int _postId;
+    private int notificationCount;
 
     protected override async Task OnInitializedAsync()
     {
@@ -152,6 +154,7 @@ else
         _postId = Id;
         await GetPost(Id);
         _searchQuery = SearchQuery;
+        notificationCount = await NotificationService.GetNotificationsCount();
     }
 
     private void CancelPostDialog()

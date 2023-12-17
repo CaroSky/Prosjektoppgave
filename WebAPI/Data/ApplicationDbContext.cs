@@ -28,6 +28,8 @@ namespace WebAPI.Data
 
         public DbSet<Like> Like { get; set; }
 
+        public DbSet<Notfication> Notification { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -36,6 +38,9 @@ namespace WebAPI.Data
                 .HasKey(pt => new { pt.PostsPostId, pt.TagsTagId });
             modelBuilder.Entity<Like>()
                 .HasKey(pt => new { pt.UserId, pt.PostId });
+            modelBuilder.Entity<Notfication>()
+                .HasKey(pt => new { pt.UserId, pt.PostId });
+
 
             // Her legger du til konfigurasjonen for relasjonen mellom Blog og IdentityUser
             modelBuilder.Entity<Blog>()

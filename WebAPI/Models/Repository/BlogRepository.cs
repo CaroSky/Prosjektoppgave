@@ -43,11 +43,18 @@ namespace WebAPI.Models.Repositories
         Task UnsubscribeFromBlog(string userId, int blogId);
         Task<bool> IsSubscribed(string userId, int blogId);
         Task<Dictionary<int, bool>> GetAllSubscriptionStatuses(string userId);
+        Task<IEnumerable<Subscription>> GetSubscriptionsByBlogId(int blogId);
         Task<IEnumerable<Like>> GetAllLikes();
         Task<Like> GetLike(int postId, string userId);
         Task SaveLike(Like vote);
         Task DeleteLike(Like like);
         Task<IEnumerable<Like>> GetAllLikesForUser(String userId);
+        Task InsertMultipleNotifications(List<Notfication> notifications);
+        Task<IEnumerable<Notfication>> GetAllNotificationsForUser(String userId);
+        Task<int> GetNotificationsCountForUser(String userId);
+        Task<Notfication> GetNotification(int postId, string userId);
+        Task DeleteNotification(Notfication notification);
+        Task DeleteAllNotificationsForUser(String userId);
     } 
 
 
@@ -208,6 +215,8 @@ namespace WebAPI.Models.Repositories
             _db.SaveChanges();
             await RemoveOrphanedTags();
             await RemoveOrphanedLikes(post.PostId);
+            await RemoveOrphanedNotifications(post.PostId);
+            await DeleteAllNotificationsForPost(post.PostId);
 
 
 
@@ -472,6 +481,13 @@ namespace WebAPI.Models.Repositories
             }
         }
 
+        public async Task<IEnumerable<Subscription>> GetSubscriptionsByBlogId(int blogId)
+        {
+            var subscriptions = _db.Subscriptions.Where(subcription => subcription.BlogId == blogId);
+            return subscriptions;
+        }
+
+
         public async Task<IEnumerable<Like>> GetAllLikes()
         {
             try
@@ -607,6 +623,113 @@ namespace WebAPI.Models.Repositories
             }
         }
 
+        public async Task InsertMultipleNotifications(List<Notfication> notifications)
+        {
+            _db.Notification.AddRange(notifications);
+            _db.SaveChanges();
+        }
+
+        public async Task RemoveOrphanedNotifications(int postId)
+        {
+
+            var notificationsToDelete = _db.Notification.Where(notification => notification.PostId == postId);
+
+            if (notificationsToDelete.Any())
+            {
+                _logger.LogInformation("Orphaned notifications to be removed");
+                _db.Notification.RemoveRange(notificationsToDelete);
+                await _db.SaveChangesAsync();
+                _logger.LogInformation("Orphaned notifications removed successfully.");
+            }
+            else
+            {
+                _logger.LogInformation("No orphaned notifications found to remove.");
+            }
+        }
+
+        public async Task<IEnumerable<Notfication>> GetAllNotificationsForUser(String userId)
+        {
+            try
+            {
+                _logger.LogInformation("Getting all notifications");
+                var notifications = await _db.Notification
+                    .Where(s => s.UserId == userId)
+                    .ToListAsync();
+                return notifications;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all notifications");
+                throw;
+            }
+        }
+
+        public async Task<int> GetNotificationsCountForUser(String userId)
+        {
+            try
+            {
+                _logger.LogInformation("Getting the count of notifications");
+                var notifications = await _db.Notification
+                    .Where(s => s.UserId == userId)
+                    .ToListAsync();
+
+                int count = _db.Notification.Count(n => n.UserId == userId);
+                return count;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting the count of notifications");
+                throw;
+            }
+        }
+
+        public async Task<Notfication> GetNotification(int postId, string userId)
+        {
+            var notification = await _db.Notification
+                .Where(item => item.PostId == postId && item.UserId == userId)
+                .FirstAsync();
+            return notification;
+        }
+
+        public async Task DeleteNotification(Notfication notification)
+        {
+            _db.Notification.Remove(notification);
+            _db.SaveChanges();
+        }
+
+        public async Task DeleteAllNotificationsForUser(String userId)
+        {
+            var notificationsToDelete = _db.Notification.Where(notification => notification.UserId == userId);
+
+            if (notificationsToDelete.Any())
+            {
+                _logger.LogInformation("Orphaned notifications to be removed");
+                _db.Notification.RemoveRange(notificationsToDelete);
+                await _db.SaveChangesAsync();
+                _logger.LogInformation("Orphaned notifications removed successfully.");
+            }
+            else
+            {
+                _logger.LogInformation("No orphaned notifications found to remove.");
+            }
+        }
+
+        public async Task DeleteAllNotificationsForPost(int postId)
+        {
+            var notificationsToDelete = _db.Notification.Where(notification => notification.PostId == postId);
+
+            if (notificationsToDelete.Any())
+            {
+                _logger.LogInformation("Orphaned notifications to be removed");
+                _db.Notification.RemoveRange(notificationsToDelete);
+                await _db.SaveChangesAsync();
+                _logger.LogInformation("Orphaned notifications removed successfully.");
+            }
+            else
+            {
+                _logger.LogInformation("No orphaned notifications found to remove.");
+            }
+        }
     }
 
 }

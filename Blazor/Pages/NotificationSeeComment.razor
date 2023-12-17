@@ -1,4 +1,4 @@
-﻿@page "/searchSeeComment/{PostId:int}/{SearchQuery}"
+﻿@page "/notificationSeeComment/{PostId:int}"
 
 @using SharedModels.Entities
 @using SharedModels.ViewModels;
@@ -197,7 +197,7 @@
     private void NavigateToPost()
     {
         Console.WriteLine($"BlogId when getting the posts: {_postId}.");
-        NavigationManager.NavigateTo($"/searchSeePost/{_postId}/{SearchQuery}");
+        NavigationManager.NavigateTo($"/notificationSeePost/{_postId}/");
     }
 }
 

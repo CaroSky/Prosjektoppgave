@@ -11,6 +11,7 @@
 @inject NavigationManager NavigationManager
 @inject SearchService SearchService
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider
+@inject NotificationService NotificationService
 
 
 
@@ -111,6 +112,7 @@ else
     private string _userId;
     private Dictionary<int, bool> _blogSubscriptionStatus;
     private List<string> _suggestions;
+    private int notificationCount;
 
 
 
@@ -133,6 +135,16 @@ else
             _blogSubscriptionStatus = new Dictionary<int, bool>();
         }
 
+        notificationCount = await NotificationService.GetNotificationsCount();
+        //NotificationService.OnNotificationCountChanged += UpdateNotificationCount;
+        Console.WriteLine($"Notification count in blog: {notificationCount}.");
+
+    }
+
+    private void UpdateNotificationCount(int count)
+    {
+        notificationCount = count;
+        StateHasChanged();
     }
 
     protected void OnPropertyChanged()
@@ -263,6 +275,5 @@ else
         _searchQuery = suggestion;
         _suggestions.Clear(); // Clear the suggestions after selecting one
     }
-
 
 }

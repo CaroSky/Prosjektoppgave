@@ -1,0 +1,172 @@
+﻿@using SharedModels.Entities
+@using SharedModels.ViewModels
+@using Blazor.Data;
+@using System.Security.Claims
+@using System.IdentityModel.Tokens.Jwt;
+@using WebAPI.Migrations
+
+@page "/notificationSeePost/{Id:int}"
+
+@inject NavigationManager NavigationManager
+@inject PostService PostService
+@inject CustomAuthenticationStateProvider AuthenticationStateProvider
+@inject NotificationService NotificationService
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous">
+</head>
+
+<div class="d-flex justify-content-between">
+        <button class="btn btn-primary" @onclick="@(() => NavigateToNotificationPosts())">Go back to notifications list</button>
+</div>
+
+<br/>
+
+@if (posts == null)
+{
+    <p>Loading posts...</p>
+}
+
+else
+{
+
+    @foreach (var post in posts)
+    {
+        <div class="card post-preview mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-auto">
+                        <!-- Adjust the column size as needed -->
+                        <h4 class="card-title">@post.Post.Title</h4>
+                    </div>
+                    <div class="col-auto">
+                        <div class="row">
+                            <div class="col-auto">
+                                <label for="likes" class="mr-2">@post.Post.CountLike Likes</label>
+                            </div>
+                            @if (user.Identity.IsAuthenticated && post.Post.OwnerId != _userId)
+                            {
+                                <div class="col-auto">
+                                    <button class="btn btn-success" @onclick="@(() => Like(post))">
+                                        <i class="fas fa-thumbs-up"></i>
+                                    </button>
+                                </div>
+                                <div class="col-auto">
+                                    <label for="vote" class="mr-2">@post.Like</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <p class="card-text"><small class="text-muted">@post.Post.OwnerUsername posted on @post.Post.Created.ToString("yyyy-MM-dd")</small></p>
+                <br/>
+                <div class="row">
+                    <div class="col-auto">
+                        <p class="card-text">@post.Post.Content</p>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" disabled="disabled" @bind="post.Post.IsCommentAllowed" />
+                            <label class="form-check-label" for="commentCheckbox">Allow Comments</label>
+                        </div>
+                        <button class="btn btn-primary mt-2" @onclick="@(() => NavigateToComments(post.Post.PostId))">See Comments</button>
+                    </div>
+                    <div class="col-auto">
+                    @if (post.Post.ImageBase64 != "")
+                    {
+                        <div>
+                            <img src="@($"data:image/png;base64,{post.Post.ImageBase64}")"/>
+                        </div>
+                    }
+
+                    </div>
+
+                </div>
+
+ 
+            </div>
+        </div>
+
+    }
+   
+
+
+}
+
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    [Parameter]
+    public string SearchQuery { get; set; }
+    private SharedModels.Entities.Post _post = new SharedModels.Entities.Post();
+    private PostCreateViewModel _viewPost = new PostCreateViewModel();
+    private PostEditViewModel _viewEditPost = new SharedModels.ViewModels.PostEditViewModel();
+    private PostIndexViewModel postIndexViewModel;
+    private bool allowed;
+    private IEnumerable<PostWithLike> posts;
+    private ClaimsPrincipal user;
+    private string _username;
+    private string _userId;
+    private string _blogTitle;
+    private bool _isInSearchMode;
+    private string _searchQuery;
+    private int _postId;
+    private int notificationCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        user = authState.User;
+        _username = user?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        _userId = user?.FindFirst(JwtRegisteredClaimNames.NameId)?.Value;
+        _postId = Id;
+        await GetPost(Id);
+        _searchQuery = SearchQuery;
+        notificationCount = await NotificationService.GetNotificationsCount();
+    }
+
+ 
+
+    private async Task GetPost(int postId)
+    {
+        Console.WriteLine($"BlogId when getting the posts: {postId}.");
+        Console.WriteLine("In search mode");
+        var postIndexViewModel = await PostService.GetPostByPostIdAsync(postId);
+        posts = postIndexViewModel.Posts;
+        _searchQuery = SearchQuery;
+        await NotificationService.DeleteNotification(Id);
+    }
+
+
+    private async Task Like(PostWithLike post)
+    {
+        if (post.Like == "Liked!")
+        {
+            Console.WriteLine("Deleting like...");
+            await PostService.DeleteLikeAsync(post.Post.PostId);
+            Console.WriteLine("Like deleted."); 
+        }
+        else
+        {
+            Console.WriteLine("Creating new like...");
+            await PostService.CreateLikeAsync(post.Post.PostId);
+            Console.WriteLine("New like created."); 
+        }
+
+        await GetPost(Id);
+    }
+
+
+    private void NavigateToComments(int postId)
+    {
+        NavigationManager.NavigateTo($"/notificationSeeComment/{postId}");
+    }
+
+
+    private void NavigateToNotificationPosts()
+    {
+        NavigationManager.NavigateTo($"/notifications/");
+    }
+}
+
+

@@ -2,7 +2,7 @@
 @using SharedModels.ViewModels
 @using Blazor.Data;
 
-@page "/search/{SearchQuery}"
+@page "/notifications"
 
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
@@ -10,15 +10,17 @@
 @inject NotificationService NotificationService
 
 
-<h3>Search results</h3>
+<h3>Notifications</h3>
 
 @if (posts == null)
 {
-    <p>No post found...</p>
+    <p>No notifications...</p>
 }
 
 else
 {
+    <button class="btn btn-primary mt-2" @onclick="@(() => ClearNotifications())">Clear notifications</button>
+    <br/>
     @foreach (var post in posts)
     {
 
@@ -65,7 +67,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var postEnumerable = await SearchService.SearchPostAsync(SearchQuery);
+        var postEnumerable = await NotificationService.GetNotificationPosts();
         if (postEnumerable.Count() == 0)
         {
             posts = null;
@@ -75,6 +77,7 @@ else
         {
             posts = postEnumerable.ToList();
         }
+
         notificationCount = await NotificationService.GetNotificationsCount();
         
 
@@ -82,7 +85,14 @@ else
 
     private void NavigateToPost(int postId)
     {
-        NavigationManager.NavigateTo($"/searchSeePost/{postId}/{SearchQuery}");
+        NavigationManager.NavigateTo($"/notificationSeePost/{postId}");
+    }
+
+    private async Task ClearNotifications()
+    {
+        await NotificationService.DeleteAllNotificationForUser();
+        NavigationManager.NavigateTo($"/blogs");
+       
     }
 
  

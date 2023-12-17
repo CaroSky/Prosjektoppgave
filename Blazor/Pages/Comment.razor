@@ -8,6 +8,8 @@
 @inject CommentService CommentService
 @inject NavigationManager NavigationManager
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider
+@inject NotificationService NotificationService
+
 
 
 <div class="d-flex justify-content-between">
@@ -70,6 +72,8 @@
         private string _userId;
         private string _postTitle;
         private int _blogId;
+        private int notificationCount;
+
 
 
         protected override async Task OnInitializedAsync()
@@ -80,6 +84,7 @@
             _userId = user?.FindFirst(JwtRegisteredClaimNames.NameId)?.Value;
         
             await GetCommentsForPost(PostId);
+            notificationCount = await NotificationService.GetNotificationsCount();
         
         }
 
