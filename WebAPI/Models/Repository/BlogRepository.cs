@@ -141,6 +141,8 @@ namespace WebAPI.Models.Repositories
 
             _db.Blog.Remove(blog);
             _db.SaveChanges();
+            await RemoveOrphanedSubscriptions(blog.BlogId);
+
         }
 
 
@@ -205,8 +207,10 @@ namespace WebAPI.Models.Repositories
            
             _db.SaveChanges();
             await RemoveOrphanedTags();
+            await RemoveOrphanedLikes(post.PostId);
 
-            
+
+
         }
 
         //comment-----------------------------------------------------------
@@ -451,6 +455,23 @@ namespace WebAPI.Models.Repositories
             return subscriptionStatuses;
         }
 
+        public async Task RemoveOrphanedSubscriptions(int blogId)
+        {
+            var subscriptionsToDelete = _db.Subscriptions.Where(subcription => subcription.BlogId == blogId);
+
+            if (subscriptionsToDelete.Any())
+            {
+                _logger.LogInformation("Orphaned subscriptions to be removed");
+                _db.Subscriptions.RemoveRange(subscriptionsToDelete);
+                await _db.SaveChangesAsync();
+                _logger.LogInformation("Orphaned subscriptions removed successfully.");
+            }
+            else
+            {
+                _logger.LogInformation("No orphaned subscriptions found to remove.");
+            }
+        }
+
         public async Task<IEnumerable<Like>> GetAllLikes()
         {
             try
@@ -566,6 +587,24 @@ namespace WebAPI.Models.Repositories
                 throw;
             }
 
+        }
+
+        public async Task RemoveOrphanedLikes(int postId)
+        {
+
+            var likesToDelete = _db.Like.Where(like => like.PostId == postId);
+
+            if (likesToDelete.Any())
+            {
+                _logger.LogInformation("Orphaned likes to be removed");
+                _db.Like.RemoveRange(likesToDelete);
+                await _db.SaveChangesAsync();
+                _logger.LogInformation("Orphaned likes removed successfully.");
+            }
+            else
+            {
+                _logger.LogInformation("No orphaned likes found to remove.");
+            }
         }
 
     }
