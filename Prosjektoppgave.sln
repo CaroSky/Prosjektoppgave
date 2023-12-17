@@ -12,7 +12,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebAPI", "WebAPI\WebAPI.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedModels", "Shared\SharedModels.csproj", "{D7272CE0-1358-4BE1-B00E-8F660DDDE4BF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlogUnitTest", "BlogUnitTest\BlogUnitTest.csproj", "{12F92081-DDE7-49CB-95E9-D55AEE0CFAF1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlogUnitTest", "BlogUnitTest\BlogUnitTest.csproj", "{12F92081-DDE7-49CB-95E9-D55AEE0CFAF1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

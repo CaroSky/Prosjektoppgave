@@ -11,6 +11,7 @@ namespace SharedModels.ViewModels
         public string BlogTitle { get; set; }
         public bool IsPostAllowed { get; set; }
         public int OwnerId { get; set; }
+        public string ImageBase64 { get; set; }
     }
 
     public class PostCreateViewModel
@@ -19,6 +20,7 @@ namespace SharedModels.ViewModels
         public string Content { get; set; }
         public int BlogId { get; set; }
         public bool IsCommentAllowed { get; set; }
+        public string ImageBase64 { get; set; }
 
     }
 
@@ -30,6 +32,7 @@ namespace SharedModels.ViewModels
         public DateTime Created { get; set; }
         public int BlogId { get; set; }
         public bool IsCommentAllowed { get; set; }
+        public string ImageBase64 { get; set; }
 
     }
 }

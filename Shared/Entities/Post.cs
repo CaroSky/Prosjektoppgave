@@ -19,7 +19,8 @@ namespace SharedModels.Entities
         public Blog Blog { get; set; }
         public string OwnerId { get; set; } // Tove: Fremmednøkkel for brukeren
         public bool IsCommentAllowed { get; set; }
+        public string ImageBase64 { get; set; }
 
-        }
+    }
     
 }

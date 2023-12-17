@@ -20,6 +20,10 @@
                     <label for="postContent">Content:</label>
                     <textarea id="postContent" class="form-control" @bind="post.Content" required></textarea>
                 </div>
+                <div class="form-group">
+                    <label for="imageUpload">Image:</label>
+                    <InputFile id="imageUpload" OnChange="HandleImageUpload" accept="image/*" />
+                </div>
 
                 <div class="form-group">
                     <div class="form-check">
@@ -45,6 +49,7 @@
     [Parameter] public EventCallback OnCancel { get; set; }
     [Parameter] public EventCallback OnSave { get; set; }
     [Parameter] public PostEditViewModel post { get; set; }
+    [Parameter] public EventCallback<string> OnImageUpload { get; set; }
 
     private bool _show;
 
@@ -59,4 +64,18 @@
         _show = false;
         StateHasChanged();
     }
+    private async Task HandleImageUpload(InputFileChangeEventArgs e)
+    {
+        var imageFile = e.File;
+        if (imageFile != null)
+        {
+            var buffer = new byte[imageFile.Size];
+            await imageFile.OpenReadStream().ReadAsync(buffer);
+            // Convert the image buffer to Base64
+            var base64Image = Convert.ToBase64String(buffer);
+
+            await OnImageUpload.InvokeAsync(base64Image);
+        }
+    }
+
 }

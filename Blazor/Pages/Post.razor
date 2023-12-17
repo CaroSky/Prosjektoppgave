@@ -29,6 +29,12 @@ else
             <h4>@post.Title</h4>
             <p>@post.Content</p>
             <p>@post.Created.ToString("yyyy-MM-dd")</p>
+
+            <!-- Display the image if ImageBase64 is not empty -->
+            @if (!string.IsNullOrWhiteSpace(post.ImageBase64))
+            {
+                <img src="@($"data:image/jpeg;base64,{post.ImageBase64}")" alt="Image" class="img-thumbnail" width="400" height="300" />
+            }
             <button class="btn btn-primary" @onclick="@(() => NavigateToComments(post.PostId))">View</button>
         @if (post.OwnerId == _userId)
         {
@@ -47,6 +53,7 @@ else
                post="@_viewEditPost"
                OnCancel="CancelPostDialog"
                OnSave="OnSavePostDialog"
+               OnImageUpload="HandleImageUploadAsync"
 @ref="_dialog"></PostDialogBox>
 
 
@@ -96,7 +103,8 @@ else
                     Title = _viewEditPost.Title,
                     Content = _viewEditPost.Content,
                     BlogId = _viewEditPost.BlogId,
-                    IsCommentAllowed = _viewEditPost.IsCommentAllowed
+                    IsCommentAllowed = _viewEditPost.IsCommentAllowed,
+                    ImageBase64 = _viewEditPost.ImageBase64
                 };
 
             Console.WriteLine("Creating new post...");
@@ -185,6 +193,12 @@ else
        
         _titleDialog = title;
         _dialog.Show();
+    }
+
+    private async Task HandleImageUploadAsync(string base64Image)
+    {
+        // Do something with the base64Image, e.g., set it in _viewEditPost
+        _viewEditPost.ImageBase64 = base64Image;
     }
 
 

@@ -236,6 +236,7 @@ namespace WebAPI.Models.Repositories
                 Created = post.Created,
                 BlogId = post.Blog.BlogId,
                 IsCommentAllowed = post.IsCommentAllowed,
+                ImageBase64 = post.ImageBase64
             };
 
             return editPost;

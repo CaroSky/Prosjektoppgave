@@ -94,16 +94,16 @@ namespace WebAPI.Controllers
 
             //Kall til metoden save i repository
             var post = new Post
-                {
-                    Title = postCreateViewModel.Title,
-                    Content = postCreateViewModel.Content,
-                    Created = DateTime.Now,
-                   // Author = await _manager.FindByNameAsync(User.Identity.Name),
-                    Blog = await _repository.GetBlogById(postCreateViewModel.BlogId),
-                    IsCommentAllowed = true,
-                    OwnerId = user.Id,
-                };
-            
+            {
+                Title = postCreateViewModel.Title,
+                Content = postCreateViewModel.Content,
+                Created = DateTime.Now,
+                Blog = await _repository.GetBlogById(postCreateViewModel.BlogId),
+                IsCommentAllowed = postCreateViewModel.IsCommentAllowed,
+                OwnerId = user.Id,
+                ImageBase64 = postCreateViewModel.ImageBase64 // Include image base64 data
+            };
+
             // Ekstraher tags fra innholdet
             var tags = ExtractHashtags(post.Content);
             //Lagrer post
@@ -224,9 +224,10 @@ namespace WebAPI.Controllers
                 IsCommentAllowed = postEditViewModel.IsCommentAllowed,
                 Blog = await _repository.GetBlogById(postEditViewModel.BlogId),
                 OwnerId = user.Id,
+                ImageBase64 = postEditViewModel.ImageBase64 // Update image base64 data
             };
             //find the owner (the person logged in)
-           // post.Author = await _manager.FindByNameAsync(User.Identity.Name);
+            // post.Author = await _manager.FindByNameAsync(User.Identity.Name);
 
             await _repository.UpdatePost(post, User);
             // _repository.Update(product);
