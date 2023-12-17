@@ -45,6 +45,7 @@ namespace Blazor.Data
 
                 // Log the details of the PostIndexViewModel
                 _logger.LogInformation($"Received PostIndexViewModel with {postIndexViewModel.Posts?.Count()} posts");
+
                 foreach (var post in postIndexViewModel.Posts)
                 {
                     _logger.LogInformation($"Post ID: {post.PostId}, Liked: {postIndexViewModel.UserLiked.GetValueOrDefault(post.PostId)}");

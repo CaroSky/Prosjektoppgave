@@ -62,6 +62,7 @@ namespace WebAPI.Controllers
             }
 
             var blog = await _repository.GetBlogById(id);
+            var likesByPostId = await _repository.GetLikesByPostIdAsync(id);
             var posts = await _repository.GetAllPostByBlogId(id);
 
             var userLikedPosts = new Dictionary<int, bool>();
@@ -82,7 +83,8 @@ namespace WebAPI.Controllers
                 BlogId = id,
                 BlogTitle = blog.Title,
                 IsPostAllowed = blog.IsPostAllowed,
-                UserLiked = userLikedPosts
+                UserLiked = userLikedPosts,
+                LikesByPostId = likesByPostId
             };
 
             return postIndexViewModel;

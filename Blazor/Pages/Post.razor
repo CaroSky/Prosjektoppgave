@@ -40,6 +40,7 @@ else
                 @(likeStatusCache.TryGetValue(post.PostId, out var isLiked) && isLiked ? "Unlike" : "Like")
             </button>
 
+
         @if (post.OwnerId == _userId)
         {
 
@@ -48,6 +49,7 @@ else
             <button class="btn btn-danger" @onclick="@(() => DeletePost(post.PostId))">Delete</button>
         }
         </div>
+        <span class="likes-count">Likes: @(GetLikesCount(post.PostId))</span>
 
     }
 
@@ -76,6 +78,9 @@ else
     private string _username;
     private string _userId;
     private Dictionary<int, bool> likeStatusCache = new Dictionary<int, bool>();
+    private Dictionary<int, LikeInfo> likesByPostIdCache = new Dictionary<int, LikeInfo>();
+
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -141,6 +146,23 @@ else
             foreach (var kvp in postIndexViewModel.UserLiked)
             {
                 likeStatusCache[kvp.Key] = kvp.Value;
+            }
+        }
+
+        // Update the likesByPostIdCache with likes count and usernames
+        likesByPostIdCache.Clear();
+        if (postIndexViewModel.LikesByPostId != null)
+        {
+            foreach (var kvp in postIndexViewModel.LikesByPostId)
+            {
+                // Get the list of usernames
+                List<string> usernames = kvp.Value;
+
+                // Calculate the number of likes
+                int numberOfLikes = usernames.Count;
+
+                // Store the number of likes and the list of usernames in the cache
+                likesByPostIdCache[kvp.Key] = new LikeInfo(numberOfLikes, usernames);
             }
         }
 
@@ -226,21 +248,67 @@ else
 
     }
 
-    private async Task ToggleLikePost(SharedModels.Entities.Post post)
+    private void ToggleLikePost(SharedModels.Entities.Post post)
     {
-        bool success = await PostService.LikePostAsync(post.PostId);
-        if (success)
+        if (!likesByPostIdCache.TryGetValue(post.PostId, out var likeInfo))
         {
-            likeStatusCache[post.PostId] = !likeStatusCache.TryGetValue(post.PostId, out var isLiked) || !isLiked;
-            StateHasChanged(); // Refresh UI
+            // If there's no entry in the cache, create one
+            likeInfo = new LikeInfo
+                {
+                    LikesCount = 0,
+                    Usernames = new List<string>()
+                };
+            likesByPostIdCache[post.PostId] = likeInfo;
+        }
+
+        if (likeStatusCache.TryGetValue(post.PostId, out var isLiked) && isLiked)
+        {
+            // If the post is already liked, decrement the like count
+            likeInfo.LikesCount--;
+            // Remove the username from the list of liked users
+            likeInfo.Usernames.Remove(_username);
         }
         else
         {
-            // Handle error case
+            // If the post is not liked, increment the like count
+            likeInfo.LikesCount++;
+            // Add the username to the list of liked users
+            likeInfo.Usernames.Add(_username);
         }
+
+        // Toggle the like status
+        likeStatusCache[post.PostId] = !isLiked;
+
+        // Refresh the UI
+        StateHasChanged();
     }
 
 
+    private int GetLikesCount(int postId)
+    {
+        if (likesByPostIdCache.TryGetValue(postId, out var likeInfo))
+        {
+            return likeInfo.LikesCount;
+        }
+        return 0; // Default to 0 likes if not found
+    }
+
+    public class LikeInfo
+    {
+        public int LikesCount { get; set; }
+        public List<string> Usernames { get; set; }
+
+        public LikeInfo(int likesCount, List<string> usernames)
+        {
+            LikesCount = likesCount;
+            Usernames = usernames;
+        }
+        public LikeInfo()
+        {
+            LikesCount = 0;
+            Usernames = new List<string>();
+        }
+    }
 
 }
 

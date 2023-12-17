@@ -52,6 +52,7 @@ namespace WebAPI.Models.Repositories
         Task<List<String>> SearchSuggestions(String searchQuery);
         Task ToggleLikePost(int postId, string userId);
         Task<bool> CheckIfUserLikedPost(int postId, string userId);
+        Task<Dictionary<int, List<string>>> GetLikesByPostIdAsync(int blogId);
     } 
 
 
@@ -602,6 +603,33 @@ namespace WebAPI.Models.Repositories
             var like = await _db.Likes.FirstOrDefaultAsync(l => l.PostId == postId && l.UserId == userId && l.IsLiked);
             return like != null;
         }
+
+        public async Task<Dictionary<int, List<string>>> GetLikesByPostIdAsync(int blogId)
+        {
+            var likesWithUsernames = new Dictionary<int, List<string>>();
+
+            var likes = await (from like in _db.Likes
+                               join post in _db.Post on like.PostId equals post.PostId
+                               join user in _db.Users on like.UserId equals user.Id
+                               where post.Blog.BlogId == blogId && like.IsLiked
+                               select new { like.PostId, user.UserName }).ToListAsync();
+
+            foreach (var like in likes)
+            {
+                if (!likesWithUsernames.ContainsKey(like.PostId))
+                {
+                    likesWithUsernames[like.PostId] = new List<string>();
+                }
+
+                likesWithUsernames[like.PostId].Add(like.UserName);
+            }
+
+            return likesWithUsernames;
+        }
+
+
+
+
 
 
     }

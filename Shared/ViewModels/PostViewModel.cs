@@ -14,6 +14,7 @@ namespace SharedModels.ViewModels
         public string ImageBase64 { get; set; }
         public Dictionary<int, int> LikesCount { get; set; } 
         public Dictionary<int, bool> UserLiked { get; set; }
+        public Dictionary<int, List<string>> LikesByPostId { get; set; }
     }
 
     public class PostCreateViewModel
