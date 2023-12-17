@@ -109,6 +109,47 @@ a, .btn-link {
         border: 3px solid #feb640; /* Ramme farge som matcher paletten */
     }
 
+.post-container {
+    border: 1px solid #dee2e6; /* Grå ramme */
+    background-color: #f8f9fa; /* Lys grå bakgrunnsfarge */
+    padding: 1rem;
+    margin-bottom: 1rem; /* Gir litt plass mellom postene */
+}
+
+.comment-container {
+    background-color: #ffffff; /* Hvit bakgrunnsfarge for kommentarene */
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.comment-separator {
+    border-top: 1px solid #dee2e6; /* Grå linje mellom kommentarer */
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.small-text {
+    font-size: 0.75rem; /* Mindre skrift for metadata */
+}
+
+.post-content {
+    font-family: 'Times New Roman', Times, serif; /* eller en annen skrifttype som du foretrekker */
+    font-size: 1.25rem; /* eller større basert på dine preferanser */
+    line-height: 1.6; /* Dette gir mer plass mellom linjene for bedre lesbarhet */
+    max-width: 1000px; /* Tilpasser maksimal bredde for bedre linjelengde */
+    margin-left: auto; /* Senterer teksten horisontalt */
+    margin-right: auto;
+    margin-bottom: 1rem;
+    text-align: justify; /* Justerer teksten for en ren og jevn kant på begge sider */
+    padding: 1rem; /* Tilføyer litt plass rundt teksten */
+}
+
+
+
+
+
+
+
 
 
 

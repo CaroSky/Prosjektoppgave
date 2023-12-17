@@ -41,30 +41,29 @@ else
     }
     @foreach (var post in posts)
     {
-        <div class="post-preview blog-post">
-            <h2 class="blog-post-title">
-                @post.Title
-            </h2>
-            <p class="blog-post-meta">@post.Created.ToString("yyyy-MM-dd") by @post.OwnerId</p>
-            <p>@post.Content</p>
-
-            <div>
-                <Comment PostId="@post.PostId" />
-            </div>
-            <div class="d-flex justify-content-between align-items-center">
-                <button class="btn btn-primary" @onclick="@(() => NavigateToComments(post.PostId))">View</button>
+        <div class="post-container">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h2 class="blog-post-title">@post.Title</h2>
                 @if (post.OwnerId == _userId)
                 {
                     <div>
-                        <button class="btn btn-secondary" @onclick="@(() => EditPostDialog("Update", post.PostId, post))">Edit</button>
-                        <button class="btn btn-danger" @onclick="@(() => DeletePost(post.PostId))">Delete</button>
+                        <button class="btn btn-secondary btn-sm" @onclick="@(() => EditPostDialog("Update", post.PostId, post))">Edit</button>
+                        <button class="btn btn-danger btn-sm" @onclick="@(() => DeletePost(post.PostId))">Delete</button>
                     </div>
                 }
             </div>
-        </div>
-       
-    }
+            <p class="small-text">@post.Created.ToString("yyyy-MM-dd") by @post.OwnerId</p>
 
+            @foreach (var paragraph in post.Content.Split(new string[] { "\r\n", "\n\n" }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                <p class="post-content">@paragraph</p>
+            }
+            
+            <div>
+                <Comment PostId="@post.PostId" />
+            </div>
+        </div>
+    }
 
 
 }

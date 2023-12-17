@@ -10,11 +10,14 @@
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider
 
 
-<h3>Comments for Post @PostId</h3>
 
     @if (comments == null)
     {
-        <p>Loading comments...</p>
+        
+        @if (user.Identity.IsAuthenticated)
+        {
+            <button class="btn btn-success ml-auto" @onclick="@(() => CreateCommentDialog("Create"))">Add New Comment</button>
+        }
     }
     else
 {
@@ -22,34 +25,33 @@
     {
         <button class="btn btn-success ml-auto" @onclick="@(() => CreateCommentDialog("Create"))">Add New Comment</button>
     }
-    <table class="table">
-            <thead>
-                <tr>
-                    <th>Content</th>
-                    <th>Created</th>
-                    <th>Author</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var comment in comments)
-                {
-                    <tr>
-                  
-                        <td>@comment.Created</td>
-                        <td>@comment.Content</td>
-                        <td>@comment.OwnerId</td>
-
+    @if (comments.Any())
+    {
+        <div class="comment-container">
+            <p><span class="badge">@comments.Count()</span> Comments:</p>
+            @foreach (var comment in comments)
+            {
+                <div class="comment-separator"></div>
+                <div class="row mb-2">
+                    <div class="col-sm-2 text-center">
+                        <img src="path_to_avatar.jpg" class="img-circle" height="65" width="65" alt="Avatar">
+                    </div>
+                    <div class="col-sm-8">
+                        <h4>@comment.OwnerId<small class="small-text">@comment.Created.ToString("MMM dd, yyyy, h:mm tt")</small></h4>
+                        <p>@comment.Content</p>
+                    </div>
                     @if (comment.OwnerId == _userId)
                     {
-
-                        <button class="btn btn-secondary" @onclick="@(() => EditCommentDialog("Update", comment.CommentId, comment))">Edit</button>
-
-                        <button class="btn btn-danger" @onclick="@(() => DeleteComment(comment.CommentId))">Delete</button>
+                        <div class="col-sm-2 d-flex justify-content-end">
+                            <button class="btn btn-sm btn-outline-secondary" @onclick="@(() => EditCommentDialog("Update", comment.CommentId, comment))">Edit</button>
+                            <button class="btn btn-sm btn-outline-danger" @onclick="@(() => DeleteComment(comment.CommentId))">Delete</button>
+                        </div>
                     }
-                    </tr>
-                }
-            </tbody>
-        </table>
+                </div>
+            }
+        </div>
+    }
+
 }
 
 
