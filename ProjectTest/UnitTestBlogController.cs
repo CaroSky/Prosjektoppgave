@@ -86,16 +86,15 @@ namespace ProjectTest
 
             // Act
             var result = await _blogController.Post(blog);
-            var createdAtActionResult = result as CreatedAtActionResult;
+            var okResult = result as OkObjectResult;
 
             // Assert
             _mockUserManager.Verify(x => x.FindByNameAsync("testuser"), Times.Once);
             _mockRepository.Verify(x => x.SaveBlog(blog, _blogController.User), Times.Once);
 
-            Assert.IsNotNull(createdAtActionResult);
-            Assert.AreEqual("Get", createdAtActionResult.ActionName);
-            Assert.AreEqual(201, createdAtActionResult.StatusCode);
-            Assert.AreEqual(blog, createdAtActionResult.Value);
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(200, okResult.StatusCode);
+            Assert.AreEqual(blog, okResult.Value);
         }
 
  

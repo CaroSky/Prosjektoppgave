@@ -2,14 +2,53 @@
 @using System.IdentityModel.Tokens.Jwt;
 @using Microsoft.AspNetCore.Identity;
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
+@inject TokenService TokenService
+
 
 <AuthorizeView>
     <Authorized>
-        Logged in!
-        <a href="LogOut">Log out</a>
+        <label for="logout" class="mr-2"> Logged in!   </label>
+        <a href="#" @onclick="HandleLogout">Logout</a>
     </Authorized>
     <NotAuthorized>
         <a href="Register">Register</a>
         <a href="Login">Log in</a>
     </NotAuthorized>
 </AuthorizeView>
+
+
+@code {
+ 
+    private async Task HandleLogout()
+    {
+        try
+        {
+    // Send a logout request to the server (optional, see explanation below)
+            var response = await Http.PostAsync("api/Accounts/logout", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+    // Handle the response from the server if necessary
+
+                TokenService.JwtToken = null;
+
+
+                var authStateProvider = (CustomAuthenticationStateProvider)AuthenticationStateProvider;
+                authStateProvider.NotifyUserLogout();
+
+    // Redirect to the login page or another appropriate page
+                NavigationManager.NavigateTo("/", forceLoad: true);
+            }
+            else
+            {
+    // Handle failed logout attempt
+            }
+        }
+        catch (Exception ex)
+        {
+    // Handle exceptions
+        }
+    }
+}
