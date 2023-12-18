@@ -12,6 +12,11 @@ using WebAPI.Models.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using WebAPI.Models.ViewModels;
 using BlogUnitTest;
+using Microsoft.AspNetCore.SignalR;
+using WebAPI.Hubs;
+using Blazor.Pages;
+using System.Reflection.Metadata;
+using Blog = SharedModels.Entities.Blog;
 
 namespace BlogUnitTest
 {
@@ -24,6 +29,7 @@ namespace BlogUnitTest
         private Mock<ILogger<BlogController>> _mockLogger;
         private Mock<SignInManager<IdentityUser>> _mockSignInManager;
         private IAuthorizationService _authorizationService;
+        private Mock<IHubContext<SubscriptionHub>> _mockHubContext;
 
         [TestInitialize]
         public void Setup()
@@ -37,7 +43,17 @@ namespace BlogUnitTest
                 new Mock<IUserClaimsPrincipalFactory<IdentityUser>>().Object,
                 null, null, null, null);
 
-            _blogController = new BlogController(_mockUserManager.Object, _mockRepository.Object, _mockLogger.Object, _mockSignInManager.Object);
+            // Create a mock instance of IHubContext
+            _mockHubContext = new Mock<IHubContext<SubscriptionHub>>();
+            _mockHubContext.Setup(x =>
+                x.Clients.User(It.IsAny<string>()).SendCoreAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<object[]>(),
+                    default(CancellationToken))
+            )
+            .Returns(Task.CompletedTask);
+
+            _blogController = new BlogController(_mockUserManager.Object, _mockRepository.Object, _mockLogger.Object, _mockSignInManager.Object, _mockHubContext.Object); // Pass _mockHubContext.Object to the controller
         }
 
         [TestMethod]
@@ -118,7 +134,7 @@ namespace BlogUnitTest
             };
 
             _mockUserManager.Setup(x => x.FindByNameAsync("testuser")).ReturnsAsync(user);
-            _mockRepository.Setup(x => x.UpdateBlog(It.IsAny<Blog>())).Returns(Task.CompletedTask);
+            _mockRepository.Setup(x => x.UpdateBlog(It.IsAny<SharedModels.Entities.Blog>())).Returns(Task.CompletedTask);
 
             // Act
             var result = await _blogController.Put(blogId, blog);
@@ -139,7 +155,7 @@ namespace BlogUnitTest
         {
             // Arrange
             var blogId = 1;
-            var blog = new Blog { BlogId = blogId, Title = "Test Blog" };
+            var blog = new SharedModels.Entities.Blog { BlogId = blogId, Title = "Test Blog" };
 
             _mockRepository.Setup(x => x.GetBlogById(blogId)).ReturnsAsync(blog);
             _mockRepository.Setup(x => x.DeleteBlog(blog, It.IsAny<ClaimsPrincipal>())).Returns(Task.CompletedTask);
@@ -166,6 +182,7 @@ namespace BlogUnitTest
             var blogId = 1;
             var userIdClaim = new Claim(ClaimTypes.NameIdentifier, "http://example.com:testuser");
             var user = new IdentityUser { Id = "1", UserName = "testuser" };
+            var blog = new SharedModels.Entities.Blog { BlogId = blogId, Title = "Sample Blog Title" };
 
             _blogController.ControllerContext = new ControllerContext
             {
@@ -174,6 +191,9 @@ namespace BlogUnitTest
                     User = new ClaimsPrincipal(new ClaimsIdentity(new[] { userIdClaim }))
                 }
             };
+
+            _mockUserManager.Setup(x => x.FindByNameAsync("testuser")).ReturnsAsync(user);
+            _mockRepository.Setup(x => x.GetBlogById(blogId)).ReturnsAsync(blog);
 
             _mockUserManager.Setup(x => x.FindByNameAsync("testuser")).ReturnsAsync(user);
             _mockRepository.Setup(x => x.SubscribeToBlog(user.Id, blogId)).Returns(Task.CompletedTask);
