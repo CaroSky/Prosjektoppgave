@@ -194,6 +194,7 @@ namespace WebAPI.Controllers
             string username = words[words.Length - 1].Trim();
             var user = await _manager.FindByNameAsync(username);
 
+
             if (user == null)
             {
                 return Unauthorized(); // Brukeren er ikke autentisert
