@@ -185,12 +185,16 @@ namespace WebAPI.Controllers
             {
                 foreach (var subscription in subscribeUserList)
                 {
-                    var newNotification = new Notification()
+                    if (subscription.UserId != post.OwnerId)
                     {
-                        PostId = post.PostId,
-                        UserId = subscription.UserId
-                    };
-                    notifications.Add(newNotification);
+                        var newNotification = new Notification()
+                        {
+                            PostId = post.PostId,
+                            UserId = subscription.UserId
+                        };
+                        notifications.Add(newNotification);
+                    }
+
                 }
 
                 
