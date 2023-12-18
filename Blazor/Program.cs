@@ -29,6 +29,7 @@ builder.Services.AddScoped<BlogService>();
 builder.Services.AddScoped<PostService>();
 builder.Services.AddScoped<SearchService>();
 builder.Services.AddScoped<CommentService>();
+builder.Services.AddScoped<SignalRService>();
 
 
 var app = builder.Build();

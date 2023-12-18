@@ -28,5 +28,24 @@
     </div>
 
     <script src="_framework/blazor.server.js"></script>
+    <script>
+        function showToast(message) {
+            var toast = document.createElement("div");
+            toast.innerHTML = message;
+            toast.style.position = "fixed";
+            toast.style.bottom = "20px";
+            toast.style.right = "20px";
+            toast.style.backgroundColor = "rgba(0,0,0,0.7)";
+            toast.style.color = "white";
+            toast.style.padding = "10px";
+            toast.style.borderRadius = "5px";
+            toast.style.zIndex = 1000;
+            document.body.appendChild(toast);
+            setTimeout(function () {
+                document.body.removeChild(toast);
+            }, 3000); // Dismiss toast after 3 seconds
+        }
+    </script>
+
 </body>
 </html>

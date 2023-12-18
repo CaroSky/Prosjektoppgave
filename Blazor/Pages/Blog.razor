@@ -11,6 +11,8 @@
 @inject NavigationManager NavigationManager
 @inject SearchService SearchService
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider
+@inject SignalRService SignalRService
+@inject IJSRuntime JSRuntime
 
 <h3>Blog List</h3>
 
@@ -144,6 +146,7 @@ else
     private Dictionary<int, string> blogOwnerUsernames = new Dictionary<int, string>();
     private string _searchQuery;
     private List<string> _suggestions;
+    private CancellationTokenSource _cts = new CancellationTokenSource();
 
     protected override async Task OnInitializedAsync()
     {
@@ -168,7 +171,8 @@ else
             var username = await BlogService.GetUsernameByOwnerIdAsync(blog.OwnerId);
             blogOwnerUsernames[blog.BlogId] = username ?? "Unknown";
         }
-
+        await SignalRService.InitializeConnection();
+        _ = ReceiveMessage();
     }
 
     private async Task OnSaveDialog()
@@ -296,5 +300,21 @@ else
         _searchQuery = suggestion;
         _suggestions.Clear(); 
     }
+    private async Task ReceiveMessage()
+    {
+        while (!_cts.IsCancellationRequested)
+        {
+            var message = await SignalRService.WaitForMessageAsync();
+            if (!string.IsNullOrEmpty(message))
+            {
+                await JSRuntime.InvokeVoidAsync("showToast", message); // Display the message
+            }
+        }
+    }
 
+    public void Dispose()
+    {
+        _cts.Cancel();
+        SignalRService.Disconnect().ConfigureAwait(false);
+    }
 }

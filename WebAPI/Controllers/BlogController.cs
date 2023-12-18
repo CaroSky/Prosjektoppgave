@@ -9,6 +9,8 @@ using WebAPI.Models.Repositories;
 using WebAPI.Models.ViewModels;
 using System.Xml.Linq;
 using SharedModels.Entities;
+using Microsoft.AspNetCore.SignalR;
+using WebAPI.Hubs;
 
 
 
@@ -27,15 +29,17 @@ namespace WebAPI.Controllers
         private IAuthorizationService _authorizationService;
 
         private readonly ILogger<BlogController> _logger;
+        private readonly IHubContext<SubscriptionHub> _hubContext;
 
 
 
-        public BlogController(UserManager<IdentityUser> manager, IBlogRepository repository, ILogger<BlogController> logger, SignInManager<IdentityUser> signManager)
+        public BlogController(UserManager<IdentityUser> manager, IBlogRepository repository, ILogger<BlogController> logger, SignInManager<IdentityUser> signManager, IHubContext<SubscriptionHub> hubContext)
         {
             this._repository = repository;
             this._manager = manager;
             _logger = logger;
             _signManager = signManager;
+            _hubContext = hubContext;
         }
 
         [HttpGet]
@@ -219,9 +223,10 @@ namespace WebAPI.Controllers
                 return Unauthorized();
             }
 
-            _logger.LogInformation($"User ID in blog Controller - Subscribe: {user.Id}");
+            var blog = await _repository.GetBlogById(blogId);
 
             await _repository.SubscribeToBlog(user.Id, blogId);
+            await _hubContext.Clients.User(username).SendAsync("ReceiveSubscriptionMessage", $"You are now subscribing to {blog.Title}.");
             return Ok();
         }
 
