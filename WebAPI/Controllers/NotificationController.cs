@@ -19,8 +19,7 @@ namespace WebAPI.Controllers
         private readonly ILogger<NotificationController> _logger;
 
 
-        public NotificationController(UserManager<IdentityUser> manager, IBlogRepository repository,
-            ILogger<NotificationController> logger)
+        public NotificationController(UserManager<IdentityUser> manager, IBlogRepository repository, ILogger<NotificationController> logger)
         {
             this._repository = repository;
             this._manager = manager;
@@ -119,24 +118,21 @@ namespace WebAPI.Controllers
 
         // GET: Delete
         [HttpDelete("{id}")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             //find the user that is logged in 
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);   //it return a http://...:username so I need to get the username from the string
-            if (userIdClaim == null)
-            {
-                return Unauthorized(); // Brukeren er ikke autentisert
-            }
             string[] words = userIdClaim.ToString().Split(':');
             string username = words[words.Length - 1].Trim();
             var user = await _manager.FindByNameAsync(username);
 
-
-            if (!ModelState.IsValid)
+            if (user == null)
             {
-                return BadRequest(ModelState);
+                return Unauthorized(); // Brukeren er ikke autentisert
             }
+
+
             var notification = await _repository.GetNotification(id, user.Id);
 
             if (notification == null)
@@ -145,24 +141,20 @@ namespace WebAPI.Controllers
             }
 
             await _repository.DeleteNotification(notification);
-            //await _repository.RemoveOrphanedTags();
             return Ok(notification);
         }
 
         // GET: Delete
         [HttpDelete]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> Delete()
         {
             //find the user that is logged in 
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);   //it return a http://...:username so I need to get the username from the string
-            if (userIdClaim == null)
-            {
-                return Unauthorized(); // Brukeren er ikke autentisert
-            }
             string[] words = userIdClaim.ToString().Split(':');
             string username = words[words.Length - 1].Trim();
             var user = await _manager.FindByNameAsync(username);
+
             if (user == null)
             {
                 return Unauthorized(); // Brukeren er ikke autentisert
@@ -171,9 +163,7 @@ namespace WebAPI.Controllers
             await _repository.DeleteAllNotificationsForUser(user.Id);
 
   
-            return Ok();
-
-
+            return Ok("deleted");
         }
     }
 }

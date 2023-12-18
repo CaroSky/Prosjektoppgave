@@ -49,11 +49,11 @@ namespace WebAPI.Models.Repositories
         Task SaveLike(Like vote);
         Task DeleteLike(Like like);
         Task<IEnumerable<Like>> GetAllLikesForUser(String userId);
-        Task InsertMultipleNotifications(List<Notfication> notifications);
-        Task<IEnumerable<Notfication>> GetAllNotificationsForUser(String userId);
+        Task InsertMultipleNotifications(List<Notification> notifications);
+        Task<IEnumerable<Notification>> GetAllNotificationsForUser(String userId);
         Task<int> GetNotificationsCountForUser(String userId);
-        Task<Notfication> GetNotification(int postId, string userId);
-        Task DeleteNotification(Notfication notification);
+        Task<Notification> GetNotification(int postId, string userId);
+        Task DeleteNotification(Notification notification);
         Task DeleteAllNotificationsForUser(String userId);
     } 
 
@@ -79,7 +79,9 @@ namespace WebAPI.Models.Repositories
             try
             {
                 _logger.LogInformation("Getting all blogs");
-                var blogs = await _db.Blog.ToListAsync();
+                var blogs = await _db.Blog
+                        .OrderByDescending(p => p.Created)
+                        .ToListAsync();
                 return blogs;
             }
             catch (Exception ex)
@@ -158,7 +160,10 @@ namespace WebAPI.Models.Repositories
 
         public async Task<IEnumerable<Post>> GetAllPostByBlogId(int id)
         {
-            var allPosts = _db.Post.Include(item => item.Blog).ToList();
+            var allPosts = _db.Post
+                .Include(item => item.Blog)
+                .OrderByDescending(item => item.Created)
+                .ToList();
             var posts = allPosts.Where(item => item.Blog.BlogId == id);
             return posts;
         }
@@ -226,7 +231,10 @@ namespace WebAPI.Models.Repositories
 
         public async Task<IEnumerable<Comment>> GetAllCommentsByPostId(int postId)
         {
-            var allComments = _db.Comment.Include(item => item.Post).ToList();
+            var allComments = _db.Comment
+                .Include(item => item.Post)
+                .OrderByDescending(item => item.Created)
+                .ToList();
             var comments = allComments.Where(item => item.Post.PostId == postId);
             return comments;
         }
@@ -350,7 +358,10 @@ namespace WebAPI.Models.Repositories
         {
 
             List<Post> postsList = new List<Post>();
-            var postListUser = _db.Post.Where(item => item.OwnerUsername == searchQuery).ToList();
+            var postListUser = _db.Post
+                .Where(item => item.OwnerUsername == searchQuery)
+                .OrderByDescending(item => item.Created)
+                .ToList();
             foreach (var post in postListUser)
             {
                 postsList.Add(post);
@@ -623,7 +634,7 @@ namespace WebAPI.Models.Repositories
             }
         }
 
-        public async Task InsertMultipleNotifications(List<Notfication> notifications)
+        public async Task InsertMultipleNotifications(List<Notification> notifications)
         {
             _db.Notification.AddRange(notifications);
             _db.SaveChanges();
@@ -647,7 +658,7 @@ namespace WebAPI.Models.Repositories
             }
         }
 
-        public async Task<IEnumerable<Notfication>> GetAllNotificationsForUser(String userId)
+        public async Task<IEnumerable<Notification>> GetAllNotificationsForUser(String userId)
         {
             try
             {
@@ -683,7 +694,7 @@ namespace WebAPI.Models.Repositories
             }
         }
 
-        public async Task<Notfication> GetNotification(int postId, string userId)
+        public async Task<Notification> GetNotification(int postId, string userId)
         {
             var notification = await _db.Notification
                 .Where(item => item.PostId == postId && item.UserId == userId)
@@ -691,7 +702,7 @@ namespace WebAPI.Models.Repositories
             return notification;
         }
 
-        public async Task DeleteNotification(Notfication notification)
+        public async Task DeleteNotification(Notification notification)
         {
             _db.Notification.Remove(notification);
             _db.SaveChanges();

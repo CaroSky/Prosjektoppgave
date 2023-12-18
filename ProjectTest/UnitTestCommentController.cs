@@ -356,7 +356,7 @@ namespace ProjectTest
             _mockUserManager.Setup(m => m.FindByNameAsync(It.IsAny<string>()))
                 .ReturnsAsync((IdentityUser)null);
 
-            _commentController.ModelState.AddModelError("Content", "Content is required.");
+            //_commentController.ModelState.AddModelError("Content", "Content is required.");
 
             // Act
             var result = await _commentController.Put(1, new CommentEditViewModel { CommentId = 2, });
@@ -378,7 +378,7 @@ namespace ProjectTest
             _mockUserManager.Setup(m => m.FindByNameAsync(It.IsAny<string>()))
                 .ReturnsAsync((IdentityUser)null);
 
-            _commentController.ModelState.AddModelError("Content", "Content is required.");
+            //_commentController.ModelState.AddModelError("Content", "Content is required.");
 
             // Act
             var result = await _commentController.Create(new CommentCreateViewModel());
@@ -400,7 +400,7 @@ namespace ProjectTest
             _mockUserManager.Setup(m => m.FindByNameAsync(It.IsAny<string>()))
                 .ReturnsAsync((IdentityUser)null);
 
-            _commentController.ModelState.AddModelError("Content", "Content is required.");
+            //_commentController.ModelState.AddModelError("Content", "Content is required.");
 
             // Act
             var result = await _commentController.Delete(1, 2);
@@ -422,7 +422,7 @@ namespace ProjectTest
             _mockUserManager.Setup(m => m.FindByNameAsync(It.IsAny<string>()))
                 .ReturnsAsync((IdentityUser)null);
 
-            _commentController.ModelState.AddModelError("Content", "Content is required.");
+            //_commentController.ModelState.AddModelError("Content", "Content is required.");
 
             // Act
             var result = await _commentController.Get(1, 2);

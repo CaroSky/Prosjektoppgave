@@ -169,11 +169,11 @@ namespace WebAPI.Controllers
 
 
             var subscribeUserList = await _repository.GetSubscriptionsByBlogId(post.Blog.BlogId);
-            var notifications = new List<Notfication>();
+            var notifications = new List<Notification>();
 
             if (post.OwnerId != post.Blog.OwnerId)
             {
-                var newNotification = new Notfication()
+                var newNotification = new Notification()
                 {
                     PostId = post.PostId,
                     UserId = post.Blog.OwnerId
@@ -185,7 +185,7 @@ namespace WebAPI.Controllers
             {
                 foreach (var subscription in subscribeUserList)
                 {
-                    var newNotification = new Notfication()
+                    var newNotification = new Notification()
                     {
                         PostId = post.PostId,
                         UserId = subscription.UserId

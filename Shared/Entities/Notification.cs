@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SharedModels.Entities
 {
-    public class Notfication
+    public class Notification
     {
         public string UserId { get; set; }
         public int PostId { get; set; }

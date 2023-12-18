@@ -28,7 +28,7 @@ namespace WebAPI.Data
 
         public DbSet<Like> Like { get; set; }
 
-        public DbSet<Notfication> Notification { get; set; }
+        public DbSet<Notification> Notification { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -38,7 +38,7 @@ namespace WebAPI.Data
                 .HasKey(pt => new { pt.PostsPostId, pt.TagsTagId });
             modelBuilder.Entity<Like>()
                 .HasKey(pt => new { pt.UserId, pt.PostId });
-            modelBuilder.Entity<Notfication>()
+            modelBuilder.Entity<Notification>()
                 .HasKey(pt => new { pt.UserId, pt.PostId });
 
 
