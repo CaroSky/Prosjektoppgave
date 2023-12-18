@@ -1,14 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 using SharedModels.ViewModels;
-using System.Reflection.Metadata;
 using System.Security.Claims;
-//using WebAPI.Models.Entities;
 using WebAPI.Models.Repositories;
-using WebAPI.Models.ViewModels;
 using SharedModels.Entities;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.SignalR;
@@ -21,14 +16,8 @@ namespace WebAPI.Controllers
     public class PostController : Controller
     {
         private IBlogRepository _repository;
-
         private UserManager<IdentityUser> _manager;
         private readonly ILogger<PostController> _logger;
-
-        private string _username = "til061@uit.no";
-
-
-
         private readonly IHubContext<NotificationHub> _hubContext;
 
         public PostController(UserManager<IdentityUser> manager, IBlogRepository repository, ILogger<PostController> logger, IHubContext<NotificationHub> hubContext)
@@ -44,8 +33,8 @@ namespace WebAPI.Controllers
 
         public async Task<PostIndexViewModel> GetPosts([FromRoute] int id)
         {
-            //find the user that is logged in 
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);   //it return a http://...:username so I need to get the username from the string
+
             if (userIdClaim != null)
             {
                 var userId = userIdClaim.Value;
@@ -53,12 +42,12 @@ namespace WebAPI.Controllers
                 string[] words = userIdClaim.ToString().Split(':');
                 string username = words[words.Length - 1].Trim();
                 var user = await _manager.FindByNameAsync(username);
+                _logger.LogInformation($"Hentet bruker: {user?.UserName}, ID: {user?.Id}");
             }
             else
             {
                 _logger.LogWarning("User ID claim not found.");
             }
-
 
             var blog = await _repository.GetBlogById(id);
             var posts = await _repository.GetAllPostByBlogId(id);
@@ -269,13 +258,19 @@ namespace WebAPI.Controllers
             //find the owner (the person logged in)
            // post.Author = await _manager.FindByNameAsync(User.Identity.Name);
 
-            await _repository.UpdatePost(post, User);
-            // _repository.Update(product);
-            //tempdata
-            //TempData["message"] = string.Format("{0} has been updated", post.Title);
+            
+            await _repository.RemovePostTags(post.PostId);
+            // Fjern foreldreløse tags
+            await _repository.RemoveOrphanedTags();
 
             var tags = ExtractHashtags(post.Content);
-            foreach (var tagName in tags)
+            var userNames = ExtractUsernames(post.Content);
+            await _repository.UpdatePost(post, User);
+
+            var allTags = tags.Concat(userNames).ToList();
+
+
+            foreach (var tagName in allTags)
             {
                 var tag = await _repository.GetTagByName(tagName) ?? new Tag { Name = tagName };
                 if (tag.TagId == 0)
@@ -285,10 +280,30 @@ namespace WebAPI.Controllers
                 var postTag = new PostTag { PostsPostId = post.PostId, TagsTagId = tag.TagId };
                 await _repository.SavePostTag(postTag);
             }
-
-            // Fjern foreldreløse tags
-            await _repository.RemoveOrphanedTags();
-
+            foreach (var userName in userNames)
+            {
+                var taggedUser = await _manager.FindByNameAsync(userName);
+                if (taggedUser != null)
+                {
+                    _logger.LogInformation($"Bruker funnet, sender notifikasjon: {userName}");
+                    try
+                    {
+                        _logger.LogInformation($"Sending tag notification to user: {taggedUser.UserName}");
+                        await _hubContext.Clients.User(taggedUser.UserName).SendAsync("ReceiveTagNotification", $"Du har blitt tagget i et innlegg av {user.UserName}.");
+                        _logger.LogInformation($"Notifikasjon sendt til bruker: {userName}");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Feil ved sending av notifikasjon til bruker: {userName}");
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning($"Fant ingen bruker med brukernavn: {userName}");
+                }
+            }
+            _logger.LogInformation("Post creation process completed.");
+           // return CreatedAtAction("Get", new { id = post.PostId }, post);
 
             return Ok(post);
 
