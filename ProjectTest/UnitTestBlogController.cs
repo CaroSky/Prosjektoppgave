@@ -97,7 +97,73 @@ namespace ProjectTest
             Assert.AreEqual(blog, okResult.Value);
         }
 
- 
+        [TestMethod]
+        public async Task Delete_NotSignedIN_ReturnsUnauthorizedResult()
+        {
+            // Arrange
+            var userIdClaim = new Claim(ClaimTypes.NameIdentifier, "test");
+            var userClaimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { userIdClaim }));
+            _blogController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaimsPrincipal }
+            };
+            _mockUserManager.Setup(m => m.FindByNameAsync(It.IsAny<string>()))
+                .ReturnsAsync((IdentityUser)null);
+
+            //_commentController.ModelState.AddModelError("Content", "Content is required.");
+
+            // Act
+            var result = await _blogController.Delete(1);
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(UnauthorizedResult));
+        }
+
+        [TestMethod]
+        public async Task Delete_InvalidModelState_ReturnsBadRequestResult()
+        {
+            // Arrange
+            var userIdClaim = new Claim(ClaimTypes.NameIdentifier, "test");
+            var userClaimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { userIdClaim }));
+            _blogController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaimsPrincipal }
+            };
+            _mockUserManager.Setup(m => m.FindByNameAsync(It.IsAny<string>()))
+                .ReturnsAsync(new IdentityUser { });
+
+            _blogController.ModelState.AddModelError("Content", "Content is required.");
+
+            // Act
+            var result = await _blogController.Delete(1);
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
+        }
+
+        [TestMethod]
+        public async Task Delete_NotFound_ReturnsBadRequestResult()
+        {
+            // Arrange
+            var userIdClaim = new Claim(ClaimTypes.NameIdentifier, "test");
+            var userClaimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { userIdClaim }));
+            _blogController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaimsPrincipal }
+            };
+            _mockUserManager.Setup(m => m.FindByNameAsync(It.IsAny<string>()))
+                .ReturnsAsync(new IdentityUser { });
+            _mockRepository.Setup(x => x.GetBlogById(It.IsAny<int>())).ReturnsAsync((Blog)null);
+            
+
+
+            // Act
+            var result = await _blogController.Delete(1);
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(NotFoundResult));
+        }
+
 
         [TestMethod]
         public async Task Put_ReturnsOkForValidBlogUpdate()
@@ -138,8 +204,19 @@ namespace ProjectTest
         {
             // Arrange
             var blogId = 1;
-            var blog = new Blog { BlogId = blogId, Title = "Test Blog" };
+            var blog = new Blog { BlogId = blogId, Title = "Test Blog", OwnerId = "a"};
+            var userIdClaim = new Claim(ClaimTypes.NameIdentifier, "http://example.com:testuser");
+            var user = new IdentityUser { Id = "1", UserName = "testuser" };
 
+            _blogController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    User = new ClaimsPrincipal(new ClaimsIdentity(new[] { userIdClaim }))
+                }
+            };
+            _mockUserManager.Setup(m => m.FindByNameAsync(It.IsAny<string>()))
+                .ReturnsAsync(new IdentityUser { Id = "a"});
             _mockRepository.Setup(x => x.GetBlogById(blogId)).ReturnsAsync(blog);
             _mockRepository.Setup(x => x.DeleteBlog(blog, It.IsAny<ClaimsPrincipal>())).Returns(Task.CompletedTask);
 
@@ -155,6 +232,49 @@ namespace ProjectTest
             Assert.IsNotNull(okResult);
             Assert.AreEqual(200, okResult.StatusCode);
             Assert.AreEqual(blog, okResult.Value);
+        }
+
+        [TestMethod]
+        public async Task Put_NotSignedIN_ReturnsUnauthorizedResult()
+        {
+            // Arrange
+            var userIdClaim = new Claim(ClaimTypes.NameIdentifier, "test");
+            var userClaimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { userIdClaim }));
+            _blogController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaimsPrincipal }
+            };
+            _mockUserManager.Setup(m => m.FindByNameAsync(It.IsAny<string>()))
+                .ReturnsAsync(new IdentityUser { });
+            _mockRepository.Setup(x => x.UpdateBlog(It.IsAny<Blog>())).Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _blogController.Put(1, new Blog(){OwnerId = "a"});
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(UnauthorizedResult));
+        }
+
+        [TestMethod]
+        public async Task Put_InvalidModelState_ReturnsBadRequestResult()
+        {
+            // Arrange
+            var userIdClaim = new Claim(ClaimTypes.NameIdentifier, "test");
+            var userClaimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { userIdClaim }));
+            _blogController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaimsPrincipal }
+            };
+            _mockUserManager.Setup(m => m.FindByNameAsync(It.IsAny<string>()))
+                .ReturnsAsync(new IdentityUser {Id = "a"});
+
+            _blogController.ModelState.AddModelError("Content", "Content is required.");
+
+            // Act
+            var result = await _blogController.Put(1, new Blog() { OwnerId = "a" });
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
         }
 
 

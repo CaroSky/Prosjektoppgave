@@ -197,6 +197,80 @@ namespace ProjectTest
             Assert.IsInstanceOfType(result, typeof(OkObjectResult));
         }
 
+
+
+        [TestMethod]
+        public async Task Put_InvalidModel_ReturnsBadRequestResult()
+        {
+            // Arrange
+            var postEditViewModel = new PostEditViewModel
+            {
+                PostId = 1,
+                Title = "Updated Title",
+                Content = "#Updated Content",
+                Created = DateTime.Now,
+                IsCommentAllowed = true,
+                BlogId = 1,
+                OwnerId = "testOwnerId",
+                OwnerUsername = "testOwnerUsername"
+            };
+            var userIdClaim = new Claim(ClaimTypes.NameIdentifier, "test");
+            var userClaimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { userIdClaim }));
+            _postController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaimsPrincipal }
+            };
+            _mockUserManager.Setup(m => m.FindByNameAsync(It.IsAny<string>()))
+                .ReturnsAsync(new IdentityUser { });
+
+            // Set up repository to return null for GetCommentById
+            _mockRepository.Setup(repo => repo.GetPostById(1))
+                .ReturnsAsync((Post)null);
+            _postController.ModelState.AddModelError("Content", "Content is required.");
+
+            // Act
+            var result = await _postController.Put(1, postEditViewModel);
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
+
+        }
+        [TestMethod]
+        public async Task Put_InvalidId_ReturnsBadRequestResult()
+        {
+            // Arrange
+            var postEditViewModel = new PostEditViewModel
+            {
+                PostId = 2,
+                Title = "Updated Title",
+                Content = "#Updated Content",
+                Created = DateTime.Now,
+                IsCommentAllowed = true,
+                BlogId = 1,
+                OwnerId = "testOwnerId",
+                OwnerUsername = "testOwnerUsername"
+            };
+            var userIdClaim = new Claim(ClaimTypes.NameIdentifier, "test");
+            var userClaimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { userIdClaim }));
+            _postController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaimsPrincipal }
+            };
+            _mockUserManager.Setup(m => m.FindByNameAsync(It.IsAny<string>()))
+                .ReturnsAsync(new IdentityUser { });
+
+            // Set up repository to return null for GetCommentById
+            _mockRepository.Setup(repo => repo.GetPostById(1))
+                .ReturnsAsync((Post)null);
+
+            // Act
+            var result = await _postController.Put(1, postEditViewModel);
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(BadRequestResult));
+
+        }
+
         [TestMethod]
         public async Task Get_ValidData_ReturnsPostIndexViewModel()
         {
@@ -213,7 +287,7 @@ namespace ProjectTest
 
             // Set up repository to return dummy data and mock necessary methods
             _mockRepository.Setup(repo => repo.GetPostById(postId))
-                .ReturnsAsync(new Post { /* replace with your Post data */ }); // replace with your Post data
+                .ReturnsAsync(new Post { }); 
 
             // Act
             var result = await _postController.Get(postId, blogId);
@@ -222,12 +296,14 @@ namespace ProjectTest
             Assert.IsNotNull(result);
         }
 
+        
+
         [TestMethod]
         public async Task Delete_ExistingPost_ReturnsOkResult()
         {
             // Arrange
-            var postId = 1; // replace with your test data
-            var blogId = 2; // replace with your test data
+            var postId = 1; 
+            var blogId = 2; 
 
             var userIdClaim = new Claim(ClaimTypes.NameIdentifier, "test");
             var userClaimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { userIdClaim }));
@@ -238,7 +314,7 @@ namespace ProjectTest
 
             // Set up repository to return dummy data and mock necessary methods
             _mockRepository.Setup(repo => repo.GetPostById(postId))
-                .ReturnsAsync(new Post { /* replace with your Post data */ }); // replace with your Post data
+                .ReturnsAsync(new Post {  }); 
 
             // Act
             var result = await _postController.Delete(postId, blogId);
@@ -252,8 +328,8 @@ namespace ProjectTest
         public async Task Delete_NonExistingPost_ReturnsNotFoundResult()
         {
             // Arrange
-            var postId = 1; // replace with your test data
-            var blogId = 2; // replace with your test data
+            var postId = 1; 
+            var blogId = 2; 
 
             var userIdClaim = new Claim(ClaimTypes.NameIdentifier, "test");
             var userClaimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { userIdClaim }));
@@ -271,6 +347,32 @@ namespace ProjectTest
 
             // Assert
             Assert.IsInstanceOfType(result, typeof(NotFoundResult));
+
+        }
+
+        [TestMethod]
+        public async Task Delete_InvalidPosttId_ReturnsNotFoundResult()
+        {
+            // Arrange
+            var userIdClaim = new Claim(ClaimTypes.NameIdentifier, "test");
+            var userClaimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { userIdClaim }));
+            _postController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaimsPrincipal }
+            };
+            _mockUserManager.Setup(m => m.FindByNameAsync(It.IsAny<string>()))
+                .ReturnsAsync(new IdentityUser { });
+
+            // Set up repository to return null for GetCommentById
+            _mockRepository.Setup(repo => repo.GetPostById(1))
+                .ReturnsAsync((Post)null);
+            _postController.ModelState.AddModelError("Content", "Content is required.");
+
+            // Act
+            var result = await _postController.Delete(1, 2);
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
 
         }
 

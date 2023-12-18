@@ -242,12 +242,6 @@ namespace WebAPI.Controllers
                 _logger.LogWarning("User ID claim not found.");
             }
 
-            //---------------------------------------------------------
-            if (!ModelState.IsValid)
-            {
-                _logger.LogWarning("The model is not valid.");
-            }
-
             //find post
             var post = await _repository.GetPostById(id);
 
