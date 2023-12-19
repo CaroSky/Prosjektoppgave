@@ -134,7 +134,6 @@ else
         var postIndexViewModel = await PostService.GetPostByPostIdAsync(postId);
         posts = postIndexViewModel.Posts;
         _searchQuery = SearchQuery;
-        await NotificationService.DeleteNotification(Id);
     }
 
 

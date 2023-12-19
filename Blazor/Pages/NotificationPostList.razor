@@ -19,8 +19,9 @@
 
 else
 {
-    <button class="btn btn-primary mt-2" @onclick="@(() => ClearNotifications())">Clear notifications</button>
+    <button class="btn btn-primary mt-2" @onclick="@(() => ClearNotifications())">Clear all notifications</button>
     <br/>
+    <br />
     @foreach (var post in posts)
     {
 
@@ -31,10 +32,10 @@ else
                 <p class="card-text">@post.Content</p>
 
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" disabled="disabled" @bind="post.IsCommentAllowed" />
+                    <input class="form-check-input" type="checkbox" disabled="disabled" @bind="post.IsCommentAllowed"/>
                     <label class="form-check-label" for="commentCheckbox">Allow Comments</label>
                 </div>
-                </div>
+            </div>
                 @if (post.ImageBase64 != "")
                 {
                     <div>
@@ -42,7 +43,9 @@ else
                     </div>
                 }
                 <div>
-                <button class="btn btn-primary mt-2" @onclick="@(() => NavigateToPost(post.PostId))">See Post</button>
+                    <button class="btn btn-primary mt-2" @onclick="@(() => NavigateToPost(post.PostId))">See Post</button>
+                    <button class="btn btn-primary mt-2" @onclick="@(() => ClearOneNotification(post.PostId))">Clear this notification</button>
+
             </div>
         </div>
     }
@@ -67,6 +70,11 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        await GetNotifications();
+    }
+
+    private async Task GetNotifications()
+    {
         var postEnumerable = await NotificationService.GetNotificationPosts();
         if (postEnumerable.Count() == 0)
         {
@@ -79,8 +87,6 @@ else
         }
 
         notificationCount = await NotificationService.GetNotificationsCount();
-        
-
     }
 
     private void NavigateToPost(int postId)
@@ -93,6 +99,12 @@ else
         await NotificationService.DeleteAllNotificationForUser();
         NavigationManager.NavigateTo($"/blogs");
        
+    }
+
+    private async Task ClearOneNotification(int postId)
+    {
+        await NotificationService.DeleteNotification(postId);
+        await GetNotifications();
     }
 
  
