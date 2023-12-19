@@ -3,6 +3,8 @@
 @using Blazor.Data;
 @using System.Security.Claims
 @using System.IdentityModel.Tokens.Jwt;
+@using Microsoft.AspNetCore.SignalR
+@using Microsoft.AspNetCore.SignalR.Client
 @using WebAPI.Migrations
 
 @page "/post/{Id:int}"
@@ -11,6 +13,8 @@
 @inject PostService PostService
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider
 @inject NotificationService NotificationService
+@inject IHubContext<ChatHub> chatHubContext
+
 
 
 <head>
@@ -33,6 +37,14 @@ else
 {
     @if (allowed && user.Identity.IsAuthenticated)
     {
+        <ul id="messagesList">
+            @foreach (var message in _receivedMessages)
+            {
+                <li @onclick="() => DeleteMessage()">@message</li>
+            }
+        </ul>
+
+
 
         <button class="btn btn-success ml-auto" @onclick="@(() => CreatePostDialog("Create"))">Add New Post</button>
     }
@@ -148,6 +160,9 @@ else
     private bool _isInSearchMode;
     private string _searchQuery;
     private int notificationCount;
+    private string _message = "";
+    private List<string> _receivedMessages = new List<string>();
+    private HubConnection hubConnection;
 
     protected override async Task OnInitializedAsync()
     {
@@ -158,6 +173,7 @@ else
         await GetPostsForBlog(Id);
         _titleDialog = "title";
         notificationCount = await NotificationService.GetNotificationsCount();
+        InitSignalR();
     }
 
     private void CancelPostDialog()
@@ -181,6 +197,8 @@ else
 
             Console.WriteLine("Creating new post...");
             await PostService.CreatePostAsync(createViewModel);
+            _message = "New post from";
+            await SendMessage();
             Console.WriteLine("New post created.");
         }
         else if (_titleDialog == "Update")
@@ -358,12 +376,45 @@ else
     private void NavigateToComments(int postId)
     {
         NavigationManager.NavigateTo($"/comment/{postId}");
+
     }
 
     private void NavigateToBlogs()
     {
         NavigationManager.NavigateTo($"/blogs");
     }
+
+    private async Task SendMessage()
+    {
+        await chatHubContext.Clients.All.SendAsync("ReceiveMessage", _username, _message);
+        _message = "";
+    }
+
+    private async Task InitSignalR()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
+            .Build();
+
+        hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        {
+            var encodedMsg = $"{message} {user}!";
+            // Use InvokeAsync to switch to the main thread
+            InvokeAsync(() =>
+            {
+                _receivedMessages.Add(encodedMsg);
+                StateHasChanged();
+            });
+        });
+
+        await hubConnection.StartAsync();
+    }
+
+    private void DeleteMessage()
+    {
+        _receivedMessages = new List<string>();
+    }
+
 
 }
 

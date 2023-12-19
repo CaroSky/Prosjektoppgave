@@ -6,6 +6,7 @@
 @inject NavigationManager NavigationManager
 @inject CustomAuthenticationStateProvider AuthenticationStateProvider
 
+
 <PageTitle>Index</PageTitle>
 
 <h1>BlogWorld</h1>
@@ -22,6 +23,10 @@ else
 }
 <button class="btn btn-success ml-auto" @onclick="@(() => GoToBlogs())">Go to blogs</button>
 
+<script src="_content/Microsoft.AspNetCore.Components.Web.Extensions/script.js"></script>
+<script src="_content/Microsoft.AspNetCore.Components.Web.Extensions/script.js"></script>
+<script src="_content/Microsoft.AspNetCore.Components.Web.Extensions/script.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.9/signalr.min.js"></script>
 
 @code {
     private ClaimsPrincipal user;

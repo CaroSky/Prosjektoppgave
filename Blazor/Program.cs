@@ -30,6 +30,7 @@ builder.Services.AddScoped<PostService>();
 builder.Services.AddScoped<SearchService>();
 builder.Services.AddScoped<CommentService>();
 builder.Services.AddScoped<NotificationService>();
+builder.Services.AddSignalR();
 
 
 var app = builder.Build();
@@ -46,6 +47,7 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseRouting();
+app.MapHub<ChatHub>("/chathub");
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 app.MapRazorPages();
