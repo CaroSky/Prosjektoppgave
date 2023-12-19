@@ -79,8 +79,6 @@ namespace WebAPI.Controllers
             string username = words[words.Length - 1].Trim();
             var user = await _manager.FindByNameAsync(username);
 
-
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -313,7 +311,7 @@ namespace WebAPI.Controllers
         // GET: Delete
         [HttpDelete("{id}")]
         //[Authorize]
-        public async Task<IActionResult> Delete([FromRoute] int id, int blogId)
+        public async Task<IActionResult> Delete([FromRoute] int id)
         {
             //find the user that is logged in 
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);   //it return a http://...:username so I need to get the username from the string

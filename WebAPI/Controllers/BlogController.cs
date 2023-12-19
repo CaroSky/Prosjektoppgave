@@ -265,5 +265,32 @@ namespace WebAPI.Controllers
             return Ok(subscriptionStatuses);
         }
 
+        [HttpGet("followedBlogs")]
+        [Authorize]
+        public async Task<IActionResult> GetFollowedBlogs()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                _logger.LogWarning("User ID claim not found.");
+                return Unauthorized();
+            }
+
+            string userId = userIdClaim.Value;
+
+            _logger.LogInformation($"User ID in blog Controller - GetFollowedBlogs: {userId}");
+
+            try
+            {
+                var followedBlogs = await _repository.GetBlogsUserFollows(userId);
+                return Ok(followedBlogs);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting followed blogs");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving data");
+            }
+        }
+
     }
 }

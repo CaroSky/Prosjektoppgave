@@ -108,8 +108,6 @@ namespace WebAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -131,7 +129,6 @@ namespace WebAPI.Controllers
             return CreatedAtAction("Get", new { id = comment.CommentId }, comment);
             
         }
-
 
         // GET: Edit
         [HttpGet("{id}")]
